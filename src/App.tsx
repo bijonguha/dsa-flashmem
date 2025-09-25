@@ -24,8 +24,27 @@ const LoadingSpinner: React.FC<{ message?: string }> = ({ message = 'Loading...'
 
 type AppView = 'home' | 'import' | 'review' | 'settings' | 'dashboard';
 
+// Get initial view from URL hash or localStorage
+const getInitialView = (): AppView => {
+  // First, try to get from URL hash
+  const hash = window.location.hash.replace('#', '') as AppView;
+  const validViews: AppView[] = ['home', 'import', 'review', 'settings', 'dashboard'];
+  
+  if (validViews.includes(hash)) {
+    return hash;
+  }
+  
+  // Fallback to localStorage
+  const saved = localStorage.getItem('dsa-flashmem-currentView') as AppView;
+  if (saved && validViews.includes(saved)) {
+    return saved;
+  }
+  
+  return 'home';
+};
+
 function App() {
-  const [currentView, setCurrentView] = useState<AppView>('home');
+  const [currentView, setCurrentView] = useState<AppView>(getInitialView);
   const [flashcardCount, setFlashcardCount] = useState(0);
   const [dueCards, setDueCards] = useState<Flashcard[]>([]);
   const [settings, setSettings] = useState<AppSettings>({
@@ -43,6 +62,27 @@ function App() {
   });
   const [selectedCard, setSelectedCard] = useState<Flashcard | null>(null);
   const [showSolution, setShowSolution] = useState(false);
+
+  // Update URL and localStorage when view changes
+  useEffect(() => {
+    window.location.hash = currentView;
+    localStorage.setItem('dsa-flashmem-currentView', currentView);
+  }, [currentView]);
+
+  // Handle browser back/forward buttons
+  useEffect(() => {
+    const handleHashChange = () => {
+      const hash = window.location.hash.replace('#', '') as AppView;
+      const validViews: AppView[] = ['home', 'import', 'review', 'settings', 'dashboard'];
+      
+      if (validViews.includes(hash)) {
+        setCurrentView(hash);
+      }
+    };
+
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, []);
 
   // Define helper functions first
   const loadDueCardsHelper = useCallback(async () => {
