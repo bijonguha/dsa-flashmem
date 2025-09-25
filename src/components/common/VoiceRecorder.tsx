@@ -80,7 +80,7 @@ export const VoiceRecorder: React.FC<VoiceRecorderProps> = ({
 
   const handleStartRecording = useCallback(() => {
     if (!isSupported) {
-      const errorMsg = 'Speech recognition is not supported in this browser';
+      const errorMsg = 'Speech recognition is not supported. Please use HTTPS or localhost and ensure your browser supports the Web Speech API.';
       onError?.(errorMsg);
       setRecordingState('error');
       return;
@@ -147,7 +147,7 @@ export const VoiceRecorder: React.FC<VoiceRecorderProps> = ({
     // 2. Recognition stopped unexpectedly
     // 3. We haven't exceeded max restart attempts
     // 4. Speech recognition is supported
-    if (recordingState === 'recording' && !isListening && isSupported && restartCount < MAX_RESTART_ATTEMPTS) {
+    if (recordingState === 'recording' && !isListening && isSupported && !error && restartCount < MAX_RESTART_ATTEMPTS) {
       console.log(`Auto-restarting speech recognition (attempt ${restartCount + 1}/${MAX_RESTART_ATTEMPTS})`);
       
       restartTimeoutRef.current = window.setTimeout(() => {
@@ -214,11 +214,25 @@ export const VoiceRecorder: React.FC<VoiceRecorderProps> = ({
 
   if (!isSupported) {
     return (
-      <div className="flex items-center space-x-2 text-red-600" role="alert">
-        <AlertCircle className={getIconSizeClasses()} aria-hidden="true" />
-        <span className={getTextSizeClass()}>
-          Voice recording not supported in this browser
-        </span>
+      <div className="flex flex-col space-y-2 p-4 bg-red-50 border border-red-200 rounded-lg" role="alert">
+        <div className="flex items-center space-x-2 text-red-600">
+          <AlertCircle className={getIconSizeClasses()} aria-hidden="true" />
+          <span className={`${getTextSizeClass()} font-medium`}>
+            Voice recording not available
+          </span>
+        </div>
+        <div className="text-sm text-red-700 space-y-1">
+          <p>Speech recognition requires:</p>
+          <ul className="list-disc list-inside ml-2 space-y-1">
+            <li>HTTPS connection or localhost</li>
+            <li>Modern browser with Web Speech API support</li>
+            <li>Microphone permissions enabled</li>
+          </ul>
+          <p className="mt-2">
+            <strong>Current status:</strong> {window.location.protocol === 'https:' ? 'HTTPS ✓' : 'HTTPS ✗'} | 
+            {window.location.hostname === 'localhost' ? ' Localhost ✓' : ' Localhost ✗'}
+          </p>
+        </div>
       </div>
     );
   }
@@ -296,9 +310,24 @@ export const VoiceRecorder: React.FC<VoiceRecorderProps> = ({
       {showTranscript && (transcript || error) && (
         <div className="bg-gray-50 rounded-lg p-4 border">
           {error ? (
-            <div className="flex items-center space-x-2 text-red-600">
-              <AlertCircle className="h-4 w-4 flex-shrink-0" />
-              <span className="text-sm">{error}</span>
+            <div className="space-y-2">
+              <div className="flex items-center space-x-2 text-red-600">
+                <AlertCircle className="h-4 w-4 flex-shrink-0" />
+                <span className="text-sm">{error}</span>
+              </div>
+              {!isSupported && (
+                <div className="flex items-center space-x-2">
+                  <button
+                    onClick={() => window.location.reload()}
+                    className="px-3 py-1 text-xs bg-red-100 text-red-700 rounded hover:bg-red-200 transition-colors"
+                  >
+                    Refresh Page
+                  </button>
+                  <span className="text-xs text-gray-500">
+                    Try refreshing if this is a connection issue
+                  </span>
+                </div>
+              )}
             </div>
           ) : (
             <div>

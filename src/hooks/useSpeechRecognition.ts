@@ -93,8 +93,8 @@ export const useSpeechRecognition = ({
       return;
     }
 
-    // Prevent multiple initializations
-    if (isInitializedRef.current) {
+    // Prevent multiple initializations only if recognition is already created
+    if (isInitializedRef.current && recognitionRef.current) {
       return;
     }
 
@@ -206,11 +206,111 @@ export const useSpeechRecognition = ({
   }, [continuous, interimResults, isSupported, stableCallbacks, cleanup]);
 
   const startListening = useCallback((timeout: number = RECOGNITION_TIMEOUT) => {
-    if (!recognitionRef.current || !isSupported) {
-      const errorMsg = 'Speech recognition not available';
+    if (!isSupported) {
+      const errorMsg = 'Speech recognition not available. Please use HTTPS or localhost.';
       setState(prev => ({ ...prev, error: errorMsg }));
       stableCallbacks.onError(errorMsg);
       return;
+    }
+
+    // Try to initialize if not already done
+    if (!recognitionRef.current) {
+      try {
+        const SpeechRecognition = window.webkitSpeechRecognition || window.SpeechRecognition;
+        const recognition = new SpeechRecognition();
+
+        // Configure recognition settings
+        recognition.continuous = continuous;
+        recognition.interimResults = interimResults;
+        recognition.lang = DEFAULT_LANGUAGE;
+        recognition.maxAlternatives = 1;
+        if ((window as any).webkitSpeechGrammarList) {
+          recognition.grammars = new (window as any).webkitSpeechGrammarList();
+        }
+
+        recognition.onstart = () => {
+          setState(prev => ({ 
+            ...prev, 
+            isListening: true, 
+            error: undefined,
+            transcript: '',
+            confidence: 0
+          }));
+        };
+
+        recognition.onresult = (event: SpeechRecognitionEvent) => {
+          try {
+            let finalTranscript = '';
+            let interimTranscript = '';
+            let maxConfidence = 0;
+
+            for (let i = event.resultIndex; i < event.results.length; i++) {
+              const result = event.results[i] as SpeechRecognitionResult;
+              const alternative = result[0];
+              
+              if (!alternative) continue;
+              
+              const { transcript, confidence } = alternative;
+
+              if (result.isFinal) {
+                finalTranscript += transcript;
+                maxConfidence = Math.max(maxConfidence, confidence || 0);
+              } else if (interimResults) {
+                interimTranscript += transcript;
+              }
+            }
+
+            const currentTranscript = finalTranscript || interimTranscript;
+            const currentConfidence = finalTranscript ? maxConfidence : 0;
+
+            setState(prev => ({
+              ...prev,
+              transcript: currentTranscript,
+              confidence: currentConfidence,
+              error: undefined
+            }));
+
+            if (finalTranscript.trim()) {
+              stableCallbacks.onResult(finalTranscript.trim(), maxConfidence);
+            }
+          } catch (error) {
+            console.error('Error processing speech recognition result:', error);
+            stableCallbacks.onError('Failed to process speech recognition result');
+          }
+        };
+
+        recognition.onend = () => {
+          setState(prev => ({ ...prev, isListening: false }));
+          if (timeoutRef.current) {
+            clearTimeout(timeoutRef.current);
+            timeoutRef.current = null;
+          }
+        };
+
+        recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
+          if (event.error === 'language-not-supported') {
+            console.warn('Language not supported, continuing with browser default');
+            return;
+          }
+          
+          const errorMessage = getErrorMessage(event.error);
+          setState(prev => ({ 
+            ...prev, 
+            isListening: false, 
+            error: errorMessage 
+          }));
+          stableCallbacks.onError(errorMessage);
+        };
+
+        recognitionRef.current = recognition;
+        isInitializedRef.current = true;
+      } catch (error) {
+        const errorMsg = 'Failed to initialize speech recognition';
+        console.error(errorMsg, error);
+        setState(prev => ({ ...prev, error: errorMsg }));
+        stableCallbacks.onError(errorMsg);
+        return;
+      }
     }
 
     // Prevent starting if already listening
