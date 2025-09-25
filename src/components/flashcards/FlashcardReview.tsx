@@ -75,13 +75,7 @@ export const FlashcardReview: React.FC<FlashcardReviewProps> = ({
   }, [currentIndex, resetCardState]);
 
   const handleVoiceTranscript = useCallback((transcript: string) => {
-    setUserAnswer(prev => prev ? `${prev}\n${transcript}`.trim() : transcript);
-    setInputMethod('voice');
-  }, []);
-
-  const handleVoiceInterim = useCallback((transcript: string) => {
-    // Update with interim results in real-time
-    setUserAnswer(prev => prev ? `${prev}\n${transcript}`.trim() : transcript);
+    setUserAnswer(prev => prev ? `${prev}\n${transcript}`.trim() : transcript); // Append final transcript
     setInputMethod('voice');
   }, []);
 
@@ -267,8 +261,8 @@ export const FlashcardReview: React.FC<FlashcardReviewProps> = ({
             <button
               onClick={() => setInputMethod('typing')}
               className={`px-3 py-1 text-sm rounded ${
-                inputMethod === 'typing' 
-                  ? 'bg-blue-500 text-white' 
+                inputMethod === 'typing'
+                  ? 'bg-blue-500 text-white'
                   : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
               }`}
             >
@@ -277,8 +271,8 @@ export const FlashcardReview: React.FC<FlashcardReviewProps> = ({
             <button
               onClick={() => setInputMethod('voice')}
               className={`px-3 py-1 text-sm rounded ${
-                inputMethod === 'voice' 
-                  ? 'bg-blue-500 text-white' 
+                inputMethod === 'voice'
+                  ? 'bg-blue-500 text-white'
                   : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
               }`}
             >
@@ -291,13 +285,12 @@ export const FlashcardReview: React.FC<FlashcardReviewProps> = ({
           <textarea
             value={userAnswer}
             onChange={(e) => setUserAnswer(e.target.value)}
-            className="w-full h-32 p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
+            className="w-full h-32 p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none text-gray-900"
             placeholder="Explain your approach, algorithm, and complexity analysis..."
           />
         ) : (
           <VoiceRecorder
             onTranscript={handleVoiceTranscript}
-            onInterim={handleVoiceInterim}
             placeholder="Click the microphone to start speaking..."
             timeout={settings.timer_duration * 1000}
             size="md"
