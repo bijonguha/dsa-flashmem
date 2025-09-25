@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useCallback, useEffect, useRef, useMemo, useTransition } from 'react';
 import { Mic, Square, Volume2, AlertCircle } from 'lucide-react';
 import { useSpeechRecognition } from '../../hooks/useSpeechRecognition';
 
@@ -37,6 +37,7 @@ export const VoiceRecorder: React.FC<VoiceRecorderProps> = ({
   const [recordingState, setRecordingState] = useState<RecordingState>('idle');
   const [restartCount, setRestartCount] = useState(0);
   const restartTimeoutRef = useRef<number | null>(null);
+  const [isPending, startTransition] = useTransition();
   
   // Derived state for backward compatibility
   const isRecording = recordingState === 'recording' || recordingState === 'starting';
@@ -92,17 +93,19 @@ export const VoiceRecorder: React.FC<VoiceRecorderProps> = ({
       return;
     }
 
-    try {
-      setRecordingState('starting');
-      resetTranscript();
-      onStart?.();
-      startListening(timeout);
-      setRecordingState('recording');
-    } catch (error) {
-      console.error('Failed to start recording:', error);
-      setRecordingState('error');
-      onError?.('Failed to start voice recording');
-    }
+    startTransition(() => {
+      try {
+        setRecordingState('starting');
+        resetTranscript();
+        onStart?.();
+        startListening(timeout);
+        setRecordingState('recording');
+      } catch (error) {
+        console.error('Failed to start recording:', error);
+        setRecordingState('error');
+        onError?.('Failed to start voice recording');
+      }
+    });
   }, [isSupported, recordingState, restartCount, resetTranscript, onStart, startListening, timeout, onError]);
 
   const handleStopRecording = useCallback(() => {
@@ -110,23 +113,25 @@ export const VoiceRecorder: React.FC<VoiceRecorderProps> = ({
       return;
     }
     
-    try {
-      setRecordingState('stopping');
-      stopListening();
-      onStop?.();
-      
-      // Clear any pending restart timeouts
-      if (restartTimeoutRef.current) {
-        clearTimeout(restartTimeoutRef.current);
-        restartTimeoutRef.current = null;
+    startTransition(() => {
+      try {
+        setRecordingState('stopping');
+        stopListening();
+        onStop?.();
+        
+        // Clear any pending restart timeouts
+        if (restartTimeoutRef.current) {
+          clearTimeout(restartTimeoutRef.current);
+          restartTimeoutRef.current = null;
+        }
+        
+        setRecordingState('idle');
+        setRestartCount(0);
+      } catch (error) {
+        console.error('Failed to stop recording:', error);
+        setRecordingState('error');
       }
-      
-      setRecordingState('idle');
-      setRestartCount(0);
-    } catch (error) {
-      console.error('Failed to stop recording:', error);
-      setRecordingState('error');
-    }
+    });
   }, [recordingState, stopListening, onStop]);
 
   // Call onInterim when transcript changes during recording with debouncing
@@ -244,7 +249,7 @@ export const VoiceRecorder: React.FC<VoiceRecorderProps> = ({
         <div className="relative">
           <button
             onClick={isRecording ? handleStopRecording : handleStartRecording}
-            disabled={disabled || recordingState === 'starting' || recordingState === 'stopping'}
+            disabled={disabled || isPending || recordingState === 'starting' || recordingState === 'stopping'}
             className={`
               ${getButtonSizeClasses()}
               rounded-full transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2
