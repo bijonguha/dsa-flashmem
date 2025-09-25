@@ -1,0 +1,41 @@
+{
+  "name": "DSA FlashMem",
+  "short_name": "DSA FlashMem",
+  "description": "AI-powered flashcards for data structures and algorithms with spaced repetition",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f8fafc",
+  "theme_color": "#3b82f6",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon.svg",
+      "sizes": "128x128",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["education", "productivity"],
+  "shortcuts": [
+    {
+      "name": "Start Review",
+      "short_name": "Review",
+      "description": "Start reviewing flashcards",
+      "url": "/#review",
+      "icons": []
+    },
+    {
+      "name": "Import Cards",
+      "short_name": "Import",
+      "description": "Import new flashcards",
+      "url": "/#import",
+      "icons": []
+    }
+  ]
+}

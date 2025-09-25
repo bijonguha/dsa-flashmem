@@ -1,0 +1,16 @@
+<svg width="16" height="16" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <circle cx="8" cy="8" r="8" fill="#3B82F6"/>
+  
+  <!-- Simple card -->
+  <rect x="3" y="4" width="10" height="8" rx="1" fill="#FFFFFF"/>
+  
+  <!-- Minimal tree -->
+  <g transform="translate(6, 6)">
+    <circle cx="2" cy="1" r="0.8" fill="#3B82F6"/>
+    <circle cx="0.5" cy="3" r="0.5" fill="#10B981"/>
+    <circle cx="3.5" cy="3" r="0.5" fill="#10B981"/>
+    <line x1="1.5" y1="1.5" x2="1" y2="2.5" stroke="#6B7280" stroke-width="0.5"/>
+    <line x1="2.5" y1="1.5" x2="3" y2="2.5" stroke="#6B7280" stroke-width="0.5"/>
+  </g>
+</svg>

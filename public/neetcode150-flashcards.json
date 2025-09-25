@@ -1,0 +1,1809 @@
+[
+  {
+    "id": "two-sum",
+    "topic": "Arrays & Hashing",
+    "title": "Two Sum",
+    "question": "Given an array of integers nums and an integer target, return indices of the two numbers such that they add up to target. You may assume that each input would have exactly one solution, and you may not use the same element twice. You can return the answer in any order.",
+    "hint": "Think about using a hash map to store complements as you iterate through the array.",
+    "expected_points": [
+      "Use a hash map to store number-to-index mappings",
+      "For each number, check if target-number exists in the map", 
+      "Return the indices when complement is found",
+      "Time complexity: O(n), Space complexity: O(n)"
+    ],
+    "solution": {
+      "prerequisites": ["Hash tables", "Array iteration"],
+      "youtube_url": "https://www.youtube.com/watch?v=KLlXCFG5TnA",
+      "approaches": [
+        {
+          "name": "Hash Map Approach",
+          "code": "def twoSum(nums, target):\n    hashmap = {}\n    \n    for i, num in enumerate(nums):\n        complement = target - num\n        \n        if complement in hashmap:\n            return [hashmap[complement], i]\n        \n        hashmap[num] = i\n    \n    return []",
+          "time_complexity": "O(n)",
+          "space_complexity": "O(n)",
+          "explanation": "We iterate through the array once, using a hash map to store each number and its index. For each number, we calculate its complement (target - current number) and check if it exists in our hash map. If it does, we found our answer and return both indices."
+        }
+      ]
+    },
+    "neetcode_url": "https://neetcode.io/problems/two-sum",
+    "difficulty": "Easy",
+    "tags": ["Array", "Hash Table"]
+  },
+  {
+    "id": "contains-duplicate",
+    "topic": "Arrays & Hashing",
+    "title": "Contains Duplicate",
+    "question": "Given an integer array nums, return true if any value appears at least twice in the array, and return false if every element is distinct.",
+    "hint": "Consider using a data structure that allows fast lookups to track elements you've seen.",
+    "expected_points": [
+      "Use a set to track seen elements",
+      "Return true immediately when duplicate found",
+      "Time complexity: O(n), Space complexity: O(n)",
+      "Alternative: Sort first then check adjacent elements"
+    ],
+    "solution": {
+      "prerequisites": ["Hash sets", "Array iteration"],
+      "youtube_url": "https://www.youtube.com/watch?v=3OamzN90kPg",
+      "approaches": [
+        {
+          "name": "Hash Set Approach",
+          "code": "def containsDuplicate(nums):\n    seen = set()\n    \n    for num in nums:\n        if num in seen:\n            return True\n        seen.add(num)\n    \n    return False",
+          "time_complexity": "O(n)",
+          "space_complexity": "O(n)",
+          "explanation": "We iterate through the array and use a set to keep track of numbers we've seen. If we encounter a number that's already in the set, we return True. Otherwise, we add it to the set and continue."
+        },
+        {
+          "name": "Sorting Approach",
+          "code": "def containsDuplicate(nums):\n    nums.sort()\n    \n    for i in range(1, len(nums)):\n        if nums[i] == nums[i-1]:\n            return True\n    \n    return False",
+          "time_complexity": "O(n log n)",
+          "space_complexity": "O(1)",
+          "explanation": "Sort the array first, then check adjacent elements. If any two adjacent elements are equal, we have a duplicate. This approach uses less space but has worse time complexity."
+        }
+      ]
+    },
+    "neetcode_url": "https://neetcode.io/problems/duplicate-integer",
+    "difficulty": "Easy",
+    "tags": ["Array", "Hash Table", "Sorting"]
+  },
+  {
+    "id": "valid-anagram",
+    "topic": "Arrays & Hashing",
+    "title": "Valid Anagram",
+    "question": "Given two strings s and t, return true if t is an anagram of s, and false otherwise. An Anagram is a word or phrase formed by rearranging the letters of a different word or phrase, typically using all the original letters exactly once.",
+    "hint": "Think about character frequency counting or sorting the strings.",
+    "expected_points": [
+      "Count character frequencies in both strings",
+      "Compare frequency maps for equality",
+      "Alternative: Sort both strings and compare",
+      "Handle edge cases like different lengths"
+    ],
+    "solution": {
+      "prerequisites": ["Hash maps", "String manipulation"],
+      "youtube_url": "https://www.youtube.com/watch?v=9UtInBqnCgA",
+      "approaches": [
+        {
+          "name": "Character Count Approach",
+          "code": "def isAnagram(s, t):\n    if len(s) != len(t):\n        return False\n    \n    char_count = {}\n    \n    # Count characters in s\n    for char in s:\n        char_count[char] = char_count.get(char, 0) + 1\n    \n    # Subtract characters in t\n    for char in t:\n        if char not in char_count:\n            return False\n        char_count[char] -= 1\n        if char_count[char] == 0:\n            del char_count[char]\n    \n    return len(char_count) == 0",
+          "time_complexity": "O(n)",
+          "space_complexity": "O(k)",
+          "explanation": "We count the frequency of each character in the first string, then decrement the count for each character in the second string. If the strings are anagrams, all counts should be zero at the end."
+        },
+        {
+          "name": "Sorting Approach", 
+          "code": "def isAnagram(s, t):\n    return sorted(s) == sorted(t)",
+          "time_complexity": "O(n log n)",
+          "space_complexity": "O(1)",
+          "explanation": "Sort both strings and compare them. If they're anagrams, their sorted versions will be identical. This is more concise but less efficient."
+        }
+      ]
+    },
+    "neetcode_url": "https://neetcode.io/problems/is-anagram",
+    "difficulty": "Easy", 
+    "tags": ["Hash Table", "String", "Sorting"]
+  },
+  {
+    "id": "group-anagrams",
+    "topic": "Arrays & Hashing",
+    "title": "Group Anagrams",
+    "question": "Given an array of strings strs, group the anagrams together. You can return the answer in any order. An Anagram is a word or phrase formed by rearranging the letters of a different word or phrase, typically using all the original letters exactly once.",
+    "hint": "Use a hash map where the key is a sorted string representation of each word.",
+    "expected_points": [
+      "Sort each string to create a canonical representation",
+      "Use sorted string as key in hash map",
+      "Group strings with same sorted representation",
+      "Time complexity: O(n * k log k), Space complexity: O(n * k)"
+    ],
+    "solution": {
+      "prerequisites": ["Hash maps", "String sorting", "Grouping algorithms"],
+      "youtube_url": "https://www.youtube.com/watch?v=vzdNOK2oB2E",
+      "approaches": [
+        {
+          "name": "Sorting Approach",
+          "code": "def groupAnagrams(strs):\n    anagram_map = {}\n    \n    for s in strs:\n        # Sort the string to create a key\n        sorted_s = ''.join(sorted(s))\n        \n        if sorted_s not in anagram_map:\n            anagram_map[sorted_s] = []\n        anagram_map[sorted_s].append(s)\n    \n    return list(anagram_map.values())",
+          "time_complexity": "O(n * k log k)",
+          "space_complexity": "O(n * k)",
+          "explanation": "For each string, we sort its characters to create a canonical representation. Strings with the same canonical form are anagrams and get grouped together in our hash map."
+        },
+        {
+          "name": "Character Count Approach",
+          "code": "def groupAnagrams(strs):\n    anagram_map = {}\n    \n    for s in strs:\n        # Create a character count tuple as key\n        count = [0] * 26\n        for char in s:\n            count[ord(char) - ord('a')] += 1\n        \n        key = tuple(count)\n        if key not in anagram_map:\n            anagram_map[key] = []\n        anagram_map[key].append(s)\n    \n    return list(anagram_map.values())",
+          "time_complexity": "O(n * k)",
+          "space_complexity": "O(n * k)",
+          "explanation": "Instead of sorting, we count character frequencies for each string and use the count array as a key. This avoids sorting overhead but uses more space."
+        }
+      ]
+    },
+    "neetcode_url": "https://neetcode.io/problems/group-anagrams",
+    "difficulty": "Medium",
+    "tags": ["Array", "Hash Table", "String", "Sorting"]
+  },
+  {
+    "id": "top-k-frequent-elements",
+    "topic": "Arrays & Hashing",
+    "title": "Top K Frequent Elements",
+    "question": "Given an integer array nums and an integer k, return the k most frequent elements. You may return the answer in any order.",
+    "hint": "Use a heap (priority queue) to efficiently find the k most frequent elements.",
+    "expected_points": [
+      "Count frequency of each element using hash map",
+      "Use min heap to maintain k most frequent elements",
+      "Alternative: Use bucket sort approach",
+      "Time complexity: O(n log k), Space complexity: O(n)"
+    ],
+    "solution": {
+      "prerequisites": ["Hash maps", "Heaps/Priority queues", "Bucket sort"],
+      "youtube_url": "https://www.youtube.com/watch?v=YPTqKIgVk-k",
+      "approaches": [
+        {
+          "name": "Heap Approach",
+          "code": "import heapq\n\ndef topKFrequent(nums, k):\n    # Count frequencies\n    count = {}\n    for num in nums:\n        count[num] = count.get(num, 0) + 1\n    \n    # Use min heap to keep track of k most frequent\n    heap = []\n    for num, freq in count.items():\n        heapq.heappush(heap, (freq, num))\n        if len(heap) > k:\n            heapq.heappop(heap)\n    \n    return [num for freq, num in heap]",
+          "time_complexity": "O(n log k)",
+          "space_complexity": "O(n)",
+          "explanation": "We count frequencies using a hash map, then use a min heap to maintain only the k most frequent elements. This is efficient when k is much smaller than n."
+        },
+        {
+          "name": "Bucket Sort Approach",
+          "code": "def topKFrequent(nums, k):\n    # Count frequencies\n    count = {}\n    for num in nums:\n        count[num] = count.get(num, 0) + 1\n    \n    # Create buckets for each frequency\n    buckets = [[] for _ in range(len(nums) + 1)]\n    for num, freq in count.items():\n        buckets[freq].append(num)\n    \n    # Collect k most frequent from buckets\n    result = []\n    for i in range(len(buckets) - 1, -1, -1):\n        for num in buckets[i]:\n            result.append(num)\n            if len(result) == k:\n                return result\n    \n    return result",
+          "time_complexity": "O(n)",
+          "space_complexity": "O(n)",
+          "explanation": "We use bucket sort where each bucket represents a frequency level. This gives us O(n) time complexity but uses more space."
+        }
+      ]
+    },
+    "neetcode_url": "https://neetcode.io/problems/top-k-frequent-elements",
+    "difficulty": "Medium",
+    "tags": ["Array", "Hash Table", "Heap", "Sorting", "Bucket Sort"]
+  },
+  {
+    "id": "product-of-array-except-self",
+    "topic": "Arrays & Hashing",
+    "title": "Product of Array Except Self",
+    "question": "Given an integer array nums, return an array answer such that answer[i] is equal to the product of all the elements of nums except nums[i]. The product of any prefix or suffix of nums is guaranteed to fit in a 32-bit integer. You must write an algorithm that runs in O(n) time and without using the division operator.",
+    "hint": "Think about calculating products to the left and right of each element separately.",
+    "expected_points": [
+      "Calculate left products for each position",
+      "Calculate right products for each position",
+      "Combine left and right products",
+      "Time complexity: O(n), Space complexity: O(1) excluding output array"
+    ],
+    "solution": {
+      "prerequisites": ["Array manipulation", "Prefix products", "Space optimization"],
+      "youtube_url": "https://www.youtube.com/watch?v=bNvIQI2wAjo",
+      "approaches": [
+        {
+          "name": "Two Pass Approach",
+          "code": "def productExceptSelf(nums):\n    n = len(nums)\n    result = [1] * n\n    \n    # First pass: calculate left products\n    for i in range(1, n):\n        result[i] = result[i-1] * nums[i-1]\n    \n    # Second pass: multiply by right products\n    right_product = 1\n    for i in range(n-1, -1, -1):\n        result[i] *= right_product\n        right_product *= nums[i]\n    \n    return result",
+          "time_complexity": "O(n)",
+          "space_complexity": "O(1)",
+          "explanation": "We make two passes: first to calculate left products, then to multiply by right products. This avoids using extra space for storing right products."
+        },
+        {
+          "name": "Three Array Approach",
+          "code": "def productExceptSelf(nums):\n    n = len(nums)\n    left = [1] * n\n    right = [1] * n\n    \n    # Calculate left products\n    for i in range(1, n):\n        left[i] = left[i-1] * nums[i-1]\n    \n    # Calculate right products\n    for i in range(n-2, -1, -1):\n        right[i] = right[i+1] * nums[i+1]\n    \n    # Combine results\n    return [left[i] * right[i] for i in range(n)]",
+          "time_complexity": "O(n)",
+          "space_complexity": "O(n)",
+          "explanation": "We explicitly calculate left and right products in separate arrays, then combine them. This is more intuitive but uses more space."
+        }
+      ]
+    },
+    "neetcode_url": "https://neetcode.io/problems/product-of-array-except-self",
+    "difficulty": "Medium",
+    "tags": ["Array", "Prefix Sum"]
+  },
+  {
+    "id": "valid-sudoku",
+    "topic": "Arrays & Hashing",
+    "title": "Valid Sudoku",
+    "question": "Determine if a 9 x 9 Sudoku board is valid. Only the filled cells need to be validated according to the following rules: 1) Each row must contain the digits 1-9 without repetition. 2) Each column must contain the digits 1-9 without repetition. 3) Each of the nine 3 x 3 sub-boxes of the grid must contain the digits 1-9 without repetition.",
+    "hint": "Use sets to track seen numbers in rows, columns, and 3x3 boxes.",
+    "expected_points": [
+      "Use sets to track numbers in each row, column, and 3x3 box",
+      "Check for duplicates in each constraint",
+      "Calculate 3x3 box index from row and column",
+      "Time complexity: O(1) since board is fixed size, Space complexity: O(1)"
+    ],
+    "solution": {
+      "prerequisites": ["Hash sets", "2D arrays", "Mathematical indexing"],
+      "youtube_url": "https://www.youtube.com/watch?v=TjFXEUCMqI8",
+      "approaches": [
+        {
+          "name": "Three Set Approach",
+          "code": "def isValidSudoku(board):\n    rows = [set() for _ in range(9)]\n    cols = [set() for _ in range(9)]\n    boxes = [set() for _ in range(9)]\n    \n    for i in range(9):\n        for j in range(9):\n            if board[i][j] != '.':\n                num = board[i][j]\n                box_index = (i // 3) * 3 + (j // 3)\n                \n                # Check if number already exists in row, col, or box\n                if (num in rows[i] or \n                    num in cols[j] or \n                    num in boxes[box_index]):\n                    return False\n                \n                # Add to sets\n                rows[i].add(num)\n                cols[j].add(num)\n                boxes[box_index].add(num)\n    \n    return True",
+          "time_complexity": "O(1)",
+          "space_complexity": "O(1)",
+          "explanation": "We maintain three sets for each row, column, and 3x3 box. For each cell, we check if the number already exists in its corresponding row, column, and box sets."
+        },
+        {
+          "name": "Single Pass with String Keys",
+          "code": "def isValidSudoku(board):\n    seen = set()\n    \n    for i in range(9):\n        for j in range(9):\n            if board[i][j] != '.':\n                num = board[i][j]\n                \n                # Create unique keys for row, col, and box\n                row_key = f'{num} in row {i}'\n                col_key = f'{num} in col {j}'\n                box_key = f'{num} in box {i//3}-{j//3}'\n                \n                if (row_key in seen or col_key in seen or box_key in seen):\n                    return False\n                \n                seen.add(row_key)\n                seen.add(col_key)\n                seen.add(box_key)\n    \n    return True",
+          "time_complexity": "O(1)",
+          "space_complexity": "O(1)",
+          "explanation": "We use a single set with string keys to track which numbers appear in which rows, columns, and boxes. This is more memory efficient but slightly slower due to string operations."
+        }
+      ]
+    },
+    "neetcode_url": "https://neetcode.io/problems/valid-sudoku",
+    "difficulty": "Medium",
+    "tags": ["Array", "Hash Table", "Matrix"]
+  },
+  {
+    "id": "encode-and-decode-strings",
+    "topic": "Arrays & Hashing",
+    "title": "Encode and Decode Strings",
+    "question": "Design an algorithm to encode a list of strings to a string. The encoded string is then sent over the network and is decoded back to the original list of strings. Implement the encode and decode functions.",
+    "hint": "Use a delimiter that can distinguish between different strings and handle strings that might contain the delimiter.",
+    "expected_points": [
+      "Use length prefix to encode each string",
+      "Handle edge cases like empty strings",
+      "Parse length prefix during decoding",
+      "Time complexity: O(n), Space complexity: O(1) excluding output"
+    ],
+    "solution": {
+      "prerequisites": ["String manipulation", "Parsing algorithms", "Serialization"],
+      "youtube_url": "https://www.youtube.com/watch?v=B1k_sxOSgv8",
+      "approaches": [
+        {
+          "name": "Length Prefix Approach",
+          "code": "def encode(strs):\n    result = []\n    for s in strs:\n        # Encode as length + delimiter + string\n        result.append(str(len(s)) + '#' + s)\n    return ''.join(result)\n\ndef decode(s):\n    result = []\n    i = 0\n    \n    while i < len(s):\n        # Find the delimiter\n        j = i\n        while s[j] != '#':\n            j += 1\n        \n        # Extract length\n        length = int(s[i:j])\n        \n        # Extract string\n        result.append(s[j+1:j+1+length])\n        i = j + 1 + length\n    \n    return result",
+          "time_complexity": "O(n)",
+          "space_complexity": "O(1)",
+          "explanation": "We prefix each string with its length followed by a delimiter '#'. This allows us to parse the encoded string back into individual strings without ambiguity."
+        },
+        {
+          "name": "Escape Character Approach",
+          "code": "def encode(strs):\n    result = []\n    for s in strs:\n        # Replace any existing '#' with '##'\n        escaped = s.replace('#', '##')\n        result.append(escaped + ' # ')\n    return ''.join(result)\n\ndef decode(s):\n    # Split by ' # ' and handle escaped characters\n    parts = s.split(' # ')[:-1]  # Remove last empty part\n    result = []\n    for part in parts:\n        # Unescape '##' back to '#'\n        result.append(part.replace('##', '#'))\n    return result",
+          "time_complexity": "O(n)",
+          "space_complexity": "O(1)",
+          "explanation": "We use an escape character approach where '#' is escaped as '##' and ' # ' is used as a delimiter between strings."
+        }
+      ]
+    },
+    "neetcode_url": "https://neetcode.io/problems/encode-and-decode-strings",
+    "difficulty": "Medium",
+    "tags": ["Array", "String", "Design"]
+  },
+  {
+    "id": "longest-consecutive-sequence",
+    "topic": "Arrays & Hashing",
+    "title": "Longest Consecutive Sequence",
+    "question": "Given an unsorted array of integers nums, return the length of the longest consecutive elements sequence. You must write an algorithm that runs in O(n) time.",
+    "hint": "Use a hash set to store all numbers, then for each number, check if it's the start of a sequence.",
+    "expected_points": [
+      "Use hash set to store all numbers for O(1) lookup",
+      "For each number, check if it's start of sequence (num-1 not in set)",
+      "Count consecutive numbers from each sequence start",
+      "Time complexity: O(n), Space complexity: O(n)"
+    ],
+    "solution": {
+      "prerequisites": ["Hash sets", "Sequence detection", "Optimization techniques"],
+      "youtube_url": "https://www.youtube.com/watch?v=P6RZZMu_maU",
+      "approaches": [
+        {
+          "name": "Hash Set Approach",
+          "code": "def longestConsecutive(nums):\n    if not nums:\n        return 0\n    \n    num_set = set(nums)\n    longest = 0\n    \n    for num in num_set:\n        # Check if this is the start of a sequence\n        if num - 1 not in num_set:\n            current_num = num\n            current_length = 1\n            \n            # Count consecutive numbers\n            while current_num + 1 in num_set:\n                current_num += 1\n                current_length += 1\n            \n            longest = max(longest, current_length)\n    \n    return longest",
+          "time_complexity": "O(n)",
+          "space_complexity": "O(n)",
+          "explanation": "We use a hash set for O(1) lookups. For each number, we check if it's the start of a sequence (num-1 not in set), then count consecutive numbers. Each number is visited at most twice."
+        },
+        {
+          "name": "Sorting Approach",
+          "code": "def longestConsecutive(nums):\n    if not nums:\n        return 0\n    \n    nums.sort()\n    longest = 1\n    current = 1\n    \n    for i in range(1, len(nums)):\n        if nums[i] == nums[i-1]:\n            continue  # Skip duplicates\n        elif nums[i] == nums[i-1] + 1:\n            current += 1\n        else:\n            longest = max(longest, current)\n            current = 1\n    \n    return max(longest, current)",
+          "time_complexity": "O(n log n)",
+          "space_complexity": "O(1)",
+          "explanation": "We sort the array and then count consecutive sequences. This is simpler but has O(n log n) time complexity due to sorting."
+        }
+      ]
+    },
+    "neetcode_url": "https://neetcode.io/problems/longest-consecutive-sequence",
+    "difficulty": "Medium",
+    "tags": ["Array", "Hash Table", "Union Find"]
+  },
+  {
+    "id": "valid-palindrome",
+    "topic": "Two Pointers",
+    "title": "Valid Palindrome",
+    "question": "A phrase is a palindrome if, after converting all uppercase letters into lowercase letters and removing all non-alphanumeric characters, it reads the same forward and backward. Given a string s, return true if it is a palindrome, or false otherwise.",
+    "hint": "Use two pointers starting from both ends and move them towards the center, skipping non-alphanumeric characters.",
+    "expected_points": [
+      "Use two pointers from start and end",
+      "Skip non-alphanumeric characters",
+      "Compare characters after converting to lowercase",
+      "Time complexity: O(n), Space complexity: O(1)"
+    ],
+    "solution": {
+      "prerequisites": ["Two pointers", "String manipulation", "Character validation"],
+      "youtube_url": "https://www.youtube.com/watch?v=jJXJ16kPFWg",
+      "approaches": [
+        {
+          "name": "Two Pointers Approach",
+          "code": "def isPalindrome(s):\n    left, right = 0, len(s) - 1\n    \n    while left < right:\n        # Skip non-alphanumeric characters\n        while left < right and not s[left].isalnum():\n            left += 1\n        while left < right and not s[right].isalnum():\n            right -= 1\n        \n        # Compare characters (case insensitive)\n        if s[left].lower() != s[right].lower():\n            return False\n        \n        left += 1\n        right -= 1\n    \n    return True",
+          "time_complexity": "O(n)",
+          "space_complexity": "O(1)",
+          "explanation": "We use two pointers starting from both ends. We skip non-alphanumeric characters and compare characters case-insensitively. If any pair doesn't match, it's not a palindrome."
+        },
+        {
+          "name": "String Cleaning Approach",
+          "code": "def isPalindrome(s):\n    # Clean the string: lowercase and alphanumeric only\n    cleaned = ''.join(char.lower() for char in s if char.isalnum())\n    \n    # Check if cleaned string equals its reverse\n    return cleaned == cleaned[::-1]",
+          "time_complexity": "O(n)",
+          "space_complexity": "O(n)",
+          "explanation": "We first clean the string by removing non-alphanumeric characters and converting to lowercase, then check if it equals its reverse."
+        }
+      ]
+    },
+    "neetcode_url": "https://neetcode.io/problems/valid-palindrome",
+    "difficulty": "Easy",
+    "tags": ["Two Pointers", "String"]
+  },
+  {
+    "id": "two-sum-ii",
+    "topic": "Two Pointers",
+    "title": "Two Sum II - Input Array Is Sorted",
+    "question": "Given a 1-indexed array of integers numbers that is already sorted in non-decreasing order, find two numbers such that they add up to a specific target number. Let these two numbers be numbers[index1] and numbers[index2] where 1 <= index1 < index2 <= numbers.length. Return the indices of the two numbers, index1 and index2, added by one as an integer array [index1, index2] of length 2.",
+    "hint": "Since the array is sorted, use two pointers from start and end, moving them based on the sum comparison with target.",
+    "expected_points": [
+      "Use two pointers from start and end of sorted array",
+      "Move left pointer right if sum is too small",
+      "Move right pointer left if sum is too large",
+      "Time complexity: O(n), Space complexity: O(1)"
+    ],
+    "solution": {
+      "prerequisites": ["Two pointers", "Sorted arrays", "Binary search concepts"],
+      "youtube_url": "https://www.youtube.com/watch?v=cQ1Oz4ckceM",
+      "approaches": [
+        {
+          "name": "Two Pointers Approach",
+          "code": "def twoSum(numbers, target):\n    left, right = 0, len(numbers) - 1\n    \n    while left < right:\n        current_sum = numbers[left] + numbers[right]\n        \n        if current_sum == target:\n            return [left + 1, right + 1]  # 1-indexed\n        elif current_sum < target:\n            left += 1\n        else:\n            right -= 1\n    \n    return []",
+          "time_complexity": "O(n)",
+          "space_complexity": "O(1)",
+          "explanation": "Since the array is sorted, we can use two pointers. If the sum is too small, we move the left pointer right to increase the sum. If too large, we move the right pointer left to decrease the sum."
+        },
+        {
+          "name": "Binary Search Approach",
+          "code": "def twoSum(numbers, target):\n    for i in range(len(numbers)):\n        left, right = i + 1, len(numbers) - 1\n        complement = target - numbers[i]\n        \n        while left <= right:\n            mid = (left + right) // 2\n            if numbers[mid] == complement:\n                return [i + 1, mid + 1]\n            elif numbers[mid] < complement:\n                left = mid + 1\n            else:\n                right = mid - 1\n    \n    return []",
+          "time_complexity": "O(n log n)",
+          "space_complexity": "O(1)",
+          "explanation": "For each number, we binary search for its complement in the remaining array. This is less efficient than two pointers but demonstrates binary search application."
+        }
+      ]
+    },
+    "neetcode_url": "https://neetcode.io/problems/two-sum-ii-input-array-is-sorted",
+    "difficulty": "Medium",
+    "tags": ["Array", "Two Pointers", "Binary Search"]
+  },
+  {
+    "id": "3sum",
+    "topic": "Two Pointers",
+    "title": "3Sum",
+    "question": "Given an integer array nums, return all the triplets [nums[i], nums[j], nums[k]] such that i != j, i != k, and j != k, and nums[i] + nums[j] + nums[k] == 0. Notice that the solution set must not contain duplicate triplets.",
+    "hint": "Sort the array first, then for each element, use two pointers to find pairs that sum to the negative of that element.",
+    "expected_points": [
+      "Sort the array first",
+      "For each element, use two pointers to find pairs",
+      "Skip duplicates to avoid duplicate triplets",
+      "Time complexity: O(n²), Space complexity: O(1)"
+    ],
+    "solution": {
+      "prerequisites": ["Two pointers", "Sorting", "Duplicate handling"],
+      "youtube_url": "https://www.youtube.com/watch?v=jzZsG8up2Zk",
+      "approaches": [
+        {
+          "name": "Two Pointers Approach",
+          "code": "def threeSum(nums):\n    nums.sort()\n    result = []\n    \n    for i in range(len(nums) - 2):\n        # Skip duplicates for first element\n        if i > 0 and nums[i] == nums[i-1]:\n            continue\n        \n        left, right = i + 1, len(nums) - 1\n        target = -nums[i]\n        \n        while left < right:\n            current_sum = nums[left] + nums[right]\n            \n            if current_sum == target:\n                result.append([nums[i], nums[left], nums[right]])\n                \n                # Skip duplicates for left pointer\n                while left < right and nums[left] == nums[left + 1]:\n                    left += 1\n                # Skip duplicates for right pointer\n                while left < right and nums[right] == nums[right - 1]:\n                    right -= 1\n                \n                left += 1\n                right -= 1\n            elif current_sum < target:\n                left += 1\n            else:\n                right -= 1\n    \n    return result",
+          "time_complexity": "O(n²)",
+          "space_complexity": "O(1)",
+          "explanation": "We sort the array first, then for each element, use two pointers to find pairs that sum to the negative of that element. We carefully skip duplicates to avoid duplicate triplets."
+        }
+      ]
+    },
+    "neetcode_url": "https://neetcode.io/problems/3sum",
+    "difficulty": "Medium",
+    "tags": ["Array", "Two Pointers", "Sorting"]
+  },
+  {
+    "id": "container-with-most-water",
+    "topic": "Two Pointers",
+    "title": "Container With Most Water",
+    "question": "You are given an integer array height of length n. There are n vertical lines drawn such that the two endpoints of the ith line are (i, 0) and (i, height[i]). Find two lines, which, together with the x-axis forms a container, such that the container contains the most water. Return the maximum amount of water a container can store.",
+    "hint": "Use two pointers from both ends. The area is limited by the shorter line, so always move the pointer pointing to the shorter line.",
+    "expected_points": [
+      "Use two pointers from start and end",
+      "Calculate area as min(height[left], height[right]) * (right - left)",
+      "Move pointer with smaller height",
+      "Time complexity: O(n), Space complexity: O(1)"
+    ],
+    "solution": {
+      "prerequisites": ["Two pointers", "Area calculations", "Greedy algorithms"],
+      "youtube_url": "https://www.youtube.com/watch?v=UuiTKBwPgAo",
+      "approaches": [
+        {
+          "name": "Two Pointers Approach",
+          "code": "def maxArea(height):\n    left, right = 0, len(height) - 1\n    max_area = 0\n    \n    while left < right:\n        # Calculate current area\n        width = right - left\n        current_area = min(height[left], height[right]) * width\n        max_area = max(max_area, current_area)\n        \n        # Move pointer with smaller height\n        if height[left] < height[right]:\n            left += 1\n        else:\n            right -= 1\n    \n    return max_area",
+          "time_complexity": "O(n)",
+          "space_complexity": "O(1)",
+          "explanation": "We use two pointers from both ends. The area is determined by the shorter line and the distance between lines. We always move the pointer pointing to the shorter line because moving the other pointer can only decrease the area."
+        }
+      ]
+    },
+    "neetcode_url": "https://neetcode.io/problems/container-with-most-water",
+    "difficulty": "Medium",
+    "tags": ["Array", "Two Pointers", "Greedy"]
+  },
+  {
+    "id": "best-time-to-buy-and-sell-stock",
+    "topic": "Sliding Window",
+    "title": "Best Time to Buy and Sell Stock",
+    "question": "You are given an array prices where prices[i] is the price of a given stock on the ith day. You want to maximize your profit by choosing a single day to buy one stock and choosing a different day in the future to sell that stock. Return the maximum profit you can achieve from this transaction. If you cannot achieve any profit, return 0.",
+    "hint": "Keep track of the minimum price seen so far and calculate profit for each day.",
+    "expected_points": [
+      "Keep track of minimum price seen so far",
+      "Calculate profit for each day (price - min_price)",
+      "Update maximum profit seen so far",
+      "Time complexity: O(n), Space complexity: O(1)"
+    ],
+    "solution": {
+      "prerequisites": ["Sliding window", "Dynamic programming", "Profit maximization"],
+      "youtube_url": "https://www.youtube.com/watch?v=1pkOgXD63yU",
+      "approaches": [
+        {
+          "name": "Sliding Window Approach",
+          "code": "def maxProfit(prices):\n    if not prices:\n        return 0\n    \n    min_price = prices[0]\n    max_profit = 0\n    \n    for price in prices:\n        # Update minimum price seen so far\n        min_price = min(min_price, price)\n        \n        # Calculate profit if we sell today\n        profit = price - min_price\n        \n        # Update maximum profit\n        max_profit = max(max_profit, profit)\n    \n    return max_profit",
+          "time_complexity": "O(n)",
+          "space_complexity": "O(1)",
+          "explanation": "We keep track of the minimum price seen so far and calculate the profit for each day. The maximum profit is the maximum of all these daily profits."
+        }
+      ]
+    },
+    "neetcode_url": "https://neetcode.io/problems/best-time-to-buy-and-sell-stock",
+    "difficulty": "Easy",
+    "tags": ["Array", "Dynamic Programming"]
+  },
+  {
+    "id": "longest-substring-without-repeating-characters",
+    "topic": "Sliding Window",
+    "title": "Longest Substring Without Repeating Characters",
+    "question": "Given a string s, find the length of the longest substring without repeating characters.",
+    "hint": "Use a sliding window with a set to track characters in the current window. Expand right pointer and shrink left pointer when duplicates are found.",
+    "expected_points": [
+      "Use sliding window with two pointers",
+      "Use set to track characters in current window",
+      "Expand right pointer, shrink left when duplicate found",
+      "Time complexity: O(n), Space complexity: O(min(m,n)) where m is charset size"
+    ],
+    "solution": {
+      "prerequisites": ["Sliding window", "Hash sets", "Two pointers"],
+      "youtube_url": "https://www.youtube.com/watch?v=wiGpQwVHdZE",
+      "approaches": [
+        {
+          "name": "Sliding Window Approach",
+          "code": "def lengthOfLongestSubstring(s):\n    char_set = set()\n    left = 0\n    max_length = 0\n    \n    for right in range(len(s)):\n        # If character is already in set, shrink window\n        while s[right] in char_set:\n            char_set.remove(s[left])\n            left += 1\n        \n        # Add current character to set\n        char_set.add(s[right])\n        \n        # Update maximum length\n        max_length = max(max_length, right - left + 1)\n    \n    return max_length",
+          "time_complexity": "O(n)",
+          "space_complexity": "O(min(m,n))",
+          "explanation": "We use a sliding window with two pointers and a set to track characters. We expand the right pointer and shrink the left pointer when we encounter a duplicate character."
+        },
+        {
+          "name": "Optimized Sliding Window",
+          "code": "def lengthOfLongestSubstring(s):\n    char_map = {}\n    left = 0\n    max_length = 0\n    \n    for right in range(len(s)):\n        # If character exists and is within current window\n        if s[right] in char_map and char_map[s[right]] >= left:\n            left = char_map[s[right]] + 1\n        \n        char_map[s[right]] = right\n        max_length = max(max_length, right - left + 1)\n    \n    return max_length",
+          "time_complexity": "O(n)",
+          "space_complexity": "O(min(m,n))",
+          "explanation": "We use a hash map to store the last index of each character. This allows us to jump the left pointer directly to the position after the last occurrence of the duplicate character."
+        }
+      ]
+    },
+    "neetcode_url": "https://neetcode.io/problems/longest-substring-without-repeating-characters",
+    "difficulty": "Medium",
+    "tags": ["Hash Table", "String", "Sliding Window"]
+  },
+  {
+    "id": "longest-repeating-character-replacement",
+    "topic": "Sliding Window",
+    "title": "Longest Repeating Character Replacement",
+    "question": "You are given a string s and an integer k. You can choose any character of the string and change it to any other uppercase English letter. You can perform this operation at most k times. Return the length of the longest substring containing the same letter you can get after performing the above operations.",
+    "hint": "Use a sliding window and keep track of the most frequent character in the current window. If window_size - max_frequency > k, shrink the window.",
+    "expected_points": [
+      "Use sliding window with character frequency tracking",
+      "Track most frequent character in current window",
+      "Shrink window when replacements needed exceed k",
+      "Time complexity: O(n), Space complexity: O(1)"
+    ],
+    "solution": {
+      "prerequisites": ["Sliding window", "Character frequency", "Window constraints"],
+      "youtube_url": "https://www.youtube.com/watch?v=gqXU1UY_Aoc",
+      "approaches": [
+        {
+          "name": "Sliding Window Approach",
+          "code": "def characterReplacement(s, k):\n    char_count = {}\n    left = 0\n    max_frequency = 0\n    max_length = 0\n    \n    for right in range(len(s)):\n        # Add character to window\n        char_count[s[right]] = char_count.get(s[right], 0) + 1\n        max_frequency = max(max_frequency, char_count[s[right]])\n        \n        # If window size - max frequency > k, shrink window\n        if (right - left + 1) - max_frequency > k:\n            char_count[s[left]] -= 1\n            left += 1\n        \n        max_length = max(max_length, right - left + 1)\n    \n    return max_length",
+          "time_complexity": "O(n)",
+          "space_complexity": "O(1)",
+          "explanation": "We use a sliding window and track character frequencies. The key insight is that we need at most k replacements, so if window_size - max_frequency > k, we need to shrink the window."
+        }
+      ]
+    },
+    "neetcode_url": "https://neetcode.io/problems/longest-repeating-character-replacement",
+    "difficulty": "Medium",
+    "tags": ["Hash Table", "String", "Sliding Window"]
+  },
+  {
+    "id": "permutation-in-string",
+    "topic": "Sliding Window",
+    "title": "Permutation in String",
+    "question": "Given two strings s1 and s2, return true if s2 contains the permutation of s1. In other words, one of the first string's permutations is the substring of the second string.",
+    "hint": "Use a sliding window of size len(s1) and compare character frequencies between the window and s1.",
+    "expected_points": [
+      "Use sliding window of size len(s1)",
+      "Compare character frequencies between window and s1",
+      "Slide window and update frequency counts",
+      "Time complexity: O(n), Space complexity: O(1)"
+    ],
+    "solution": {
+      "prerequisites": ["Sliding window", "Character frequency", "String matching"],
+      "youtube_url": "https://www.youtube.com/watch?v=UbyhOgBN834",
+      "approaches": [
+        {
+          "name": "Sliding Window Approach",
+          "code": "def checkInclusion(s1, s2):\n    if len(s1) > len(s2):\n        return False\n    \n    # Count characters in s1\n    s1_count = {}\n    for char in s1:\n        s1_count[char] = s1_count.get(char, 0) + 1\n    \n    # Initialize window\n    window_count = {}\n    for i in range(len(s1)):\n        window_count[s2[i]] = window_count.get(s2[i], 0) + 1\n    \n    if window_count == s1_count:\n        return True\n    \n    # Slide the window\n    for i in range(len(s1), len(s2)):\n        # Remove leftmost character\n        left_char = s2[i - len(s1)]\n        window_count[left_char] -= 1\n        if window_count[left_char] == 0:\n            del window_count[left_char]\n        \n        # Add new character\n        right_char = s2[i]\n        window_count[right_char] = window_count.get(right_char, 0) + 1\n        \n        if window_count == s1_count:\n            return True\n    \n    return False",
+          "time_complexity": "O(n)",
+          "space_complexity": "O(1)",
+          "explanation": "We use a sliding window of size len(s1) and compare character frequencies. We slide the window one character at a time and update the frequency counts accordingly."
+        }
+      ]
+    },
+    "neetcode_url": "https://neetcode.io/problems/permutation-in-string",
+    "difficulty": "Medium",
+    "tags": ["Hash Table", "Two Pointers", "String", "Sliding Window"]
+  },
+  {
+    "id": "minimum-window-substring",
+    "topic": "Sliding Window",
+    "title": "Minimum Window Substring",
+    "question": "Given two strings s and t of lengths m and n respectively, return the minimum window substring of s such that every character in t (including duplicates) is included in the window. If there is no such window, return the empty string. The testcases will be generated such that the answer is unique.",
+    "hint": "Use a sliding window with two pointers. Expand right pointer until all characters in t are covered, then shrink left pointer to find minimum window.",
+    "expected_points": [
+      "Use sliding window with two pointers",
+      "Expand right until all characters in t are covered",
+      "Shrink left to find minimum valid window",
+      "Time complexity: O(m + n), Space complexity: O(m + n)"
+    ],
+    "solution": {
+      "prerequisites": ["Sliding window", "Character frequency", "Window optimization"],
+      "youtube_url": "https://www.youtube.com/watch?v=jSto0O4AJbM",
+      "approaches": [
+        {
+          "name": "Sliding Window Approach",
+          "code": "def minWindow(s, t):\n    if not s or not t or len(s) < len(t):\n        return \"\"\n    \n    # Count characters in t\n    t_count = {}\n    for char in t:\n        t_count[char] = t_count.get(char, 0) + 1\n    \n    required = len(t_count)\n    formed = 0\n    window_counts = {}\n    \n    # Sliding window variables\n    left = right = 0\n    ans = float('inf'), None, None\n    \n    while right < len(s):\n        # Add character from right to window\n        c = s[right]\n        window_counts[c] = window_counts.get(c, 0) + 1\n        \n        # Check if current character's frequency matches\n        if c in t_count and window_counts[c] == t_count[c]:\n            formed += 1\n        \n        # Try to contract window\n        while left <= right and formed == required:\n            c = s[left]\n            \n            # Save the smallest window\n            if right - left + 1 < ans[0]:\n                ans = (right - left + 1, left, right)\n            \n            # Remove character from left\n            window_counts[c] -= 1\n            if c in t_count and window_counts[c] < t_count[c]:\n                formed -= 1\n            \n            left += 1\n        \n        right += 1\n    \n    return \"\" if ans[0] == float('inf') else s[ans[1]:ans[2] + 1]",
+          "time_complexity": "O(m + n)",
+          "space_complexity": "O(m + n)",
+          "explanation": "We use a sliding window to find the minimum substring that contains all characters in t. We expand the right pointer until we have all required characters, then shrink the left pointer to find the minimum window."
+        }
+      ]
+    },
+    "neetcode_url": "https://neetcode.io/problems/minimum-window-substring",
+    "difficulty": "Hard",
+    "tags": ["Hash Table", "String", "Sliding Window"]
+  },
+  {
+    "id": "valid-parentheses",
+    "topic": "Stack",
+    "title": "Valid Parentheses",
+    "question": "Given a string s containing just the characters '(', ')', '{', '}', '[' and ']', determine if the input string is valid. An input string is valid if: 1) Open brackets must be closed by the same type of brackets. 2) Open brackets must be closed in the correct order. 3) Every close bracket has a corresponding open bracket of the same type.",
+    "hint": "Use a stack to keep track of opening brackets. When you see a closing bracket, check if it matches the most recent opening bracket.",
+    "expected_points": [
+      "Use stack to track opening brackets",
+      "For closing brackets, check if stack is empty or top doesn't match",
+      "Valid string if stack is empty at the end",
+      "Time complexity: O(n), Space complexity: O(n)"
+    ],
+    "solution": {
+      "prerequisites": ["Stack", "String parsing", "Bracket matching"],
+      "youtube_url": "https://www.youtube.com/watch?v=WTzjTskDFMg",
+      "approaches": [
+        {
+          "name": "Stack Approach",
+          "code": "def isValid(s):\n    stack = []\n    mapping = {')': '(', '}': '{', ']': '['}\n    \n    for char in s:\n        if char in mapping:\n            # Closing bracket\n            if not stack or stack.pop() != mapping[char]:\n                return False\n        else:\n            # Opening bracket\n            stack.append(char)\n    \n    return not stack",
+          "time_complexity": "O(n)",
+          "space_complexity": "O(n)",
+          "explanation": "We use a stack to keep track of opening brackets. For each closing bracket, we check if the stack is empty or if the top element matches the expected opening bracket."
+        }
+      ]
+    },
+    "neetcode_url": "https://neetcode.io/problems/valid-parentheses",
+    "difficulty": "Easy",
+    "tags": ["String", "Stack"]
+  },
+  {
+    "id": "daily-temperatures",
+    "topic": "Stack",
+    "title": "Daily Temperatures",
+    "question": "Given an array of integers temperatures representing the daily temperatures, return an array answer such that answer[i] is the number of days you have to wait after the ith day to get a warmer temperature. If there is no future day for which this is possible, keep answer[i] == 0 instead.",
+    "hint": "Use a stack to store indices of temperatures. For each temperature, pop from stack while current temperature is greater than stack top, and calculate the difference in indices.",
+    "expected_points": [
+      "Use stack to store indices of temperatures",
+      "Pop indices where current temperature is greater",
+      "Calculate days as difference between indices",
+      "Time complexity: O(n), Space complexity: O(n)"
+    ],
+    "solution": {
+      "prerequisites": ["Stack", "Monotonic stack", "Index tracking"],
+      "youtube_url": "https://www.youtube.com/watch?v=cTBiBSnjO3c",
+      "approaches": [
+        {
+          "name": "Monotonic Stack Approach",
+          "code": "def dailyTemperatures(temperatures):\n    stack = []  # Store indices\n    result = [0] * len(temperatures)\n    \n    for i, temp in enumerate(temperatures):\n        # While stack is not empty and current temp > stack top temp\n        while stack and temperatures[stack[-1]] < temp:\n            prev_index = stack.pop()\n            result[prev_index] = i - prev_index\n        \n        stack.append(i)\n    \n    return result",
+          "time_complexity": "O(n)",
+          "space_complexity": "O(n)",
+          "explanation": "We use a monotonic stack to store indices. For each temperature, we pop indices where the temperature was lower and calculate the number of days until a warmer temperature."
+        }
+      ]
+    },
+    "neetcode_url": "https://neetcode.io/problems/daily-temperatures",
+    "difficulty": "Medium",
+    "tags": ["Array", "Stack", "Monotonic Stack"]
+  },
+  {
+    "id": "evaluate-reverse-polish-notation",
+    "topic": "Stack",
+    "title": "Evaluate Reverse Polish Notation",
+    "question": "You are given an array of strings tokens that represents an arithmetic expression in a Reverse Polish Notation. Evaluate the expression. Return an integer that represents the value of the expression. Valid operators are '+', '-', '*', and '/'. Each operand may be an integer or another expression.",
+    "hint": "Use a stack to store operands. When you encounter an operator, pop the top two operands, perform the operation, and push the result back.",
+    "expected_points": [
+      "Use stack to store operands",
+      "For operators, pop two operands and perform operation",
+      "Push result back to stack",
+      "Time complexity: O(n), Space complexity: O(n)"
+    ],
+    "solution": {
+      "prerequisites": ["Stack", "Arithmetic operations", "String parsing"],
+      "youtube_url": "https://www.youtube.com/watch?v=iu0082c4HDE",
+      "approaches": [
+        {
+          "name": "Stack Approach",
+          "code": "def evalRPN(tokens):\n    stack = []\n    \n    for token in tokens:\n        if token in ['+', '-', '*', '/']:\n            # Pop two operands\n            b = stack.pop()\n            a = stack.pop()\n            \n            # Perform operation\n            if token == '+':\n                result = a + b\n            elif token == '-':\n                result = a - b\n            elif token == '*':\n                result = a * b\n            elif token == '/':\n                result = int(a / b)  # Truncate towards zero\n            \n            stack.append(result)\n        else:\n            # Operand\n            stack.append(int(token))\n    \n    return stack[0]",
+          "time_complexity": "O(n)",
+          "space_complexity": "O(n)",
+          "explanation": "We use a stack to evaluate the RPN expression. For each operator, we pop the top two operands, perform the operation, and push the result back to the stack."
+        }
+      ]
+    },
+    "neetcode_url": "https://neetcode.io/problems/evaluate-reverse-polish-notation",
+    "difficulty": "Medium",
+    "tags": ["Array", "Math", "Stack"]
+  },
+  {
+    "id": "reverse-linked-list",
+    "topic": "Linked Lists",
+    "title": "Reverse Linked List",
+    "question": "Given the head of a singly linked list, reverse the list and return the reversed list.",
+    "hint": "Think about the three-pointer technique: previous, current, and next.",
+    "expected_points": [
+      "Use three pointers: prev, current, next",
+      "Iteratively reverse the links between nodes",
+      "Handle the null termination correctly",
+      "Can be solved both iteratively and recursively"
+    ],
+    "solution": {
+      "prerequisites": ["Linked list traversal", "Pointer manipulation"],
+      "youtube_url": "https://www.youtube.com/watch?v=G0_I-ZF0S38",
+      "approaches": [
+        {
+          "name": "Iterative Approach",
+          "code": "def reverseList(head):\n    prev = None\n    current = head\n    \n    while current:\n        next_temp = current.next\n        current.next = prev\n        prev = current\n        current = next_temp\n    \n    return prev",
+          "time_complexity": "O(n)",
+          "space_complexity": "O(1)",
+          "explanation": "We use three pointers to track the previous node, current node, and next node. We reverse the link by pointing current.next to prev, then move all pointers one step forward."
+        },
+        {
+          "name": "Recursive Approach",
+          "code": "def reverseList(head):\n    if not head or not head.next:\n        return head\n    \n    # Reverse the rest of the list\n    new_head = reverseList(head.next)\n    \n    # Reverse current connection\n    head.next.next = head\n    head.next = None\n    \n    return new_head",
+          "time_complexity": "O(n)",
+          "space_complexity": "O(n)",
+          "explanation": "Recursively reverse the rest of the list first, then reverse the current connection. The base case is when we reach the end of the list or a single node."
+        }
+      ]
+    },
+    "neetcode_url": "https://neetcode.io/problems/reverse-linked-list",
+    "difficulty": "Easy",
+    "tags": ["Linked List", "Recursion"]
+  },
+  {
+    "id": "linked-list-cycle",
+    "topic": "Linked Lists",
+    "title": "Linked List Cycle",
+    "question": "Given head, the head of a linked list, determine if the linked list has a cycle in it. There is a cycle in a linked list if there is some node in the list that can be reached again by continuously following the next pointer.",
+    "hint": "Use Floyd's cycle detection algorithm (tortoise and hare) - one slow pointer and one fast pointer.",
+    "expected_points": [
+      "Use Floyd's cycle detection algorithm",
+      "Slow pointer moves one step, fast pointer moves two steps",
+      "If there's a cycle, fast pointer will eventually meet slow pointer",
+      "Time complexity: O(n), Space complexity: O(1)"
+    ],
+    "solution": {
+      "prerequisites": ["Linked list traversal", "Cycle detection", "Two pointers"],
+      "youtube_url": "https://www.youtube.com/watch?v=gBTe7lFR3vc",
+      "approaches": [
+        {
+          "name": "Floyd's Cycle Detection",
+          "code": "def hasCycle(head):\n    if not head or not head.next:\n        return False\n    \n    slow = head\n    fast = head\n    \n    while fast and fast.next:\n        slow = slow.next\n        fast = fast.next.next\n        \n        if slow == fast:\n            return True\n    \n    return False",
+          "time_complexity": "O(n)",
+          "space_complexity": "O(1)",
+          "explanation": "We use two pointers: slow (moves one step) and fast (moves two steps). If there's a cycle, the fast pointer will eventually catch up to the slow pointer."
+        },
+        {
+          "name": "Hash Set Approach",
+          "code": "def hasCycle(head):\n    visited = set()\n    current = head\n    \n    while current:\n        if current in visited:\n            return True\n        visited.add(current)\n        current = current.next\n    \n    return False",
+          "time_complexity": "O(n)",
+          "space_complexity": "O(n)",
+          "explanation": "We traverse the list and keep track of visited nodes in a set. If we encounter a node we've already visited, there's a cycle."
+        }
+      ]
+    },
+    "neetcode_url": "https://neetcode.io/problems/linked-list-cycle",
+    "difficulty": "Easy",
+    "tags": ["Hash Table", "Linked List", "Two Pointers"]
+  },
+  {
+    "id": "merge-two-sorted-lists",
+    "topic": "Linked Lists",
+    "title": "Merge Two Sorted Lists",
+    "question": "You are given the heads of two sorted linked lists list1 and list2. Merge the two lists in a one sorted list. The list should be made by splicing together the nodes of the first two lists. Return the head of the merged linked list.",
+    "hint": "Use a dummy head node and compare the values of the two lists, linking the smaller node each time.",
+    "expected_points": [
+      "Use a dummy head node to simplify edge cases",
+      "Compare values and link smaller node",
+      "Handle remaining nodes after one list is exhausted",
+      "Time complexity: O(m + n), Space complexity: O(1)"
+    ],
+    "solution": {
+      "prerequisites": ["Linked list manipulation", "Merge algorithms", "Dummy nodes"],
+      "youtube_url": "https://www.youtube.com/watch?v=XIdigk956u0",
+      "approaches": [
+        {
+          "name": "Iterative Approach",
+          "code": "def mergeTwoLists(list1, list2):\n    # Create dummy head\n    dummy = ListNode(0)\n    current = dummy\n    \n    while list1 and list2:\n        if list1.val <= list2.val:\n            current.next = list1\n            list1 = list1.next\n        else:\n            current.next = list2\n            list2 = list2.next\n        current = current.next\n    \n    # Attach remaining nodes\n    current.next = list1 if list1 else list2\n    \n    return dummy.next",
+          "time_complexity": "O(m + n)",
+          "space_complexity": "O(1)",
+          "explanation": "We use a dummy head to avoid edge cases. We compare values from both lists and link the smaller node. After one list is exhausted, we attach the remaining nodes."
+        },
+        {
+          "name": "Recursive Approach",
+          "code": "def mergeTwoLists(list1, list2):\n    if not list1:\n        return list2\n    if not list2:\n        return list1\n    \n    if list1.val <= list2.val:\n        list1.next = mergeTwoLists(list1.next, list2)\n        return list1\n    else:\n        list2.next = mergeTwoLists(list1, list2.next)\n        return list2",
+          "time_complexity": "O(m + n)",
+          "space_complexity": "O(m + n)",
+          "explanation": "We recursively merge the lists by comparing the first nodes and recursively merging the rest."
+        }
+      ]
+    },
+    "neetcode_url": "https://neetcode.io/problems/merge-two-sorted-lists",
+    "difficulty": "Easy",
+    "tags": ["Linked List", "Recursion"]
+  },
+  {
+    "id": "remove-nth-node-from-end",
+    "topic": "Linked Lists",
+    "title": "Remove Nth Node From End of List",
+    "question": "Given the head of a linked list, remove the nth node from the end of the list and return its head.",
+    "hint": "Use two pointers with a gap of n between them. Move both pointers until the first pointer reaches the end, then the second pointer will be at the node to remove.",
+    "expected_points": [
+      "Use two pointers with gap of n",
+      "Move both pointers until first reaches end",
+      "Second pointer will be at node to remove",
+      "Time complexity: O(n), Space complexity: O(1)"
+    ],
+    "solution": {
+      "prerequisites": ["Linked list manipulation", "Two pointers", "Node deletion"],
+      "youtube_url": "https://www.youtube.com/watch?v=XVuQxVej6y8",
+      "approaches": [
+        {
+          "name": "Two Pointers Approach",
+          "code": "def removeNthFromEnd(head, n):\n    # Create dummy head to handle edge cases\n    dummy = ListNode(0)\n    dummy.next = head\n    \n    first = dummy\n    second = dummy\n    \n    # Move first pointer n steps ahead\n    for _ in range(n + 1):\n        first = first.next\n    \n    # Move both pointers until first reaches end\n    while first:\n        first = first.next\n        second = second.next\n    \n    # Remove the nth node\n    second.next = second.next.next\n    \n    return dummy.next",
+          "time_complexity": "O(n)",
+          "space_complexity": "O(1)",
+          "explanation": "We use two pointers with a gap of n. We move the first pointer n+1 steps ahead, then move both pointers until the first reaches the end. The second pointer will be at the node before the one to remove."
+        }
+      ]
+    },
+    "neetcode_url": "https://neetcode.io/problems/remove-nth-node-from-end-of-list",
+    "difficulty": "Medium",
+    "tags": ["Linked List", "Two Pointers"]
+  },
+  {
+    "id": "reorder-list",
+    "topic": "Linked Lists",
+    "title": "Reorder List",
+    "question": "You are given the head of a singly linked-list. The list can be represented as: L0 → L1 → … → Ln - 1 → Ln. Reorder the list to be on the following form: L0 → Ln → L1 → Ln - 1 → L2 → Ln - 2 → …",
+    "hint": "Split the list into two halves, reverse the second half, then merge them alternately.",
+    "expected_points": [
+      "Find the middle of the list",
+      "Reverse the second half",
+      "Merge the two halves alternately",
+      "Time complexity: O(n), Space complexity: O(1)"
+    ],
+    "solution": {
+      "prerequisites": ["Linked list manipulation", "Finding middle", "Reversing list", "Merging lists"],
+      "youtube_url": "https://www.youtube.com/watch?v=S5bfdUTrKLM",
+      "approaches": [
+        {
+          "name": "Three Step Approach",
+          "code": "def reorderList(head):\n    if not head or not head.next:\n        return\n    \n    # Step 1: Find the middle\n    slow = fast = head\n    while fast.next and fast.next.next:\n        slow = slow.next\n        fast = fast.next.next\n    \n    # Step 2: Reverse the second half\n    second_half = slow.next\n    slow.next = None\n    \n    prev = None\n    current = second_half\n    while current:\n        next_temp = current.next\n        current.next = prev\n        prev = current\n        current = next_temp\n    \n    # Step 3: Merge alternately\n    first_half = head\n    second_half = prev\n    \n    while second_half:\n        temp1 = first_half.next\n        temp2 = second_half.next\n        \n        first_half.next = second_half\n        second_half.next = temp1\n        \n        first_half = temp1\n        second_half = temp2",
+          "time_complexity": "O(n)",
+          "space_complexity": "O(1)",
+          "explanation": "We split the list at the middle, reverse the second half, then merge the two halves alternately to create the reordered list."
+        }
+      ]
+    },
+    "neetcode_url": "https://neetcode.io/problems/reorder-list",
+    "difficulty": "Medium",
+    "tags": ["Linked List", "Two Pointers", "Stack", "Recursion"]
+  },
+  {
+    "id": "maximum-depth-of-binary-tree",
+    "topic": "Trees",
+    "title": "Maximum Depth of Binary Tree",
+    "question": "Given the root of a binary tree, return its maximum depth. A binary tree's maximum depth is the number of nodes along the longest path from the root node down to the farthest leaf node.",
+    "hint": "Use recursion to find the maximum depth of left and right subtrees, then add 1 for the current node.",
+    "expected_points": [
+      "Use recursion to traverse the tree",
+      "Base case: return 0 for null nodes",
+      "Return 1 + max of left and right subtree depths",
+      "Time complexity: O(n), Space complexity: O(h) where h is height"
+    ],
+    "solution": {
+      "prerequisites": ["Tree traversal", "Recursion", "Depth calculation"],
+      "youtube_url": "https://www.youtube.com/watch?v=hTM3phVI6YQ",
+      "approaches": [
+        {
+          "name": "Recursive Approach",
+          "code": "def maxDepth(root):\n    if not root:\n        return 0\n    \n    left_depth = maxDepth(root.left)\n    right_depth = maxDepth(root.right)\n    \n    return 1 + max(left_depth, right_depth)",
+          "time_complexity": "O(n)",
+          "space_complexity": "O(h)",
+          "explanation": "We recursively find the maximum depth of left and right subtrees, then return 1 plus the maximum of the two depths."
+        },
+        {
+          "name": "Iterative BFS Approach",
+          "code": "def maxDepth(root):\n    if not root:\n        return 0\n    \n    queue = [root]\n    depth = 0\n    \n    while queue:\n        depth += 1\n        level_size = len(queue)\n        \n        for _ in range(level_size):\n            node = queue.pop(0)\n            if node.left:\n                queue.append(node.left)\n            if node.right:\n                queue.append(node.right)\n    \n    return depth",
+          "time_complexity": "O(n)",
+          "space_complexity": "O(w)",
+          "explanation": "We use BFS to traverse level by level, incrementing depth at each level. This gives us the maximum depth."
+        }
+      ]
+    },
+    "neetcode_url": "https://neetcode.io/problems/maximum-depth-of-binary-tree",
+    "difficulty": "Easy",
+    "tags": ["Tree", "Depth-First Search", "Breadth-First Search", "Binary Tree"]
+  },
+  {
+    "id": "same-tree",
+    "topic": "Trees",
+    "title": "Same Tree",
+    "question": "Given the roots of two binary trees p and q, write a function to check if they are the same or not. Two binary trees are considered the same if they are structurally identical, and the nodes have the same value.",
+    "hint": "Use recursion to check if both trees are null, or if both are not null and have same values and recursively check left and right subtrees.",
+    "expected_points": [
+      "Base case: both null return true, one null return false",
+      "Check if current node values are equal",
+      "Recursively check left and right subtrees",
+      "Time complexity: O(min(m,n)), Space complexity: O(min(m,n))"
+    ],
+    "solution": {
+      "prerequisites": ["Tree traversal", "Recursion", "Tree comparison"],
+      "youtube_url": "https://www.youtube.com/watch?v=vRbbcKXCxOw",
+      "approaches": [
+        {
+          "name": "Recursive Approach",
+          "code": "def isSameTree(p, q):\n    # Both null\n    if not p and not q:\n        return True\n    \n    # One null, one not\n    if not p or not q:\n        return False\n    \n    # Values different\n    if p.val != q.val:\n        return False\n    \n    # Recursively check subtrees\n    return isSameTree(p.left, q.left) and isSameTree(p.right, q.right)",
+          "time_complexity": "O(min(m,n))",
+          "space_complexity": "O(min(m,n))",
+          "explanation": "We recursively compare the trees. If both are null, they're equal. If one is null, they're different. If values differ, they're different. Otherwise, we recursively check subtrees."
+        }
+      ]
+    },
+    "neetcode_url": "https://neetcode.io/problems/same-tree",
+    "difficulty": "Easy",
+    "tags": ["Tree", "Depth-First Search", "Breadth-First Search", "Binary Tree"]
+  },
+  {
+    "id": "invert-binary-tree",
+    "topic": "Trees",
+    "title": "Invert Binary Tree",
+    "question": "Given the root of a binary tree, invert the tree, and return its root. Inverting a binary tree means swapping the left and right children of every node in the tree.",
+    "hint": "Think recursively - invert the left and right subtrees, then swap them.",
+    "expected_points": [
+      "Recursively invert left and right subtrees",
+      "Swap the left and right children of current node",
+      "Base case: null node returns null",
+      "Can be solved both recursively and iteratively"
+    ],
+    "solution": {
+      "prerequisites": ["Binary tree traversal", "Recursion"],
+      "youtube_url": "https://www.youtube.com/watch?v=OnSn2XEQ4MY",
+      "approaches": [
+        {
+          "name": "Recursive Approach",
+          "code": "def invertTree(root):\n    if not root:\n        return None\n    \n    # Swap the children\n    root.left, root.right = root.right, root.left\n    \n    # Recursively invert subtrees\n    invertTree(root.left)\n    invertTree(root.right)\n    \n    return root",
+          "time_complexity": "O(n)",
+          "space_complexity": "O(h)",
+          "explanation": "We recursively visit each node, swap its left and right children, then recursively invert both subtrees. The space complexity is O(h) due to the recursion stack, where h is the height of the tree."
+        },
+        {
+          "name": "Iterative Approach",
+          "code": "def invertTree(root):\n    if not root:\n        return None\n    \n    queue = [root]\n    \n    while queue:\n        node = queue.pop(0)\n        \n        # Swap children\n        node.left, node.right = node.right, node.left\n        \n        # Add children to queue\n        if node.left:\n            queue.append(node.left)\n        if node.right:\n            queue.append(node.right)\n    \n    return root",
+          "time_complexity": "O(n)",
+          "space_complexity": "O(n)",
+          "explanation": "We use a queue to perform level-order traversal. For each node, we swap its children and add them to the queue for processing. This avoids recursion but uses O(n) space for the queue."
+        }
+      ]
+    },
+    "neetcode_url": "https://neetcode.io/problems/invert-binary-tree",
+    "difficulty": "Easy",
+    "tags": ["Tree", "Depth-First Search", "Breadth-First Search", "Binary Tree"]
+  },
+  {
+    "id": "binary-tree-level-order-traversal",
+    "topic": "Trees",
+    "title": "Binary Tree Level Order Traversal",
+    "question": "Given the root of a binary tree, return the level order traversal of its nodes' values (i.e., from left to right, level by level).",
+    "hint": "Use a queue to process nodes level by level. Keep track of the current level size to know when to start a new level.",
+    "expected_points": [
+      "Use BFS with a queue to traverse level by level",
+      "Keep track of level size to separate levels",
+      "Process all nodes at current level before moving to next",
+      "Time complexity: O(n), Space complexity: O(w) where w is max width"
+    ],
+    "solution": {
+      "prerequisites": ["Breadth-first search", "Queue", "Level-order traversal"],
+      "youtube_url": "https://www.youtube.com/watch?v=6ZnyEApgGYg",
+      "approaches": [
+        {
+          "name": "BFS with Queue",
+          "code": "def levelOrder(root):\n    if not root:\n        return []\n    \n    result = []\n    queue = [root]\n    \n    while queue:\n        level_size = len(queue)\n        current_level = []\n        \n        for _ in range(level_size):\n            node = queue.pop(0)\n            current_level.append(node.val)\n            \n            if node.left:\n                queue.append(node.left)\n            if node.right:\n                queue.append(node.right)\n        \n        result.append(current_level)\n    \n    return result",
+          "time_complexity": "O(n)",
+          "space_complexity": "O(w)",
+          "explanation": "We use BFS with a queue to traverse level by level. For each level, we process all nodes at that level before moving to the next level."
+        },
+        {
+          "name": "DFS Approach",
+          "code": "def levelOrder(root):\n    result = []\n    \n    def dfs(node, level):\n        if not node:\n            return\n        \n        if level >= len(result):\n            result.append([])\n        \n        result[level].append(node.val)\n        dfs(node.left, level + 1)\n        dfs(node.right, level + 1)\n    \n    dfs(root, 0)\n    return result",
+          "time_complexity": "O(n)",
+          "space_complexity": "O(h)",
+          "explanation": "We use DFS with a level parameter to collect nodes at each level. This approach uses recursion and maintains the level information."
+        }
+      ]
+    },
+    "neetcode_url": "https://neetcode.io/problems/binary-tree-level-order-traversal",
+    "difficulty": "Medium",
+    "tags": ["Tree", "Breadth-First Search", "Binary Tree"]
+  },
+  {
+    "id": "binary-tree-maximum-path-sum",
+    "topic": "Trees",
+    "title": "Binary Tree Maximum Path Sum",
+    "question": "A path in a binary tree is a sequence of nodes where each pair of adjacent nodes in the sequence has an edge connecting them. A node can only appear in the sequence at most once. Note that the path does not need to pass through the root. The path sum of a path is the sum of the node values in the path. Given the root of a binary tree, return the maximum path sum of any non-empty path.",
+    "hint": "Use recursion to find the maximum path sum through each node. For each node, calculate the maximum path that includes that node.",
+    "expected_points": [
+      "Use recursion to find maximum path sum through each node",
+      "For each node, calculate max path including that node",
+      "Update global maximum at each node",
+      "Time complexity: O(n), Space complexity: O(h)"
+    ],
+    "solution": {
+      "prerequisites": ["Tree traversal", "Recursion", "Dynamic programming concepts"],
+      "youtube_url": "https://www.youtube.com/watch?v=Hr5cWUld4vU",
+      "approaches": [
+        {
+          "name": "Recursive Approach",
+          "code": "def maxPathSum(root):\n    max_sum = float('-inf')\n    \n    def max_gain(node):\n        nonlocal max_sum\n        \n        if not node:\n            return 0\n        \n        # Max path sum from left and right subtrees\n        left_gain = max(max_gain(node.left), 0)\n        right_gain = max(max_gain(node.right), 0)\n        \n        # Max path sum including current node\n        current_max = node.val + left_gain + right_gain\n        \n        # Update global maximum\n        max_sum = max(max_sum, current_max)\n        \n        # Return max path sum that can be extended upward\n        return node.val + max(left_gain, right_gain)\n    \n    max_gain(root)\n    return max_sum",
+          "time_complexity": "O(n)",
+          "space_complexity": "O(h)",
+          "explanation": "For each node, we calculate the maximum path sum that includes that node. We consider both subtrees and update the global maximum. We return the maximum path sum that can be extended upward from the current node."
+        }
+      ]
+    },
+    "neetcode_url": "https://neetcode.io/problems/binary-tree-maximum-path-sum",
+    "difficulty": "Hard",
+    "tags": ["Tree", "Depth-First Search", "Dynamic Programming", "Binary Tree"]
+  },
+  {
+    "id": "binary-search-tree-iterator",
+    "topic": "Trees",
+    "title": "Binary Search Tree Iterator",
+    "question": "Implement the BSTIterator class that represents an iterator over the in-order traversal of a binary search tree (BST). The iterator will be initialized with the root node of a BST. Calling next() will return the next smallest number in the BST. Notice that by default, all the root's left subtree is traversed before any right subtree node.",
+    "hint": "Use a stack to simulate the in-order traversal. Initialize by pushing all left nodes, then for each next() call, pop from stack and push right subtree's left nodes.",
+    "expected_points": [
+      "Use stack to simulate in-order traversal",
+      "Initialize by pushing all left nodes",
+      "For next(), pop from stack and push right subtree's left nodes",
+      "Time complexity: O(1) amortized, Space complexity: O(h)"
+    ],
+    "solution": {
+      "prerequisites": ["Binary search tree", "In-order traversal", "Iterator pattern", "Stack"],
+      "youtube_url": "https://www.youtube.com/watch?v=RXy5RzGF5wo",
+      "approaches": [
+        {
+          "name": "Stack-based Iterator",
+          "code": "class BSTIterator:\n    def __init__(self, root):\n        self.stack = []\n        self._push_all_left(root)\n    \n    def _push_all_left(self, node):\n        while node:\n            self.stack.append(node)\n            node = node.left\n    \n    def next(self):\n        node = self.stack.pop()\n        self._push_all_left(node.right)\n        return node.val\n    \n    def hasNext(self):\n        return len(self.stack) > 0",
+          "time_complexity": "O(1) amortized",
+          "space_complexity": "O(h)",
+          "explanation": "We use a stack to simulate in-order traversal. We initialize by pushing all left nodes, then for each next() call, we pop from stack and push the right subtree's left nodes."
+        }
+      ]
+    },
+    "neetcode_url": "https://neetcode.io/problems/binary-search-tree-iterator",
+    "difficulty": "Medium",
+    "tags": ["Stack", "Tree", "Design", "Binary Search Tree", "Iterator"]
+  },
+  {
+    "id": "search-in-rotated-sorted-array",
+    "topic": "Binary Search",
+    "title": "Search in Rotated Sorted Array",
+    "question": "There is an integer array nums sorted in ascending order (with distinct values). Prior to being passed to your function, nums is possibly rotated at an unknown pivot index k (1 <= k < nums.length) such that the resulting array is [nums[k], nums[k+1], ..., nums[n-1], nums[0], nums[1], ..., nums[k-1]] (0-indexed). Given the array nums after the possible rotation and an integer target, return the index of target if it is in nums, or -1 if it is not in nums.",
+    "hint": "Use binary search but determine which half is sorted. If the left half is sorted and target is in range, search left; otherwise search right.",
+    "expected_points": [
+      "Use binary search with rotation handling",
+      "Determine which half is sorted",
+      "Check if target is in the sorted half",
+      "Time complexity: O(log n), Space complexity: O(1)"
+    ],
+    "solution": {
+      "prerequisites": ["Binary search", "Array manipulation", "Rotation handling"],
+      "youtube_url": "https://www.youtube.com/watch?v=U8XENwh8Oy8",
+      "approaches": [
+        {
+          "name": "Binary Search Approach",
+          "code": "def search(nums, target):\n    left, right = 0, len(nums) - 1\n    \n    while left <= right:\n        mid = (left + right) // 2\n        \n        if nums[mid] == target:\n            return mid\n        \n        # Check if left half is sorted\n        if nums[left] <= nums[mid]:\n            # Left half is sorted\n            if nums[left] <= target < nums[mid]:\n                right = mid - 1\n            else:\n                left = mid + 1\n        else:\n            # Right half is sorted\n            if nums[mid] < target <= nums[right]:\n                left = mid + 1\n            else:\n                right = mid - 1\n    \n    return -1",
+          "time_complexity": "O(log n)",
+          "space_complexity": "O(1)",
+          "explanation": "We use binary search but handle the rotation. We determine which half is sorted and check if the target is in that sorted half. If not, we search the other half."
+        }
+      ]
+    },
+    "neetcode_url": "https://neetcode.io/problems/search-in-rotated-sorted-array",
+    "difficulty": "Medium",
+    "tags": ["Array", "Binary Search"]
+  },
+  {
+    "id": "find-minimum-in-rotated-sorted-array",
+    "topic": "Binary Search",
+    "title": "Find Minimum in Rotated Sorted Array",
+    "question": "Suppose an array of length n sorted in ascending order is rotated between 1 and n times. For example, the array nums = [0,1,2,4,5,6,7] might become: [4,5,6,7,0,1,2] if it was rotated 4 times. Given the sorted rotated array nums of unique elements, return the minimum element of this array.",
+    "hint": "Use binary search. If the middle element is greater than the rightmost element, the minimum is in the right half. Otherwise, it's in the left half.",
+    "expected_points": [
+      "Use binary search to find minimum",
+      "Compare middle element with rightmost element",
+      "If middle > right, minimum is in right half",
+      "Time complexity: O(log n), Space complexity: O(1)"
+    ],
+    "solution": {
+      "prerequisites": ["Binary search", "Array manipulation", "Rotation handling"],
+      "youtube_url": "https://www.youtube.com/watch?v=nIVW4P8b1VA",
+      "approaches": [
+        {
+          "name": "Binary Search Approach",
+          "code": "def findMin(nums):\n    left, right = 0, len(nums) - 1\n    \n    while left < right:\n        mid = (left + right) // 2\n        \n        # If middle element is greater than rightmost element,\n        # minimum is in the right half\n        if nums[mid] > nums[right]:\n            left = mid + 1\n        else:\n            # Minimum is in the left half (including mid)\n            right = mid\n    \n    return nums[left]",
+          "time_complexity": "O(log n)",
+          "space_complexity": "O(1)",
+          "explanation": "We use binary search to find the minimum. If the middle element is greater than the rightmost element, the minimum is in the right half. Otherwise, it's in the left half including the middle element."
+        }
+      ]
+    },
+    "neetcode_url": "https://neetcode.io/problems/find-minimum-in-rotated-sorted-array",
+    "difficulty": "Medium",
+    "tags": ["Array", "Binary Search"]
+  },
+  {
+    "id": "search-2d-matrix",
+    "topic": "Binary Search",
+    "title": "Search a 2D Matrix",
+    "question": "Write an efficient algorithm that searches for a value target in an m x n integer matrix. This matrix has the following properties: Integers in each row are sorted from left to right. The first integer of each row is greater than the last integer of the previous row.",
+    "hint": "Treat the 2D matrix as a 1D sorted array. Use binary search with row and column calculations.",
+    "expected_points": [
+      "Treat 2D matrix as 1D sorted array",
+      "Use binary search with row/column calculations",
+      "Calculate row = mid // n, col = mid % n",
+      "Time complexity: O(log(m*n)), Space complexity: O(1)"
+    ],
+    "solution": {
+      "prerequisites": ["Binary search", "2D arrays", "Index calculations"],
+      "youtube_url": "https://www.youtube.com/watch?v=Ber2pi2C0j0",
+      "approaches": [
+        {
+          "name": "Binary Search as 1D Array",
+          "code": "def searchMatrix(matrix, target):\n    if not matrix or not matrix[0]:\n        return False\n    \n    m, n = len(matrix), len(matrix[0])\n    left, right = 0, m * n - 1\n    \n    while left <= right:\n        mid = (left + right) // 2\n        row, col = mid // n, mid % n\n        \n        if matrix[row][col] == target:\n            return True\n        elif matrix[row][col] < target:\n            left = mid + 1\n        else:\n            right = mid - 1\n    \n    return False",
+          "time_complexity": "O(log(m*n))",
+          "space_complexity": "O(1)",
+          "explanation": "We treat the 2D matrix as a 1D sorted array and use binary search. We calculate the row and column indices from the 1D index using row = mid // n and col = mid % n."
+        }
+      ]
+    },
+    "neetcode_url": "https://neetcode.io/problems/search-a-2d-matrix",
+    "difficulty": "Medium",
+    "tags": ["Array", "Binary Search", "Matrix"]
+  },
+  {
+    "id": "koko-eating-bananas",
+    "topic": "Binary Search",
+    "title": "Koko Eating Bananas",
+    "question": "Koko loves to eat bananas. There are n piles of bananas, the ith pile has piles[i] bananas. The guards have gone and will come back in h hours. Koko can decide her bananas-per-hour eating speed of k. Each hour, she chooses some pile of bananas and eats k bananas from that pile. If the pile has less than k bananas, she eats all of them instead and will not eat any more bananas during this hour. Koko likes to eat slowly but still wants to finish eating all the bananas before the guards come back. Return the minimum integer k such that she can eat all the bananas within h hours.",
+    "hint": "Use binary search on the possible eating speeds. For each speed, calculate the total time needed and check if it's within the limit.",
+    "expected_points": [
+      "Use binary search on possible eating speeds",
+      "For each speed, calculate total time needed",
+      "Check if total time is within the limit",
+      "Time complexity: O(n * log(max(piles))), Space complexity: O(1)"
+    ],
+    "solution": {
+      "prerequisites": ["Binary search", "Mathematical calculations", "Optimization"],
+      "youtube_url": "https://www.youtube.com/watch?v=U2SozAs9RzA",
+      "approaches": [
+        {
+          "name": "Binary Search on Speed",
+          "code": "def minEatingSpeed(piles, h):\n    left, right = 1, max(piles)\n    \n    while left < right:\n        mid = (left + right) // 2\n        \n        # Calculate total time needed for this speed\n        total_time = 0\n        for pile in piles:\n            total_time += (pile + mid - 1) // mid  # Ceiling division\n        \n        if total_time <= h:\n            # This speed works, try slower speeds\n            right = mid\n        else:\n            # This speed is too slow, try faster speeds\n            left = mid + 1\n    \n    return left",
+          "time_complexity": "O(n * log(max(piles)))",
+          "space_complexity": "O(1)",
+          "explanation": "We use binary search on the possible eating speeds. For each speed, we calculate the total time needed to eat all bananas. If the time is within the limit, we try slower speeds; otherwise, we try faster speeds."
+        }
+      ]
+    },
+    "neetcode_url": "https://neetcode.io/problems/koko-eating-bananas",
+    "difficulty": "Medium",
+    "tags": ["Array", "Binary Search"]
+  },
+  {
+    "id": "number-of-islands",
+    "topic": "Graphs",
+    "title": "Number of Islands",
+    "question": "Given an m x n 2D binary grid which represents a map of '1's (land) and '0's (water), return the number of islands. An island is surrounded by water and is formed by connecting adjacent lands horizontally or vertically.",
+    "hint": "Use DFS or BFS to explore each connected component of land cells. Mark visited cells to avoid counting them again.",
+    "expected_points": [
+      "Iterate through each cell in the grid",
+      "When land ('1') is found, increment island count and start DFS/BFS",
+      "Mark visited land cells to avoid counting them again",
+      "Explore all 4 directions (up, down, left, right)"
+    ],
+    "solution": {
+      "prerequisites": ["Graph traversal", "DFS/BFS", "2D arrays"],
+      "youtube_url": "https://www.youtube.com/watch?v=pV2kpPD66nE",
+      "approaches": [
+        {
+          "name": "DFS Approach",
+          "code": "def numIslands(grid):\n    if not grid or not grid[0]:\n        return 0\n    \n    rows, cols = len(grid), len(grid[0])\n    islands = 0\n    \n    def dfs(r, c):\n        if (r < 0 or r >= rows or c < 0 or c >= cols or \n            grid[r][c] == '0'):\n            return\n        \n        grid[r][c] = '0'  # Mark as visited\n        \n        # Explore all 4 directions\n        dfs(r + 1, c)\n        dfs(r - 1, c) \n        dfs(r, c + 1)\n        dfs(r, c - 1)\n    \n    for r in range(rows):\n        for c in range(cols):\n            if grid[r][c] == '1':\n                islands += 1\n                dfs(r, c)  # Mark entire island\n    \n    return islands",
+          "time_complexity": "O(m × n)",
+          "space_complexity": "O(m × n)",
+          "explanation": "We iterate through each cell. When we find land ('1'), we increment the island count and use DFS to mark all connected land cells as visited by setting them to '0'. The DFS explores all 4 directions recursively."
+        }
+      ]
+    },
+    "neetcode_url": "https://neetcode.io/problems/islands-and-treasure",
+    "difficulty": "Medium",
+    "tags": ["Array", "Depth-First Search", "Breadth-First Search", "Union Find", "Matrix"]
+  },
+  {
+    "id": "clone-graph",
+    "topic": "Graphs",
+    "title": "Clone Graph",
+    "question": "Given a reference of a node in a connected undirected graph. Return a deep copy (clone) of the graph. Each node in the graph contains a val (int) and a list (List[Node]) of its neighbors.",
+    "hint": "Use DFS or BFS with a hash map to track cloned nodes. For each node, create a clone if not already cloned, then recursively clone its neighbors.",
+    "expected_points": [
+      "Use hash map to track cloned nodes",
+      "Use DFS or BFS to traverse the graph",
+      "Create clone for each node and recursively clone neighbors",
+      "Time complexity: O(V + E), Space complexity: O(V)"
+    ],
+    "solution": {
+      "prerequisites": ["Graph traversal", "DFS/BFS", "Hash maps", "Deep copying"],
+      "youtube_url": "https://www.youtube.com/watch?v=mQeF6bN8hMk",
+      "approaches": [
+        {
+          "name": "DFS Approach",
+          "code": "def cloneGraph(node):\n    if not node:\n        return None\n    \n    old_to_new = {}\n    \n    def dfs(node):\n        if node in old_to_new:\n            return old_to_new[node]\n        \n        # Create clone of current node\n        clone = Node(node.val)\n        old_to_new[node] = clone\n        \n        # Recursively clone neighbors\n        for neighbor in node.neighbors:\n            clone.neighbors.append(dfs(neighbor))\n        \n        return clone\n    \n    return dfs(node)",
+          "time_complexity": "O(V + E)",
+          "space_complexity": "O(V)",
+          "explanation": "We use DFS with a hash map to track cloned nodes. For each node, we create a clone if not already cloned, then recursively clone all its neighbors."
+        },
+        {
+          "name": "BFS Approach",
+          "code": "def cloneGraph(node):\n    if not node:\n        return None\n    \n    old_to_new = {}\n    queue = [node]\n    old_to_new[node] = Node(node.val)\n    \n    while queue:\n        current = queue.pop(0)\n        \n        for neighbor in current.neighbors:\n            if neighbor not in old_to_new:\n                old_to_new[neighbor] = Node(neighbor.val)\n                queue.append(neighbor)\n            old_to_new[current].neighbors.append(old_to_new[neighbor])\n    \n    return old_to_new[node]",
+          "time_complexity": "O(V + E)",
+          "space_complexity": "O(V)",
+          "explanation": "We use BFS with a hash map to track cloned nodes. We process nodes level by level, creating clones and connecting neighbors."
+        }
+      ]
+    },
+    "neetcode_url": "https://neetcode.io/problems/clone-graph",
+    "difficulty": "Medium",
+    "tags": ["Hash Table", "Depth-First Search", "Breadth-First Search", "Graph"]
+  },
+  {
+    "id": "course-schedule",
+    "topic": "Graphs",
+    "title": "Course Schedule",
+    "question": "There are a total of numCourses courses you have to take, labeled from 0 to numCourses - 1. You are given an array prerequisites where prerequisites[i] = [ai, bi] indicates that you must take course bi first if you want to take course ai. For example, the pair [0, 1], indicates that to take course 0 you have to first take course 1. Return true if you can finish all courses. Otherwise, return false.",
+    "hint": "This is a cycle detection problem in a directed graph. Use topological sort or DFS to detect cycles.",
+    "expected_points": [
+      "Build adjacency list from prerequisites",
+      "Use DFS to detect cycles in directed graph",
+      "Use three states: unvisited, visiting, visited",
+      "Time complexity: O(V + E), Space complexity: O(V + E)"
+    ],
+    "solution": {
+      "prerequisites": ["Graph traversal", "Cycle detection", "Topological sort", "DFS"],
+      "youtube_url": "https://www.youtube.com/watch?v=EgI5nU9etnU",
+      "approaches": [
+        {
+          "name": "DFS Cycle Detection",
+          "code": "def canFinish(numCourses, prerequisites):\n    # Build adjacency list\n    graph = [[] for _ in range(numCourses)]\n    for course, prereq in prerequisites:\n        graph[prereq].append(course)\n    \n    # 0: unvisited, 1: visiting, 2: visited\n    state = [0] * numCourses\n    \n    def has_cycle(course):\n        if state[course] == 1:  # Currently visiting\n            return True\n        if state[course] == 2:  # Already visited\n            return False\n        \n        state[course] = 1  # Mark as visiting\n        \n        for next_course in graph[course]:\n            if has_cycle(next_course):\n                return True\n        \n        state[course] = 2  # Mark as visited\n        return False\n    \n    for course in range(numCourses):\n        if has_cycle(course):\n            return False\n    \n    return True",
+          "time_complexity": "O(V + E)",
+          "space_complexity": "O(V + E)",
+          "explanation": "We use DFS with three states to detect cycles. If we encounter a node that's currently being visited, we have a cycle. If it's already visited, we can skip it."
+        }
+      ]
+    },
+    "neetcode_url": "https://neetcode.io/problems/course-schedule",
+    "difficulty": "Medium",
+    "tags": ["Depth-First Search", "Breadth-First Search", "Graph", "Topological Sort"]
+  },
+  {
+    "id": "climbing-stairs",
+    "topic": "Dynamic Programming",
+    "title": "Climbing Stairs",
+    "question": "You are climbing a staircase. It takes n steps to reach the top. Each time you can either climb 1 or 2 steps. In how many distinct ways can you climb to the top?",
+    "hint": "This is similar to the Fibonacci sequence - the number of ways to reach step n depends on steps n-1 and n-2.",
+    "expected_points": [
+      "Recognize the Fibonacci pattern: f(n) = f(n-1) + f(n-2)",
+      "Base cases: 1 way for n=1, 2 ways for n=2",
+      "Can use bottom-up DP with O(1) space",
+      "Time complexity: O(n), Space complexity: O(1)"
+    ],
+    "solution": {
+      "prerequisites": ["Dynamic programming", "Fibonacci sequence"],
+      "youtube_url": "https://www.youtube.com/watch?v=Y0lT9Fck7qI",
+      "approaches": [
+        {
+          "name": "Bottom-up DP (Space Optimized)",
+          "code": "def climbStairs(n):\n    if n <= 2:\n        return n\n    \n    prev2 = 1  # ways to reach step 1\n    prev1 = 2  # ways to reach step 2\n    \n    for i in range(3, n + 1):\n        current = prev1 + prev2\n        prev2 = prev1\n        prev1 = current\n    \n    return prev1",
+          "time_complexity": "O(n)",
+          "space_complexity": "O(1)",
+          "explanation": "We use the fact that the number of ways to reach step n is the sum of ways to reach steps n-1 and n-2. We only need to track the previous two values, making this space-efficient."
+        },
+        {
+          "name": "Top-down DP with Memoization",
+          "code": "def climbStairs(n):\n    memo = {}\n    \n    def dp(step):\n        if step in memo:\n            return memo[step]\n        \n        if step <= 2:\n            return step\n        \n        memo[step] = dp(step - 1) + dp(step - 2)\n        return memo[step]\n    \n    return dp(n)",
+          "time_complexity": "O(n)",
+          "space_complexity": "O(n)",
+          "explanation": "We use top-down dynamic programming with memoization. We recursively calculate the number of ways to reach each step, storing results to avoid redundant calculations."
+        }
+      ]
+    },
+    "neetcode_url": "https://neetcode.io/problems/climbing-stairs",
+    "difficulty": "Easy",
+    "tags": ["Math", "Dynamic Programming", "Memoization"]
+  },
+  {
+    "id": "maximum-subarray",
+    "topic": "Dynamic Programming",
+    "title": "Maximum Subarray (Kadane's Algorithm)",
+    "question": "Given an integer array nums, find the contiguous subarray (containing at least one number) which has the largest sum and return its sum.",
+    "hint": "Consider Kadane's algorithm - at each position, decide whether to start a new subarray or extend the current one.",
+    "expected_points": [
+      "Use Kadane's algorithm for optimal solution",
+      "At each position, choose max(current element, current element + previous sum)",
+      "Track both current sum and maximum sum seen so far",
+      "Time complexity: O(n), Space complexity: O(1)"
+    ],
+    "solution": {
+      "prerequisites": ["Dynamic programming", "Array iteration"],
+      "youtube_url": "https://www.youtube.com/watch?v=5WZl3MMT0Eg",
+      "approaches": [
+        {
+          "name": "Kadane's Algorithm",
+          "code": "def maxSubArray(nums):\n    max_sum = current_sum = nums[0]\n    \n    for i in range(1, len(nums)):\n        # Either start a new subarray or extend current one\n        current_sum = max(nums[i], current_sum + nums[i])\n        # Update maximum sum seen so far\n        max_sum = max(max_sum, current_sum)\n    \n    return max_sum",
+          "time_complexity": "O(n)",
+          "space_complexity": "O(1)",
+          "explanation": "Kadane's algorithm works by maintaining the maximum sum of subarrays ending at each position. At each step, we decide whether to start a new subarray (if the current element is larger) or extend the existing subarray."
+        }
+      ]
+    },
+    "neetcode_url": "https://neetcode.io/problems/maximum-subarray",
+    "difficulty": "Medium",
+    "tags": ["Array", "Dynamic Programming", "Divide and Conquer"]
+  },
+  {
+    "id": "house-robber",
+    "topic": "Dynamic Programming",
+    "title": "House Robber",
+    "question": "You are a professional robber planning to rob houses along a street. Each house has a certain amount of money stashed, the only constraint stopping you from robbing each of them is that adjacent houses have security systems connected and it will automatically contact the police if two adjacent houses were broken into on the same night. Given an integer array nums representing the amount of money of each house, return the maximum amount of money you can rob tonight without alerting the police.",
+    "hint": "At each house, decide whether to rob it or not. If you rob it, you can't rob the previous house. Use dynamic programming to track the maximum money.",
+    "expected_points": [
+      "Use dynamic programming to track maximum money",
+      "At each house, choose max(rob current + money from 2 houses ago, money from 1 house ago)",
+      "Can optimize space to O(1)",
+      "Time complexity: O(n), Space complexity: O(1)"
+    ],
+    "solution": {
+      "prerequisites": ["Dynamic programming", "Optimization"],
+      "youtube_url": "https://www.youtube.com/watch?v=73r3KWiEvyk",
+      "approaches": [
+        {
+          "name": "Space Optimized DP",
+          "code": "def rob(nums):\n    if not nums:\n        return 0\n    if len(nums) == 1:\n        return nums[0]\n    \n    prev2 = nums[0]\n    prev1 = max(nums[0], nums[1])\n    \n    for i in range(2, len(nums)):\n        current = max(prev1, prev2 + nums[i])\n        prev2 = prev1\n        prev1 = current\n    \n    return prev1",
+          "time_complexity": "O(n)",
+          "space_complexity": "O(1)",
+          "explanation": "We use dynamic programming with space optimization. At each house, we choose the maximum between robbing the current house plus the money from two houses ago, or taking the money from one house ago."
+        }
+      ]
+    },
+    "neetcode_url": "https://neetcode.io/problems/house-robber",
+    "difficulty": "Medium",
+    "tags": ["Array", "Dynamic Programming"]
+  },
+  {
+    "id": "longest-increasing-subsequence",
+    "topic": "Dynamic Programming",
+    "title": "Longest Increasing Subsequence",
+    "question": "Given an integer array nums, return the length of the longest strictly increasing subsequence. A subsequence is a sequence that can be derived from an array by deleting some or no elements without changing the order of the remaining elements.",
+    "hint": "Use dynamic programming where dp[i] represents the length of the longest increasing subsequence ending at index i. For each element, check all previous elements that are smaller.",
+    "expected_points": [
+      "Use DP where dp[i] = LIS ending at index i",
+      "For each element, check all previous smaller elements",
+      "Optimization: Use binary search with patience sorting",
+      "Time complexity: O(n²) or O(n log n) with optimization"
+    ],
+    "solution": {
+      "prerequisites": ["Dynamic programming", "Binary search", "Patience sorting"],
+      "youtube_url": "https://www.youtube.com/watch?v=cjWnW0hdF1Y",
+      "approaches": [
+        {
+          "name": "DP Approach",
+          "code": "def lengthOfLIS(nums):\n    if not nums:\n        return 0\n    \n    dp = [1] * len(nums)\n    \n    for i in range(1, len(nums)):\n        for j in range(i):\n            if nums[j] < nums[i]:\n                dp[i] = max(dp[i], dp[j] + 1)\n    \n    return max(dp)",
+          "time_complexity": "O(n²)",
+          "space_complexity": "O(n)",
+          "explanation": "We use dynamic programming where dp[i] represents the length of the longest increasing subsequence ending at index i. For each element, we check all previous elements that are smaller and update the DP array."
+        },
+        {
+          "name": "Binary Search Optimization",
+          "code": "import bisect\n\ndef lengthOfLIS(nums):\n    if not nums:\n        return 0\n    \n    tails = []\n    \n    for num in nums:\n        # Find the position to insert the number\n        pos = bisect.bisect_left(tails, num)\n        \n        if pos == len(tails):\n            # Extend the sequence\n            tails.append(num)\n        else:\n            # Replace the element at position pos\n            tails[pos] = num\n    \n    return len(tails)",
+          "time_complexity": "O(n log n)",
+          "space_complexity": "O(n)",
+          "explanation": "We use binary search with patience sorting. We maintain a tails array where tails[i] is the smallest tail of all increasing subsequences of length i+1. This allows us to use binary search for optimization."
+        }
+      ]
+    },
+    "neetcode_url": "https://neetcode.io/problems/longest-increasing-subsequence",
+    "difficulty": "Medium",
+    "tags": ["Array", "Binary Search", "Dynamic Programming"]
+  },
+  {
+    "id": "coin-change",
+    "topic": "Dynamic Programming",
+    "title": "Coin Change",
+    "question": "You are given an integer array coins representing coins of different denominations and an integer amount representing a total amount of money. Return the fewest number of coins that you need to make up that amount. If that amount of money cannot be made up by any combination of the coins, return -1.",
+    "hint": "Use dynamic programming where dp[i] represents the minimum number of coins needed to make amount i. For each amount, try all coin denominations.",
+    "expected_points": [
+      "Use DP where dp[i] = minimum coins for amount i",
+      "For each amount, try all coin denominations",
+      "Initialize dp[0] = 0, others to infinity",
+      "Time complexity: O(amount × coins), Space complexity: O(amount)"
+    ],
+    "solution": {
+      "prerequisites": ["Dynamic programming", "Optimization"],
+      "youtube_url": "https://www.youtube.com/watch?v=H9bfqozjoqs",
+      "approaches": [
+        {
+          "name": "Bottom-up DP",
+          "code": "def coinChange(coins, amount):\n    dp = [float('inf')] * (amount + 1)\n    dp[0] = 0\n    \n    for i in range(1, amount + 1):\n        for coin in coins:\n            if coin <= i:\n                dp[i] = min(dp[i], dp[i - coin] + 1)\n    \n    return dp[amount] if dp[amount] != float('inf') else -1",
+          "time_complexity": "O(amount × coins)",
+          "space_complexity": "O(amount)",
+          "explanation": "We use bottom-up dynamic programming. For each amount from 1 to the target, we try all coin denominations and update the minimum number of coins needed."
+        }
+      ]
+    },
+    "neetcode_url": "https://neetcode.io/problems/coin-change",
+    "difficulty": "Medium",
+    "tags": ["Array", "Dynamic Programming", "Breadth-First Search"]
+  },
+  {
+    "id": "longest-common-subsequence",
+    "topic": "Dynamic Programming",
+    "title": "Longest Common Subsequence",
+    "question": "Given two strings text1 and text2, return the length of their longest common subsequence. If there is no common subsequence, return 0. A subsequence of a string is a new string generated from the original string with some characters (can be none) deleted without changing the relative order of the remaining characters.",
+    "hint": "Use 2D dynamic programming where dp[i][j] represents the LCS length of text1[0:i] and text2[0:j].",
+    "expected_points": [
+      "Use 2D DP where dp[i][j] = LCS of text1[0:i] and text2[0:j]",
+      "If characters match: dp[i][j] = dp[i-1][j-1] + 1",
+      "If characters don't match: dp[i][j] = max(dp[i-1][j], dp[i][j-1])",
+      "Time complexity: O(m×n), Space complexity: O(m×n) or O(min(m,n))"
+    ],
+    "solution": {
+      "prerequisites": ["Dynamic programming", "2D arrays", "String manipulation"],
+      "youtube_url": "https://www.youtube.com/watch?v=Ua0GhsJSlWM",
+      "approaches": [
+        {
+          "name": "2D DP Approach",
+          "code": "def longestCommonSubsequence(text1, text2):\n    m, n = len(text1), len(text2)\n    dp = [[0] * (n + 1) for _ in range(m + 1)]\n    \n    for i in range(1, m + 1):\n        for j in range(1, n + 1):\n            if text1[i-1] == text2[j-1]:\n                dp[i][j] = dp[i-1][j-1] + 1\n            else:\n                dp[i][j] = max(dp[i-1][j], dp[i][j-1])\n    \n    return dp[m][n]",
+          "time_complexity": "O(m×n)",
+          "space_complexity": "O(m×n)",
+          "explanation": "We use 2D dynamic programming where dp[i][j] represents the length of LCS of text1[0:i] and text2[0:j]. If characters match, we take the diagonal value plus 1. Otherwise, we take the maximum of top and left values."
+        },
+        {
+          "name": "Space Optimized DP",
+          "code": "def longestCommonSubsequence(text1, text2):\n    # Make text1 the shorter string\n    if len(text1) > len(text2):\n        text1, text2 = text2, text1\n    \n    m, n = len(text1), len(text2)\n    prev = [0] * (m + 1)\n    curr = [0] * (m + 1)\n    \n    for j in range(1, n + 1):\n        for i in range(1, m + 1):\n            if text1[i-1] == text2[j-1]:\n                curr[i] = prev[i-1] + 1\n            else:\n                curr[i] = max(prev[i], curr[i-1])\n        prev, curr = curr, prev\n    \n    return prev[m]",
+          "time_complexity": "O(m×n)",
+          "space_complexity": "O(min(m,n))",
+          "explanation": "We optimize space by using only two rows since we only need the previous row to calculate the current row. We make text1 the shorter string to minimize space usage."
+        }
+      ]
+    },
+    "neetcode_url": "https://neetcode.io/problems/longest-common-subsequence",
+    "difficulty": "Medium",
+    "tags": ["String", "Dynamic Programming"]
+  },
+  {
+    "id": "word-break",
+    "topic": "Dynamic Programming",
+    "title": "Word Break",
+    "question": "Given a string s and a dictionary of strings wordDict, return true if s can be segmented into a space-separated sequence of one or more dictionary words. Note that the same word in the dictionary may be reused multiple times in the segmentation.",
+    "hint": "Use dynamic programming where dp[i] represents whether the string s[0:i] can be segmented into dictionary words.",
+    "expected_points": [
+      "Use DP where dp[i] = whether s[0:i] can be segmented",
+      "For each position, check all possible word endings",
+      "Initialize dp[0] = true (empty string)",
+      "Time complexity: O(n² + m), Space complexity: O(n)"
+    ],
+    "solution": {
+      "prerequisites": ["Dynamic programming", "String manipulation", "Hash sets"],
+      "youtube_url": "https://www.youtube.com/watch?v=Sx9NNgInc3A",
+      "approaches": [
+        {
+          "name": "DP Approach",
+          "code": "def wordBreak(s, wordDict):\n    word_set = set(wordDict)\n    n = len(s)\n    dp = [False] * (n + 1)\n    dp[0] = True  # Empty string\n    \n    for i in range(1, n + 1):\n        for j in range(i):\n            if dp[j] and s[j:i] in word_set:\n                dp[i] = True\n                break\n    \n    return dp[n]",
+          "time_complexity": "O(n² + m)",
+          "space_complexity": "O(n)",
+          "explanation": "We use dynamic programming where dp[i] represents whether the string s[0:i] can be segmented. For each position, we check all possible word endings and update the DP array."
+        }
+      ]
+    },
+    "neetcode_url": "https://neetcode.io/problems/word-break",
+    "difficulty": "Medium",
+    "tags": ["Hash Table", "String", "Dynamic Programming", "Trie", "Memoization"]
+  },
+  {
+    "id": "subsets",
+    "topic": "Backtracking",
+    "title": "Subsets",
+    "question": "Given an integer array nums of unique elements, return all possible subsets (the power set). The solution set must not contain duplicate subsets. Return the solution in any order.",
+    "hint": "Use backtracking to generate all possible subsets. At each step, either include the current element or exclude it.",
+    "expected_points": [
+      "Use backtracking to generate all subsets",
+      "For each element, choose to include or exclude it",
+      "Base case: when we've processed all elements",
+      "Time complexity: O(2^n), Space complexity: O(n)"
+    ],
+    "solution": {
+      "prerequisites": ["Backtracking", "Recursion", "Subset generation"],
+      "youtube_url": "https://www.youtube.com/watch?v=REOH22Xwdkk",
+      "approaches": [
+        {
+          "name": "Backtracking Approach",
+          "code": "def subsets(nums):\n    result = []\n    \n    def backtrack(start, path):\n        # Add current subset to result\n        result.append(path[:])\n        \n        # Generate subsets by including each remaining element\n        for i in range(start, len(nums)):\n            path.append(nums[i])\n            backtrack(i + 1, path)\n            path.pop()  # Backtrack\n    \n    backtrack(0, [])\n    return result",
+          "time_complexity": "O(2^n)",
+          "space_complexity": "O(n)",
+          "explanation": "We use backtracking to generate all possible subsets. For each position, we can either include or exclude the current element. We add each generated subset to our result."
+        }
+      ]
+    },
+    "neetcode_url": "https://neetcode.io/problems/subsets",
+    "difficulty": "Medium",
+    "tags": ["Array", "Backtracking", "Bit Manipulation"]
+  },
+  {
+    "id": "combination-sum",
+    "topic": "Backtracking",
+    "title": "Combination Sum",
+    "question": "Given an array of distinct integers candidates and a target integer target, return a list of all unique combinations of candidates where the chosen numbers sum to target. You may return the combinations in any order. The same number may be chosen from candidates an unlimited number of times.",
+    "hint": "Use backtracking with the ability to reuse elements. Keep track of the current sum and remaining target.",
+    "expected_points": [
+      "Use backtracking with element reuse allowed",
+      "Keep track of current sum and remaining target",
+      "Skip elements that would exceed target",
+      "Time complexity: O(2^target), Space complexity: O(target)"
+    ],
+    "solution": {
+      "prerequisites": ["Backtracking", "Combination generation", "Sum optimization"],
+      "youtube_url": "https://www.youtube.com/watch?v=GBKI9VSKdGg",
+      "approaches": [
+        {
+          "name": "Backtracking Approach",
+          "code": "def combinationSum(candidates, target):\n    result = []\n    \n    def backtrack(start, path, remaining):\n        if remaining == 0:\n            result.append(path[:])\n            return\n        \n        if remaining < 0:\n            return\n        \n        for i in range(start, len(candidates)):\n            path.append(candidates[i])\n            backtrack(i, path, remaining - candidates[i])\n            path.pop()  # Backtrack\n    \n    backtrack(0, [], target)\n    return result",
+          "time_complexity": "O(2^target)",
+          "space_complexity": "O(target)",
+          "explanation": "We use backtracking where we can reuse elements. For each element, we can either include it (and potentially include it again) or skip to the next element. We stop when we reach the target or exceed it."
+        }
+      ]
+    },
+    "neetcode_url": "https://neetcode.io/problems/combination-sum",
+    "difficulty": "Medium",
+    "tags": ["Array", "Backtracking"]
+  },
+  {
+    "id": "permutations",
+    "topic": "Backtracking",
+    "title": "Permutations",
+    "question": "Given an array nums of distinct integers, return all the possible permutations. You can return the answer in any order.",
+    "hint": "Use backtracking to generate all permutations. Use a visited array or swap elements to avoid duplicates.",
+    "expected_points": [
+      "Use backtracking to generate all permutations",
+      "Use visited array or swap elements to avoid duplicates",
+      "Base case: when path length equals array length",
+      "Time complexity: O(n!), Space complexity: O(n)"
+    ],
+    "solution": {
+      "prerequisites": ["Backtracking", "Permutation generation", "Visited tracking"],
+      "youtube_url": "https://www.youtube.com/watch?v=s7AvT7cGdSo",
+      "approaches": [
+        {
+          "name": "Backtracking with Visited Array",
+          "code": "def permute(nums):\n    result = []\n    visited = [False] * len(nums)\n    \n    def backtrack(path):\n        if len(path) == len(nums):\n            result.append(path[:])\n            return\n        \n        for i in range(len(nums)):\n            if not visited[i]:\n                visited[i] = True\n                path.append(nums[i])\n                backtrack(path)\n                path.pop()\n                visited[i] = False\n    \n    backtrack([])\n    return result",
+          "time_complexity": "O(n!)",
+          "space_complexity": "O(n)",
+          "explanation": "We use backtracking with a visited array to generate all permutations. We mark elements as visited when we include them in the current path and unmark them when we backtrack."
+        },
+        {
+          "name": "Backtracking with Swapping",
+          "code": "def permute(nums):\n    result = []\n    \n    def backtrack(start):\n        if start == len(nums):\n            result.append(nums[:])\n            return\n        \n        for i in range(start, len(nums)):\n            nums[start], nums[i] = nums[i], nums[start]\n            backtrack(start + 1)\n            nums[start], nums[i] = nums[i], nums[start]  # Backtrack\n    \n    backtrack(0)\n    return result",
+          "time_complexity": "O(n!)",
+          "space_complexity": "O(n)",
+          "explanation": "We use backtracking with swapping. We swap elements to generate different permutations and swap back when backtracking."
+        }
+      ]
+    },
+    "neetcode_url": "https://neetcode.io/problems/permutations",
+    "difficulty": "Medium",
+    "tags": ["Array", "Backtracking"]
+  },
+  {
+    "id": "subset-sum-ii",
+    "topic": "Backtracking",
+    "title": "Subsets II",
+    "question": "Given an integer array nums that may contain duplicates, return all possible subsets (the power set). The solution set must not contain duplicate subsets. Return the solution in any order.",
+    "hint": "Use backtracking similar to subsets, but sort the array first and skip duplicate elements at the same level.",
+    "expected_points": [
+      "Sort the array first to group duplicates",
+      "Skip duplicate elements at the same recursion level",
+      "Use backtracking to generate all subsets",
+      "Time complexity: O(2^n), Space complexity: O(n)"
+    ],
+    "solution": {
+      "prerequisites": ["Backtracking", "Duplicate handling", "Sorting"],
+      "youtube_url": "https://www.youtube.com/watch?v=Vn2v6ajA7U0",
+      "approaches": [
+        {
+          "name": "Backtracking with Duplicate Handling",
+          "code": "def subsetsWithDup(nums):\n    result = []\n    nums.sort()  # Sort to group duplicates\n    \n    def backtrack(start, path):\n        result.append(path[:])\n        \n        for i in range(start, len(nums)):\n            # Skip duplicates at the same level\n            if i > start and nums[i] == nums[i-1]:\n                continue\n            \n            path.append(nums[i])\n            backtrack(i + 1, path)\n            path.pop()\n    \n    backtrack(0, [])\n    return result",
+          "time_complexity": "O(2^n)",
+          "space_complexity": "O(n)",
+          "explanation": "We sort the array first to group duplicates together. During backtracking, we skip duplicate elements at the same recursion level to avoid generating duplicate subsets."
+        }
+      ]
+    },
+    "neetcode_url": "https://neetcode.io/problems/subsets-ii",
+    "difficulty": "Medium",
+    "tags": ["Array", "Backtracking", "Bit Manipulation"]
+  },
+  {
+    "id": "combinations",
+    "topic": "Backtracking",
+    "title": "Combinations",
+    "question": "Given two integers n and k, return all possible combinations of k numbers out of the range [1, n]. You may return the answer in any order.",
+    "hint": "Use backtracking to generate combinations of k elements from [1, n]. Only include elements in ascending order.",
+    "expected_points": [
+      "Use backtracking to generate k-combinations",
+      "Only include elements in ascending order",
+      "Base case: when path length equals k",
+      "Time complexity: O(C(n,k)), Space complexity: O(k)"
+    ],
+    "solution": {
+      "prerequisites": ["Backtracking", "Combination generation"],
+      "youtube_url": "https://www.youtube.com/watch?v=q0s6m7AiM7o",
+      "approaches": [
+        {
+          "name": "Backtracking Approach",
+          "code": "def combine(n, k):\n    result = []\n    \n    def backtrack(start, path):\n        if len(path) == k:\n            result.append(path[:])\n            return\n        \n        # Prune: not enough elements left\n        if len(path) + (n - start + 1) < k:\n            return\n        \n        for i in range(start, n + 1):\n            path.append(i)\n            backtrack(i + 1, path)\n            path.pop()\n    \n    backtrack(1, [])\n    return result",
+          "time_complexity": "O(C(n,k))",
+          "space_complexity": "O(k)",
+          "explanation": "We use backtracking to generate combinations of k elements from [1, n]. We include elements in ascending order and prune branches where it's impossible to complete the combination."
+        }
+      ]
+    },
+    "neetcode_url": "https://neetcode.io/problems/combinations",
+    "difficulty": "Medium",
+    "tags": ["Backtracking"]
+  },
+  {
+    "id": "word-search",
+    "topic": "Backtracking",
+    "title": "Word Search",
+    "question": "Given an m x n grid of characters board and a string word, return true if word exists in the grid. The word can be constructed from letters of sequentially adjacent cells, where adjacent cells are horizontally or vertically neighboring. The same letter cell may not be used more than once.",
+    "hint": "Use backtracking with DFS. For each cell, try to find the word starting from that position. Mark visited cells and unmark when backtracking.",
+    "expected_points": [
+      "Use DFS backtracking to search for word",
+      "Mark visited cells and unmark when backtracking",
+      "Check all 4 directions (up, down, left, right)",
+      "Time complexity: O(m×n×4^L), Space complexity: O(L)"
+    ],
+    "solution": {
+      "prerequisites": ["Backtracking", "DFS", "2D arrays", "String matching"],
+      "youtube_url": "https://www.youtube.com/watch?v=pfiQ_PS1g8E",
+      "approaches": [
+        {
+          "name": "DFS Backtracking",
+          "code": "def exist(board, word):\n    if not board or not board[0]:\n        return False\n    \n    rows, cols = len(board), len(board[0])\n    \n    def dfs(r, c, word_idx):\n        if word_idx == len(word):\n            return True\n        \n        if (r < 0 or r >= rows or c < 0 or c >= cols or \n            board[r][c] != word[word_idx]):\n            return False\n        \n        # Mark as visited\n        temp = board[r][c]\n        board[r][c] = '#'\n        \n        # Check all 4 directions\n        found = (dfs(r + 1, c, word_idx + 1) or\n                dfs(r - 1, c, word_idx + 1) or\n                dfs(r, c + 1, word_idx + 1) or\n                dfs(r, c - 1, word_idx + 1))\n        \n        # Unmark (backtrack)\n        board[r][c] = temp\n        return found\n    \n    for r in range(rows):\n        for c in range(cols):\n            if dfs(r, c, 0):\n                return True\n    \n    return False",
+          "time_complexity": "O(m×n×4^L)",
+          "space_complexity": "O(L)",
+          "explanation": "We use DFS backtracking to search for the word. For each cell, we try to find the word starting from that position. We mark visited cells and unmark them when backtracking."
+        }
+      ]
+    },
+    "neetcode_url": "https://neetcode.io/problems/word-search",
+    "difficulty": "Medium",
+    "tags": ["Array", "Backtracking", "Matrix"]
+  },
+  {
+    "id": "palindrome-partitioning",
+    "topic": "Backtracking",
+    "title": "Palindrome Partitioning",
+    "question": "Given a string s, partition s such that every substring of the partition is a palindrome. Return all possible palindrome partitioning of s.",
+    "hint": "Use backtracking to generate all possible partitions. For each position, try all possible palindrome substrings starting from that position.",
+    "expected_points": [
+      "Use backtracking to generate all partitions",
+      "Check if substring is palindrome before adding to path",
+      "Optimize palindrome checking with memoization",
+      "Time complexity: O(2^n), Space complexity: O(n)"
+    ],
+    "solution": {
+      "prerequisites": ["Backtracking", "Palindrome checking", "String manipulation"],
+      "youtube_url": "https://www.youtube.com/watch?v=jHR7KUAAEzw",
+      "approaches": [
+        {
+          "name": "Backtracking with Palindrome Check",
+          "code": "def partition(s):\n    result = []\n    \n    def is_palindrome(substring):\n        return substring == substring[::-1]\n    \n    def backtrack(start, path):\n        if start == len(s):\n            result.append(path[:])\n            return\n        \n        for end in range(start + 1, len(s) + 1):\n            substring = s[start:end]\n            if is_palindrome(substring):\n                path.append(substring)\n                backtrack(end, path)\n                path.pop()\n    \n    backtrack(0, [])\n    return result",
+          "time_complexity": "O(2^n)",
+          "space_complexity": "O(n)",
+          "explanation": "We use backtracking to generate all possible partitions. For each position, we try all possible palindrome substrings starting from that position and recursively partition the remaining string."
+        }
+      ]
+    },
+    "neetcode_url": "https://neetcode.io/problems/palindrome-partitioning",
+    "difficulty": "Medium",
+    "tags": ["String", "Backtracking", "Dynamic Programming"]
+  },
+  {
+    "id": "letter-combinations-of-phone-number",
+    "topic": "Backtracking",
+    "title": "Letter Combinations of a Phone Number",
+    "question": "Given a string containing digits from 2-9 inclusive, return all possible letter combinations that the number could represent. Return the answer in any order. A mapping of digits to letters (just like on the telephone buttons) is given below.",
+    "hint": "Use backtracking to generate all possible letter combinations. For each digit, try all possible letters for that digit.",
+    "expected_points": [
+      "Use backtracking to generate letter combinations",
+      "Map each digit to its corresponding letters",
+      "Build combinations character by character",
+      "Time complexity: O(4^n), Space complexity: O(n)"
+    ],
+    "solution": {
+      "prerequisites": ["Backtracking", "String manipulation", "Mapping"],
+      "youtube_url": "https://www.youtube.com/watch?v=0snEunUacOE",
+      "approaches": [
+        {
+          "name": "Backtracking Approach",
+          "code": "def letterCombinations(digits):\n    if not digits:\n        return []\n    \n    digit_to_letters = {\n        '2': 'abc', '3': 'def', '4': 'ghi', '5': 'jkl',\n        '6': 'mno', '7': 'pqrs', '8': 'tuv', '9': 'wxyz'\n    }\n    \n    result = []\n    \n    def backtrack(index, path):\n        if index == len(digits):\n            result.append(''.join(path))\n            return\n        \n        digit = digits[index]\n        for letter in digit_to_letters[digit]:\n            path.append(letter)\n            backtrack(index + 1, path)\n            path.pop()\n    \n    backtrack(0, [])\n    return result",
+          "time_complexity": "O(4^n)",
+          "space_complexity": "O(n)",
+          "explanation": "We use backtracking to generate all possible letter combinations. For each digit, we try all possible letters for that digit and recursively generate combinations for the remaining digits."
+        }
+      ]
+    },
+    "neetcode_url": "https://neetcode.io/problems/letter-combinations-of-a-phone-number",
+    "difficulty": "Medium",
+    "tags": ["Hash Table", "String", "Backtracking"]
+  },
+  {
+    "id": "n-queens",
+    "topic": "Backtracking",
+    "title": "N-Queens",
+    "question": "The n-queens puzzle is the problem of placing n queens on an n×n chessboard such that no two queens attack each other. Given an integer n, return all distinct solutions to the n-queens puzzle. You may return the answer in any order.",
+    "hint": "Use backtracking to place queens row by row. For each row, try placing a queen in each column and check if it conflicts with previously placed queens.",
+    "expected_points": [
+      "Use backtracking to place queens row by row",
+      "Check diagonal and column conflicts efficiently",
+      "Use sets to track occupied columns and diagonals",
+      "Time complexity: O(n!), Space complexity: O(n)"
+    ],
+    "solution": {
+      "prerequisites": ["Backtracking", "Chess logic", "Conflict detection"],
+      "youtube_url": "https://www.youtube.com/watch?v=Ph95IHmRp5M",
+      "approaches": [
+        {
+          "name": "Backtracking with Conflict Tracking",
+          "code": "def solveNQueens(n):\n    result = []\n    board = [['.' for _ in range(n)] for _ in range(n)]\n    \n    def is_safe(row, col):\n        # Check column\n        for i in range(row):\n            if board[i][col] == 'Q':\n                return False\n        \n        # Check diagonals\n        for i, j in zip(range(row-1, -1, -1), range(col-1, -1, -1)):\n            if board[i][j] == 'Q':\n                return False\n        \n        for i, j in zip(range(row-1, -1, -1), range(col+1, n)):\n            if board[i][j] == 'Q':\n                return False\n        \n        return True\n    \n    def backtrack(row):\n        if row == n:\n            result.append([''.join(row) for row in board])\n            return\n        \n        for col in range(n):\n            if is_safe(row, col):\n                board[row][col] = 'Q'\n                backtrack(row + 1)\n                board[row][col] = '.'\n    \n    backtrack(0)\n    return result",
+          "time_complexity": "O(n!)",
+          "space_complexity": "O(n)",
+          "explanation": "We use backtracking to place queens row by row. For each row, we try placing a queen in each column and check if it conflicts with previously placed queens using diagonal and column checks."
+        }
+      ]
+    },
+    "neetcode_url": "https://neetcode.io/problems/n-queens",
+    "difficulty": "Hard",
+    "tags": ["Array", "Backtracking"]
+  },
+  {
+    "id": "jump-game",
+    "topic": "Greedy",
+    "title": "Jump Game",
+    "question": "You are given an integer array nums. You are initially positioned at the array's first index, and each element in the array represents your maximum jump length at that position. Return true if you can reach the last index, or false otherwise.",
+    "hint": "Use greedy approach - keep track of the farthest position you can reach. If you can reach the end, return true.",
+    "expected_points": [
+      "Use greedy approach to track farthest reachable position",
+      "Update farthest position at each step",
+      "Return true if farthest position reaches or exceeds last index",
+      "Time complexity: O(n), Space complexity: O(1)"
+    ],
+    "solution": {
+      "prerequisites": ["Greedy algorithms", "Array traversal"],
+      "youtube_url": "https://www.youtube.com/watch?v=Yan0cv2cLy8",
+      "approaches": [
+        {
+          "name": "Greedy Approach",
+          "code": "def canJump(nums):\n    farthest = 0\n    \n    for i in range(len(nums)):\n        # If current position is beyond farthest reachable position\n        if i > farthest:\n            return False\n        \n        # Update farthest reachable position\n        farthest = max(farthest, i + nums[i])\n        \n        # If we can reach the end\n        if farthest >= len(nums) - 1:\n            return True\n    \n    return True",
+          "time_complexity": "O(n)",
+          "space_complexity": "O(1)",
+          "explanation": "We use a greedy approach to keep track of the farthest position we can reach. At each step, we update the farthest position and check if we can reach the end."
+        }
+      ]
+    },
+    "neetcode_url": "https://neetcode.io/problems/jump-game",
+    "difficulty": "Medium",
+    "tags": ["Array", "Dynamic Programming", "Greedy"]
+  },
+  {
+    "id": "gas-station",
+    "topic": "Greedy",
+    "title": "Gas Station",
+    "question": "There are n gas stations along a circular route, where the amount of gas at the ith station is gas[i]. You have a car with an unlimited gas tank and it costs cost[i] of gas to travel from the ith station to its next (i + 1)th station. You begin the journey with an empty tank at one of the gas stations. Given two integer arrays gas and cost, return the starting gas station's index if you can travel around the circuit once in the clockwise direction, otherwise return -1.",
+    "hint": "Use greedy approach. If total gas >= total cost, there's a solution. Find the starting position where you can complete the circuit.",
+    "expected_points": [
+      "Check if total gas >= total cost",
+      "Find starting position where you can complete the circuit",
+      "Track current tank and total tank separately",
+      "Time complexity: O(n), Space complexity: O(1)"
+    ],
+    "solution": {
+      "prerequisites": ["Greedy algorithms", "Circular array", "Gas optimization"],
+      "youtube_url": "https://www.youtube.com/watch?v=lJwbPZGo05A",
+      "approaches": [
+        {
+          "name": "Greedy Approach",
+          "code": "def canCompleteCircuit(gas, cost):\n    total_tank = 0\n    current_tank = 0\n    start_station = 0\n    \n    for i in range(len(gas)):\n        total_tank += gas[i] - cost[i]\n        current_tank += gas[i] - cost[i]\n        \n        # If we can't reach the next station from current start\n        if current_tank < 0:\n            start_station = i + 1\n            current_tank = 0\n    \n    return start_station if total_tank >= 0 else -1",
+          "time_complexity": "O(n)",
+          "space_complexity": "O(1)",
+          "explanation": "We use a greedy approach where we track both the total tank (sum of all gas - cost) and current tank. If total tank >= 0, there's a solution. We find the starting position where we can complete the circuit."
+        }
+      ]
+    },
+    "neetcode_url": "https://neetcode.io/problems/gas-station",
+    "difficulty": "Medium",
+    "tags": ["Array", "Greedy"]
+  }
+]
