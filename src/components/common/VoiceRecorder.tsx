@@ -96,7 +96,6 @@ export const VoiceRecorder: React.FC<VoiceRecorderProps> = ({
     startTransition(() => {
       try {
         setRecordingState('starting');
-        resetTranscript();
         onStart?.();
         startListening(timeout);
         setRecordingState('recording');

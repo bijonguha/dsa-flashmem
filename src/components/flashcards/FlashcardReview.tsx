@@ -75,13 +75,13 @@ export const FlashcardReview: React.FC<FlashcardReviewProps> = ({
   }, [currentIndex, resetCardState]);
 
   const handleVoiceTranscript = useCallback((transcript: string) => {
-    setUserAnswer(transcript);
+    setUserAnswer(prev => prev ? `${prev}\n${transcript}`.trim() : transcript);
     setInputMethod('voice');
   }, []);
 
   const handleVoiceInterim = useCallback((transcript: string) => {
     // Update with interim results in real-time
-    setUserAnswer(transcript);
+    setUserAnswer(prev => prev ? `${prev}\n${transcript}`.trim() : transcript);
     setInputMethod('voice');
   }, []);
 

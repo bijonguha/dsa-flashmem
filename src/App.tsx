@@ -338,16 +338,22 @@ function App() {
   const renderCurrentView = () => {
     switch (currentView) {
       case 'import':
-        return <FlashcardImport onImportComplete={handleImportComplete} />;
+        return (
+          <Suspense fallback={<LoadingSpinner message="Loading import..." />}>
+            <FlashcardImport onImportComplete={handleImportComplete} />
+          </Suspense>
+        );
       
       case 'review':
         return dueCards.length > 0 ? (
-          <FlashcardReview
-            flashcards={dueCards}
-            onComplete={handleReviewComplete}
-            settings={settings}
-            onShowSolution={handleShowSolution}
-          />
+          <Suspense fallback={<LoadingSpinner message="Loading review..." />}>
+            <FlashcardReview
+              flashcards={dueCards}
+              onComplete={handleReviewComplete}
+              settings={settings}
+              onShowSolution={handleShowSolution}
+            />
+          </Suspense>
         ) : (
           <div className="max-w-2xl mx-auto p-6 text-center">
             <h2 className="text-2xl font-bold text-gray-800 mb-4">No Cards Due</h2>
@@ -364,15 +370,19 @@ function App() {
       case 'settings':
         return (
           <Suspense fallback={<LoadingSpinner message="Loading settings..." />}>
-            <Settings 
-              settings={settings} 
+            <Settings
+              settings={settings}
               onSettingsChange={setSettings}
             />
           </Suspense>
         );
       
       case 'dashboard':
-        return <Dashboard />;
+        return (
+          <Suspense fallback={<LoadingSpinner message="Loading dashboard..." />}>
+            <Dashboard />
+          </Suspense>
+        );
       
       default:
         return renderHomeView();
