@@ -111,7 +111,7 @@ export class SRSService {
    * Get cards due for review
    */
   static async getDueCards(userId: string): Promise<{ flashcard_id: string; priority: number }[]> {
-    const dueProgress = await SupabaseDataService.getDueCards(userId); // Pass userId
+    const dueProgress = await SupabaseDataService.getDueCards(userId);
 
     return dueProgress
       .map((progress) => ({
@@ -119,6 +119,48 @@ export class SRSService {
         priority: this.calculatePriority(progress),
       }))
       .sort((a, b) => b.priority - a.priority);
+  }
+
+  /**
+   * Get cards due for review with filtering and limits
+   */
+  static async getDueCardsFiltered(
+    userId: string, 
+    options?: {
+      limit?: number;
+      topicFilters?: string[];
+    }
+  ): Promise<{ flashcard_id: string; priority: number }[]> {
+    const dueProgress = await SupabaseDataService.getDueCards(userId);
+    
+    // Get all flashcards to check topics
+    const allFlashcards = await SupabaseDataService.getAllFlashcards(userId);
+    const flashcardMap = new Map(allFlashcards.map(f => [f.id, f]));
+
+    let filteredProgress = dueProgress;
+
+    // Apply topic filters if specified
+    if (options?.topicFilters && options.topicFilters.length > 0) {
+      filteredProgress = dueProgress.filter(progress => {
+        const flashcard = flashcardMap.get(progress.flashcard_id);
+        return flashcard && options.topicFilters!.includes(flashcard.topic);
+      });
+    }
+
+    // Sort by priority
+    const sortedCards = filteredProgress
+      .map((progress) => ({
+        flashcard_id: progress.flashcard_id,
+        priority: this.calculatePriority(progress),
+      }))
+      .sort((a, b) => b.priority - a.priority);
+
+    // Apply limit if specified
+    if (options?.limit && options.limit > 0) {
+      return sortedCards.slice(0, options.limit);
+    }
+
+    return sortedCards;
   }
 
   /**
@@ -173,14 +215,20 @@ export class SRSService {
   /**
    * Get study statistics
    */
-  static async getStudyStats(userId: string): Promise<{
+  static async getStudyStats(
+    userId: string,
+    options?: {
+      limit?: number;
+      topicFilters?: string[];
+    }
+  ): Promise<{
     dueToday: number;
     reviewedToday: number;
     currentStreak: number;
     averageAccuracy: number;
     totalCards: number;
   }> {
-    const allProgress = await SupabaseDataService.getAllProgress(userId); // Pass userId
+    const allProgress = await SupabaseDataService.getAllProgress(userId);
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const tomorrow = new Date(today);
@@ -190,7 +238,7 @@ export class SRSService {
       (p) => p.last_review_date >= today && p.last_review_date < tomorrow,
     ).length;
 
-    const dueToday = (await this.getDueCards(userId)).length; // Pass userId
+    const dueToday = (await this.getDueCardsFiltered(userId, options)).length;
 
     // Calculate current streak (consecutive days with reviews)
     let currentStreak = 0;
@@ -254,6 +302,15 @@ export class SRSService {
    */
   static async resetAllProgress(userId: string): Promise<void> {
     await SupabaseDataService.resetAllProgress(userId);
+  }
+
+  /**
+   * Get available topics for a user
+   */
+  static async getAvailableTopics(userId: string): Promise<string[]> {
+    const allFlashcards = await SupabaseDataService.getAllFlashcards(userId);
+    const topics = new Set(allFlashcards.map(f => f.topic));
+    return Array.from(topics).sort();
   }
 
   // Helper methods

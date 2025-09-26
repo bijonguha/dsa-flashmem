@@ -93,6 +93,11 @@ export class SupabaseDataService {
     if (error) throw error;
   }
 
+  static async deleteAllFlashcards(userId: string) {
+    const { error } = await supabase.from('flashcards').delete().eq('user_id', userId);
+    if (error) throw error;
+  }
+
   // --- Progress ---
   static async addProgress(progress: UserProgress) {
     const { data, error } = await supabase.from('progress').insert([progress]).select();
@@ -146,6 +151,66 @@ export class SupabaseDataService {
     return all.filter((p) => p.next_review_date <= now);
   }
 
+  // --- Audit Methods (Admin access to all data) ---
+  static async getAllFlashcardsForAudit() {
+    const { data, error } = await supabase.from('flashcards').select('*');
+    if (error) throw error;
+    return data || [];
+  }
+
+  static async getAllProgressForAudit() {
+    const { data, error } = await supabase.from('progress').select('*');
+    if (error) throw error;
+    return data || [];
+  }
+
+  static async getAllSessionsForAudit() {
+    const { data, error } = await supabase.from('sessions').select('*');
+    if (error) throw error;
+    return data || [];
+  }
+
+  // --- Cleanup Methods ---
+  static async deleteProgressByFlashcardId(flashcardId: string, userId: string) {
+    const { error } = await supabase.from('progress')
+      .delete()
+      .eq('flashcard_id', flashcardId)
+      .eq('user_id', userId);
+    if (error) throw error;
+  }
+
+  static async deleteSessionById(id: string) {
+    const { error } = await supabase.from('sessions').delete().eq('id', id);
+    if (error) throw error;
+  }
+
+  static async updateProgressUserIdByFlashcard(flashcardId: string, oldUserId: string, newUserId: string) {
+    const { error } = await supabase.from('progress')
+      .update({ user_id: newUserId })
+      .eq('flashcard_id', flashcardId)
+      .eq('user_id', oldUserId);
+    if (error) throw error;
+  }
+
+  static async updateSessionUserId(sessionId: string, userId: string) {
+    const { error } = await supabase.from('sessions').update({ user_id: userId }).eq('id', sessionId);
+    if (error) throw error;
+  }
+
+  static async deleteProgressWithMissingUserId() {
+    const { error } = await supabase.from('progress')
+      .delete()
+      .or('user_id.is.null,user_id.eq.');
+    if (error) throw error;
+  }
+
+  static async deleteSessionsWithMissingUserId() {
+    const { error } = await supabase.from('sessions')
+      .delete()
+      .or('user_id.is.null,user_id.eq.');
+    if (error) throw error;
+  }
+
   // --- Sessions ---
   static async addSession(session: ReviewSession) {
     const { data, error } = await supabase.from('sessions').insert([session]).select();
@@ -189,7 +254,7 @@ export class SupabaseDataService {
         throw error;
       }
 
-      // If no settings exist, create default settings
+      // If no settings exist, create default settings using upsert
       if (!data) {
         const defaultSettings: AppSettings = {
           user_id: userId,
@@ -198,20 +263,22 @@ export class SupabaseDataService {
           auto_advance: false,
           show_hints: true,
           theme: 'auto',
+          daily_review_limit: undefined,
+          topic_filters: undefined,
           // openai_api_key: undefined, // Now picked from environment variables
           // gemini_api_key: undefined, // Now picked from environment variables
         };
 
-        // Insert default settings
-        const { data: newData, error: insertError } = await supabase
+        // Use upsert to handle potential race conditions
+        const { data: newData, error: upsertError } = await supabase
           .from('settings')
-          .insert([defaultSettings])
+          .upsert([defaultSettings], { onConflict: 'user_id' })
           .select()
           .single();
 
-        if (insertError) {
-          console.error('Error creating default settings:', insertError);
-          throw insertError;
+        if (upsertError) {
+          console.error('Error upserting default settings:', upsertError);
+          throw upsertError;
         }
 
         return newData;
@@ -232,36 +299,32 @@ export class SupabaseDataService {
     }
   }
 
-  // Support both updateSettings(settings: AppSettings) and updateSettings(userId, updates)
-  static async updateSettings(
-    arg1: string | AppSettings,
-    arg2?: Partial<AppSettings>,
-  ): Promise<AppSettings[]> {
-    if (typeof arg1 === 'string') {
-      const userId = arg1;
-      const updates = arg2 || {};
-      const existing = await this.getSettings(userId).catch(() => null);
-      const merged: AppSettings = {
-        user_id: userId,
-        timer_duration: 300,
-        input_preference: 'both',
-        auto_advance: false,
-        show_hints: true,
-        theme: 'auto',
-        // openai_api_key: undefined, // Now picked from environment variables
-        // gemini_api_key: undefined, // Now picked from environment variables
-        ...(existing || {}),
-        ...updates,
-      };
-      const { data, error } = await supabase.from('settings').upsert(merged).select();
-      if (error) throw error;
-      return data;
-    } else {
-      const settings = arg1 as AppSettings;
-      const { data, error } = await supabase.from('settings').upsert(settings).select();
-      if (error) throw error;
-      return data;
+  static async updateSettings(userId: string, updates: Partial<AppSettings>): Promise<AppSettings[]> {
+    if (!userId) {
+      throw new Error("User ID is required to update settings.");
     }
+
+    const existing = await this.getSettings(userId);
+
+    const merged = {
+      ...existing,
+      ...updates,
+    };
+
+    // Ensure undefined becomes null for the database, which Supabase client might not handle automatically.
+    if (merged.daily_review_limit === undefined) {
+      (merged as any).daily_review_limit = null;
+    }
+    if (merged.topic_filters === undefined) {
+      (merged as any).topic_filters = null;
+    }
+
+    const { data, error } = await supabase.from('settings').upsert(merged).select();
+    if (error) {
+      console.error('Settings upsert error:', error);
+      throw error;
+    }
+    return data;
   }
 
   // --- Analytics ---

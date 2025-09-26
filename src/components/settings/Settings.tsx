@@ -1,5 +1,5 @@
-import React, { useCallback, useState } from 'react';
-import { Save, Check, RotateCcw, AlertTriangle } from 'lucide-react';
+import React, { useCallback, useState, useEffect } from 'react';
+import { Save, Check, RotateCcw, AlertTriangle, RefreshCw } from 'lucide-react';
 import { AppSettings } from '../../types';
 import { SupabaseDataService } from '../../services/SupabaseDataService';
 import { SRSService } from '../../services/srs';
@@ -9,12 +9,14 @@ interface SettingsProps {
   settings: AppSettings;
   onSettingsChange: (settings: AppSettings) => void;
   onResetComplete?: () => void;
+  flashcardCount?: number; // Add this to trigger topic refresh when flashcards change
 }
 
 export const Settings: React.FC<SettingsProps> = ({
   settings,
   onSettingsChange,
   onResetComplete,
+  flashcardCount,
 }) => {
   const { user } = useAuth();
   const [isSaving, setIsSaving] = useState(false);
@@ -22,6 +24,22 @@ export const Settings: React.FC<SettingsProps> = ({
   const [isResetting, setIsResetting] = useState(false);
   const [resetSuccess, setResetSuccess] = useState(false);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
+  const [availableTopics, setAvailableTopics] = useState<string[]>([]);
+
+  // Load available topics
+  useEffect(() => {
+    const loadTopics = async () => {
+      if (user) {
+        try {
+          const topics = await SRSService.getAvailableTopics(user.id);
+          setAvailableTopics(topics);
+        } catch (error) {
+          console.error('Failed to load available topics:', error);
+        }
+      }
+    };
+    loadTopics();
+  }, [user, flashcardCount]); // Re-load topics when flashcard count changes
 
   const handleSettingChange = useCallback(
     <K extends keyof AppSettings>(key: K, value: AppSettings[K]) => {
@@ -30,16 +48,34 @@ export const Settings: React.FC<SettingsProps> = ({
     [settings, onSettingsChange],
   );
 
+  const handleTopicFilterChange = useCallback((topic: string, checked: boolean) => {
+    const currentFilters = settings.topic_filters || [];
+    const newFilters = checked 
+      ? [...currentFilters, topic]
+      : currentFilters.filter(t => t !== topic);
+    
+    // If no topics selected, set to undefined (meaning "all topics")
+    handleSettingChange('topic_filters', newFilters.length === 0 ? undefined : newFilters);
+  }, [settings.topic_filters, handleSettingChange]);
+
+  const refreshTopics = useCallback(async () => {
+    if (user) {
+      try {
+        const topics = await SRSService.getAvailableTopics(user.id);
+        setAvailableTopics(topics);
+      } catch (error) {
+        console.error('Failed to refresh topics:', error);
+      }
+    }
+  }, [user]);
+
   const handleSave = useCallback(async () => {
     setIsSaving(true);
     setSaveSuccess(false);
 
     try {
-      console.log('Saving settings:', settings);
       if (settings.user_id) {
-        // Ensure userId is available
-        const result = await SupabaseDataService.updateSettings(settings);
-        console.log('Settings saved successfully:', result);
+        await SupabaseDataService.updateSettings(settings.user_id, settings);
         setSaveSuccess(true);
       } else {
         throw new Error('User ID not available for saving settings.');
@@ -128,28 +164,6 @@ export const Settings: React.FC<SettingsProps> = ({
             </select>
           </div>
 
-          {/* Timer Duration */}
-          <div>
-            <label
-              htmlFor="timer-duration"
-              className="block text-sm font-medium text-gray-700 mb-2"
-            >
-              Timer Duration
-            </label>
-            <select
-              id="timer-duration"
-              value={settings.timer_duration}
-              onChange={(e) => handleSettingChange('timer_duration', Number(e.target.value))}
-              className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-            >
-              <option value={180}>3 minutes</option>
-              <option value={300}>5 minutes</option>
-              <option value={480}>8 minutes</option>
-              <option value={600}>10 minutes</option>
-              <option value={900}>15 minutes</option>
-            </select>
-          </div>
-
           {/* Input Preference */}
           <div>
             <label
@@ -173,6 +187,96 @@ export const Settings: React.FC<SettingsProps> = ({
               <option value="voice">Voice Only</option>
               <option value="typing">Typing Only</option>
             </select>
+          </div>
+
+          {/* Daily Review Limit */}
+          <div>
+            <label
+              htmlFor="daily-review-limit"
+              className="block text-sm font-medium text-gray-700 mb-2"
+            >
+              Daily Review Limit
+            </label>
+            <select
+              id="daily-review-limit"
+              value={settings.daily_review_limit ?? 0}
+              onChange={(e) => {
+                const value = Number(e.target.value);
+                handleSettingChange('daily_review_limit', value === 0 ? undefined : value);
+              }}
+              className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+            >
+              <option value={0}>No limit</option>
+              <option value={5}>5 cards per day</option>
+              <option value={10}>10 cards per day</option>
+              <option value={15}>15 cards per day</option>
+              <option value={20}>20 cards per day</option>
+              <option value={25}>25 cards per day</option>
+              <option value={30}>30 cards per day</option>
+              <option value={50}>50 cards per day</option>
+            </select>
+            <p className="mt-1 text-xs text-gray-500">
+              Limit the number of cards to review each day. Set to "No limit" to review all due cards.
+            </p>
+          </div>
+
+          {/* Topic Filters */}
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <label className="block text-sm font-medium text-gray-700">
+                Topic Filters
+              </label>
+              <button
+                onClick={refreshTopics}
+                className="flex items-center space-x-1 text-xs text-blue-600 hover:text-blue-800 transition-colors"
+                title="Refresh available topics"
+              >
+                <RefreshCw className="h-3 w-3" />
+                <span>Refresh</span>
+              </button>
+            </div>
+            <div className="space-y-2 max-h-40 overflow-y-auto border border-gray-200 rounded-md p-3">
+              {availableTopics.length === 0 ? (
+                <p className="text-sm text-gray-500">No topics available. Import some flashcards first.</p>
+              ) : (
+                <>
+                  <div className="flex items-center mb-2">
+                    <input
+                      type="checkbox"
+                      id="all-topics"
+                      checked={!settings.topic_filters || settings.topic_filters.length === 0}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          handleSettingChange('topic_filters', undefined);
+                        }
+                      }}
+                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                    />
+                    <label htmlFor="all-topics" className="ml-2 text-sm font-medium text-gray-700">
+                      All Topics
+                    </label>
+                  </div>
+                  {availableTopics.map((topic) => (
+                    <div key={topic} className="flex items-center">
+                      <input
+                        type="checkbox"
+                        id={`topic-${topic}`}
+                        checked={settings.topic_filters?.includes(topic) || false}
+                        onChange={(e) => handleTopicFilterChange(topic, e.target.checked)}
+                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                      />
+                      <label htmlFor={`topic-${topic}`} className="ml-2 text-sm text-gray-700">
+                        {topic}
+                      </label>
+                    </div>
+                  ))}
+                </>
+              )}
+            </div>
+            <p className="mt-1 text-xs text-gray-500">
+              Select specific topics to include in daily reviews. Leave all unchecked to include all topics. 
+              Topics update automatically when you import new flashcards.
+            </p>
           </div>
 
           {/* Checkboxes */}

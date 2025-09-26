@@ -64,6 +64,8 @@ export interface AppSettings {
   auto_advance: boolean;
   show_hints: boolean;
   theme: 'light' | 'dark' | 'auto';
+  daily_review_limit?: number; // Maximum cards to review per day
+  topic_filters?: string[]; // Topics to include in daily reviews
 }
 
 // Analytics event tracking

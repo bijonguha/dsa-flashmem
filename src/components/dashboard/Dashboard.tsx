@@ -81,8 +81,14 @@ export const Dashboard: React.FC = () => {
     try {
       setIsLoading(true);
 
+      // Fetch settings to apply filters
+      const settings = await SupabaseDataService.getSettings(user.id);
+
       // Load basic stats
-      const studyStats = await SRSService.getStudyStats(user.id);
+      const studyStats = await SRSService.getStudyStats(user.id, {
+        limit: settings.daily_review_limit,
+        topicFilters: settings.topic_filters,
+      });
       const allFlashcards = await SupabaseDataService.getAllFlashcards(user.id);
       const allProgress = await SupabaseDataService.getAllProgress(user.id);
 

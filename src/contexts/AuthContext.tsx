@@ -3,6 +3,7 @@ import { User } from '@supabase/supabase-js';
 import { AuthContext } from './AuthContextValue';
 import { supabase } from '../services/supabase';
 import { AuthService } from '../services/auth';
+import { SupabaseDataService } from '../services/SupabaseDataService';
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
@@ -41,6 +42,29 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setLoading(true);
     try {
       const result = await AuthService.signUp(email, password);
+      
+      // Create profile and settings in background (don't block signup flow)
+      if (result.user) {
+        const username = email.split('@')[0];
+        
+        // Run in background without blocking
+        Promise.resolve().then(async () => {
+          try {
+            if (result.user) {
+              await SupabaseDataService.createProfile(result.user.id, username).catch(err => {
+                console.log('Profile creation failed:', err.message);
+              });
+              
+              await SupabaseDataService.getSettings(result.user.id).catch(err => {
+                console.log('Settings creation failed:', err.message);
+              });
+            }
+          } catch (error) {
+            console.error('Background profile/settings creation failed:', error);
+          }
+        });
+      }
+      
       return result;
     } catch (error) {
       throw error;

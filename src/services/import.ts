@@ -22,11 +22,16 @@ export class ImportService {
         }
       }
 
-      if (validatedFlashcards.length > 0) {
-        const upload = userId
-          ? validatedFlashcards.map((c) => ({ ...c, user_id: userId }))
-          : validatedFlashcards;
+      if (validatedFlashcards.length > 0 && userId) {
+        // Clear existing flashcards first (cascading deletes handle progress/sessions)
+        await SupabaseDataService.deleteAllFlashcards(userId);
+        
+        // Add new flashcards
+        const upload = validatedFlashcards.map((c) => ({ ...c, user_id: userId }));
         await SupabaseDataService.addFlashcards(upload);
+      } else if (validatedFlashcards.length > 0) {
+        // For imports without userId (shouldn't happen in normal flow)
+        await SupabaseDataService.addFlashcards(validatedFlashcards);
       }
 
       return {
@@ -81,9 +86,16 @@ export class ImportService {
         }
       }
 
-      if (flashcards.length > 0) {
-        const upload = userId ? flashcards.map((c) => ({ ...c, user_id: userId })) : flashcards;
+      if (flashcards.length > 0 && userId) {
+        // Clear existing flashcards first (cascading deletes handle progress/sessions)
+        await SupabaseDataService.deleteAllFlashcards(userId);
+        
+        // Add new flashcards
+        const upload = flashcards.map((c) => ({ ...c, user_id: userId }));
         await SupabaseDataService.addFlashcards(upload);
+      } else if (flashcards.length > 0) {
+        // For imports without userId (shouldn't happen in normal flow)
+        await SupabaseDataService.addFlashcards(flashcards);
       }
 
       return {

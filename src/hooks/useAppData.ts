@@ -25,6 +25,8 @@ export const useAppData = () => {
     auto_advance: false,
     show_hints: true,
     theme: 'auto',
+    daily_review_limit: undefined,
+    topic_filters: undefined,
   });
   const [stats, setStats] = useState<StudyStats>({
     dueToday: 0,
@@ -39,7 +41,15 @@ export const useAppData = () => {
     if (!user) return;
 
     try {
-      const dueProgress = await SRSService.getDueCards(user.id);
+      // Use filtered due cards based on user settings
+      const options = {
+        limit: settings.daily_review_limit,
+        topicFilters: settings.topic_filters && settings.topic_filters.length > 0 
+          ? settings.topic_filters 
+          : undefined
+      };
+      
+      const dueProgress = await SRSService.getDueCardsFiltered(user.id, options);
       const dueCardsPromises = dueProgress.map((progress) =>
         SupabaseDataService.getFlashcard(progress.flashcard_id, user.id),
       );
@@ -53,13 +63,21 @@ export const useAppData = () => {
     } catch (error) {
       console.error('Failed to load due cards:', error);
     }
-  }, [user]);
+  }, [user, settings.daily_review_limit, settings.topic_filters]);
 
   const loadStats = useCallback(async () => {
     if (!user) return;
 
     try {
-      const studyStats = await SRSService.getStudyStats(user.id);
+      // Use filtered stats based on user settings
+      const options = {
+        limit: settings.daily_review_limit,
+        topicFilters: settings.topic_filters && settings.topic_filters.length > 0 
+          ? settings.topic_filters 
+          : undefined
+      };
+      
+      const studyStats = await SRSService.getStudyStats(user.id, options);
       setStats({
         dueToday: studyStats.dueToday,
         reviewedToday: studyStats.reviewedToday,
@@ -69,25 +87,42 @@ export const useAppData = () => {
     } catch (error) {
       console.error('Failed to load stats:', error);
     }
-  }, [user]);
+  }, [user, settings.daily_review_limit, settings.topic_filters]);
 
   const loadInitialData = useCallback(async () => {
     if (!user) return;
 
     try {
-      const [savedSettings, allCards] = await Promise.all([
-        SupabaseDataService.getSettings(user.id),
-        SupabaseDataService.getAllFlashcards(user.id),
-      ]);
+      // Load settings with better error handling
+      let savedSettings;
+      try {
+        savedSettings = await SupabaseDataService.getSettings(user.id);
+      } catch (settingsError) {
+        console.error('Settings loading failed:', settingsError);
+        // Use default settings if loading fails
+        savedSettings = {
+          user_id: user.id,
+          timer_duration: 300,
+          input_preference: 'both' as 'voice' | 'typing' | 'both',
+          auto_advance: false,
+          show_hints: true,
+          theme: 'auto' as 'light' | 'dark' | 'auto',
+          daily_review_limit: undefined,
+          topic_filters: undefined,
+        };
+      }
+
+      // Load flashcards
+      const allCards = await SupabaseDataService.getAllFlashcards(user.id);
 
       setSettings(savedSettings);
       setFlashcardCount(allCards.length);
 
-      await Promise.all([loadDueCards(), loadStats()]);
+      // The useEffect below will trigger loadDueCards and loadStats
     } catch (error) {
       console.error('Failed to load initial data:', error);
     }
-  }, [user, loadDueCards, loadStats]);
+  }, [user]);
 
   useEffect(() => {
     if (user) {
@@ -100,6 +135,10 @@ export const useAppData = () => {
       if (!user || !result.success || result.imported_count === 0) return;
 
       try {
+        // Import service already cleared old flashcards and added new ones
+        // The cascading deletes already handled progress/sessions cleanup
+        
+        // Initialize progress for all imported cards (they're already in the database)
         await Promise.all(
           result.flashcards.map((card) =>
             SRSService.initializeProgress(card.id, user.id),
@@ -144,6 +183,15 @@ export const useAppData = () => {
     setShowSolution(false);
     setSelectedCard(null);
   }, []);
+
+  // Add effect to reload stats when settings change
+  useEffect(() => {
+    if (user && settings.user_id) {
+      // Reload due cards and stats when filtering settings change
+      loadDueCards();
+      loadStats();
+    }
+  }, [user, settings.daily_review_limit, settings.topic_filters, loadDueCards, loadStats]);
 
   return {
     // State

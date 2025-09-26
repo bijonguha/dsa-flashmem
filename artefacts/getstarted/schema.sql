@@ -63,13 +63,16 @@ CREATE TABLE sessions (
 
 -- Settings
 CREATE TABLE settings (
-  user_id TEXT PRIMARY KEY,
+  user_id UUID PRIMARY KEY,
   timer_duration INTEGER DEFAULT 300,
   input_preference TEXT DEFAULT 'both',
   auto_advance BOOLEAN DEFAULT false,
   show_hints BOOLEAN DEFAULT true,
   theme TEXT DEFAULT 'auto',
-  openai_api_key TEXT
+  daily_review_limit INTEGER,
+  topic_filters TEXT[],
+  openai_api_key TEXT,
+  CONSTRAINT fk_user FOREIGN KEY(user_id) REFERENCES auth.users(id) ON DELETE CASCADE
 );
 
 -- Analytics

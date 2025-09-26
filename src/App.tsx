@@ -34,6 +34,18 @@ const Settings = lazy(() =>
 const ManageCards = lazy(() =>
   import('./components/cards/ManageCards').then((m) => ({ default: m.ManageCards })),
 );
+const DatabaseAuditView = lazy(() =>
+  import('./components/admin/DatabaseAuditView').then((m) => ({ default: m.DatabaseAuditView })),
+);
+const DatabaseCleanupView = lazy(() =>
+  import('./components/admin/DatabaseCleanupView').then((m) => ({ default: m.DatabaseCleanupView })),
+);
+const AdminDashboard = lazy(() =>
+  import('./components/admin/AdminDashboard').then((m) => ({ default: m.AdminDashboard })),
+);
+const ForeignKeyMigration = lazy(() =>
+  import('./components/admin/ForeignKeyMigration').then((m) => ({ default: m.ForeignKeyMigration })),
+);
 
 // Loading component
 const LoadingSpinner: React.FC<{ message?: string }> = ({ message = 'Loading...' }) => (
@@ -63,6 +75,7 @@ function AppContent() {
   const { user, signOut, loading } = useAuth();
   const navigate = useNavigate();
   const {
+    flashcardCount,
     dueCards,
     settings,
     selectedCard,
@@ -234,7 +247,48 @@ function AppContent() {
                         settings={settings}
                         onSettingsChange={setSettings}
                         onResetComplete={handleResetComplete}
+                        flashcardCount={flashcardCount}
                       />
+                    </Suspense>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/audit"
+                element={
+                  <ProtectedRoute>
+                    <Suspense fallback={<LoadingSpinner message="Loading audit..." />}>
+                      <DatabaseAuditView />
+                    </Suspense>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/cleanup"
+                element={
+                  <ProtectedRoute>
+                    <Suspense fallback={<LoadingSpinner message="Loading cleanup..." />}>
+                      <DatabaseCleanupView />
+                    </Suspense>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin"
+                element={
+                  <ProtectedRoute>
+                    <Suspense fallback={<LoadingSpinner message="Loading admin..." />}>
+                      <AdminDashboard />
+                    </Suspense>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/migration"
+                element={
+                  <ProtectedRoute>
+                    <Suspense fallback={<LoadingSpinner message="Loading migration..." />}>
+                      <ForeignKeyMigration />
                     </Suspense>
                   </ProtectedRoute>
                 }

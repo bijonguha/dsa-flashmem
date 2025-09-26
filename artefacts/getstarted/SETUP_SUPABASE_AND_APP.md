@@ -81,6 +81,15 @@ SELECT count(*) FROM flashcards;
 
 SELECT count(*) FROM progress;
 
+## Database Migrations
+
+After setting up the initial schema, you should run the migration scripts located in the `migration` folder. These scripts make incremental changes to the database schema and should be run in numerical order.
+
+For example:
+`psql -f migration/01_audit_database.sql`
+`psql -f migration/02_cleanup_data.sql`
+`...and so on.`
+
 ## Safe wipe and reinitialize — Local (supabase CLI + Docker)
 
 1) Start or stop local environment:
