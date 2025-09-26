@@ -3,7 +3,8 @@ import { BarChart3, TrendingUp, Clock, Target, Award, Calendar } from 'lucide-re
 import { SupabaseDataService } from '../../services/SupabaseDataService';
 import { SRSService } from '../../services/srs';
 import { DashboardStats } from '../../types';
-import { ProgressChart } from './ProgressChart';
+import { WeeklyProgress } from './WeeklyProgress';
+import { DailyReviewHistory } from './DailyReviewHistory';
 import { useAuth } from '../../hooks/useAuth'; // Import useAuth
 
 export const Dashboard: React.FC = () => {
@@ -258,11 +259,6 @@ export const Dashboard: React.FC = () => {
     return 'text-red-600';
   };
 
-  const formatSessionTime = (seconds: number) => {
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = seconds % 60;
-    return `${minutes}m ${remainingSeconds}s`;
-  };
 
   // Color for accuracy gauge (hex) derived from accuracy value
   const accuracyHex =
@@ -395,10 +391,12 @@ export const Dashboard: React.FC = () => {
       {/* Progress Chart and Recent Activity */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="bg-white p-6 rounded-lg shadow-md">
-          <h2 className="text-xl font-bold text-gray-800 mb-4">Weekly Progress</h2>
-          <div>
-            <ProgressChart data={weeklyProgress} />
-          </div>
+          <WeeklyProgress
+            data={weeklyProgress}
+            weeklyGoal={5}
+            showDetails={false}
+            onDayClick={(day) => console.log('Day clicked:', day)}
+          />
         </div>
 
         <div className="card p-6 space-y-6">
@@ -610,63 +608,7 @@ export const Dashboard: React.FC = () => {
       </div>
 
       {/* Daily Review History */}
-      <div className="card p-6">
-        <h2 className="text-xl font-bold text-gray-800 mb-4">Daily Review History</h2>
-        {Object.keys(stats.daily_review_history).length > 0 ? (
-          <div className="space-y-3">
-            {Object.entries(stats.daily_review_history)
-              .sort(([dateA], [dateB]) => new Date(dateB).getTime() - new Date(dateA).getTime()) // Sort by date descending
-              .map(([date, dailyData]) => (
-                <details key={date} className="bg-white rounded-md shadow-sm" role="group">
-                  <summary className="flex items-center justify-between px-4 py-3 cursor-pointer">
-                    <div className="flex items-center gap-3">
-                      <h3 className="font-medium text-gray-800">{dailyData.date}</h3>
-                      <div className="text-sm muted">{dailyData.flashcards.length} reviews</div>
-                    </div>
-                    <div className="text-xs muted">Expand</div>
-                  </summary>
-
-                  <div className="px-4 pb-3">
-                    <ul className="divide-y">
-                      {dailyData.flashcards.map((card) => (
-                        <li key={card.id} className="flex items-center justify-between py-2">
-                          <div className="text-sm text-gray-700">{card.question}</div>
-                          <div className="ml-4 flex items-center gap-2">
-                            <span
-                              className={`pill ${
-                                card.self_rating === 'easy'
-                                  ? 'bg-success-100 text-success-600'
-                                  : card.self_rating === 'good'
-                                    ? 'bg-primary-100 text-primary-600'
-                                    : card.self_rating === 'hard'
-                                      ? 'bg-warning-100 text-warning-600'
-                                      : 'bg-danger-100 text-danger-600'
-                              }`}
-                              aria-label={`Rating ${card.self_rating}`}
-                            >
-                              {card.self_rating}
-                            </span>
-                            <div className="text-xs muted">
-                              {formatSessionTime(card.time_taken)}
-                            </div>
-                          </div>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </details>
-              ))}
-          </div>
-        ) : (
-          <div className="text-center text-gray-500 py-8">
-            <Calendar className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-            <p>No review history available yet.</p>
-            <p className="text-sm">
-              Complete some flashcards to see your daily review history here!
-            </p>
-          </div>
-        )}
-      </div>
+      <DailyReviewHistory dailyHistory={stats.daily_review_history} />
     </div>
   );
 };
