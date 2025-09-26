@@ -19,11 +19,11 @@ interface WeeklyProgressProps {
 
 // Helper to determine the color intensity based on activity and accuracy
 const getActivityColor = (completed: number, accuracy: number) => {
-  if (completed === 0) return 'bg-gray-200 dark:bg-gray-700';
+  if (completed === 0) return 'bg-neutral-200';
   // Prioritize accuracy for color coding
-  if (accuracy < 0.5) return 'bg-amber-300 dark:bg-amber-700';
-  if (completed >= 4) return 'bg-emerald-600 dark:bg-emerald-500';
-  return 'bg-emerald-400 dark:bg-emerald-600';
+  if (accuracy < 0.5) return 'bg-warning-400';
+  if (completed >= 4) return 'bg-success-600';
+  return 'bg-success-500';
 };
 
 // Helper to calculate the current study streak
@@ -81,7 +81,7 @@ const Sparkline: React.FC<{ data: number[]; className?: string }> = ({ data, cla
         points={points}
         strokeLinecap="round"
         strokeLinejoin="round"
-        className="text-emerald-600 dark:text-emerald-400"
+        className="text-success-600"
       />
     </svg>
   );
@@ -134,20 +134,20 @@ export const WeeklyProgress: React.FC<WeeklyProgressProps> = ({
       {/* Header with streak and insight */}
       <div className="flex items-center justify-between gap-3 mb-4">
         <div className="flex-1">
-          <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100">
+          <h3 className="text-sm font-medium text-neutral-900">
             Weekly Progress
           </h3>
-          <p className="text-xs text-gray-600 dark:text-gray-400 mt-1" aria-live="polite">
+          <p className="text-xs text-neutral-600 mt-1" aria-live="polite">
             {insight}
           </p>
         </div>
 
         {/* Streak badge - hidden on mobile, shown on larger screens */}
         <div className="hidden sm:flex items-center gap-2">
-          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+          <span className="text-sm font-medium text-neutral-700">
             Streak
           </span>
-          <div className="bg-emerald-50 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-300 px-2 py-1 rounded-md text-sm font-semibold">
+          <div className="bg-success-50 text-success-800 px-2 py-1 rounded-md text-sm font-semibold">
             {streak}d
           </div>
         </div>
@@ -204,32 +204,32 @@ export const WeeklyProgress: React.FC<WeeklyProgressProps> = ({
 
       {/* Detailed view (optional) */}
       {showDetails && selectedDay && (
-        <div className="mt-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-          <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">
+        <div className="mt-3 p-3 bg-neutral-50 rounded-lg">
+          <h4 className="text-sm font-medium text-neutral-900 mb-2">
             {selectedDay.date} Details
           </h4>
           <div className="grid grid-cols-2 gap-4 text-sm">
             <div>
-              <span className="text-gray-600 dark:text-gray-400">Cards Reviewed:</span>
-              <span className="ml-2 font-medium text-gray-900 dark:text-gray-100">
+              <span className="text-neutral-600">Cards Reviewed:</span>
+              <span className="ml-2 font-medium text-neutral-900">
                 {selectedDay.completed}
               </span>
             </div>
             <div>
-              <span className="text-gray-600 dark:text-gray-400">Accuracy:</span>
-              <span className="ml-2 font-medium text-gray-900 dark:text-gray-100">
+              <span className="text-neutral-600">Accuracy:</span>
+              <span className="ml-2 font-medium text-neutral-900">
                 {Math.round(selectedDay.accuracy * 100)}%
               </span>
             </div>
             <div>
-              <span className="text-gray-600 dark:text-gray-400">Correct:</span>
-              <span className="ml-2 font-medium text-emerald-600 dark:text-emerald-400">
+              <span className="text-neutral-600">Correct:</span>
+              <span className="ml-2 font-medium text-success-600">
                 {selectedDay.correct}
               </span>
             </div>
             <div>
-              <span className="text-gray-600 dark:text-gray-400">Incorrect:</span>
-              <span className="ml-2 font-medium text-amber-600 dark:text-amber-400">
+              <span className="text-neutral-600">Incorrect:</span>
+              <span className="ml-2 font-medium text-warning-600">
                 {selectedDay.incorrect}
               </span>
             </div>
@@ -239,7 +239,7 @@ export const WeeklyProgress: React.FC<WeeklyProgressProps> = ({
 
       {/* Mobile streak indicator */}
       <div className="sm:hidden mt-3 flex items-center justify-center">
-        <div className="bg-emerald-50 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-300 px-3 py-1 rounded-full text-sm font-semibold">
+        <div className="bg-success-50 text-success-800 px-3 py-1 rounded-full text-sm font-semibold">
           🔥 {streak} day streak
         </div>
       </div>

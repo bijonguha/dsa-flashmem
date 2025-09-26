@@ -9,11 +9,11 @@ export default {
       colors: {
         // Primary brand
         primary: {
-          50: '#f5f9ff',
-          100: '#eaf3ff',
-          200: '#cfe7ff',
-          300: '#9fd4ff',
-          400: '#66b8ff',
+          50: '#eff6ff',
+          100: '#dbeafe',
+          200: '#bfdbfe',
+          300: '#93c5fd',
+          400: '#60a5fa',
           500: '#3b82f6',
           600: '#2563eb',
           700: '#1d4ed8',
@@ -32,16 +32,25 @@ export default {
         },
         // Accent colors used across dashboard
         success: {
+          50: '#ecfdf5',
+          100: '#d1fae5',
+          400: '#34d399',
           500: '#10b981',
           600: '#059669',
+          800: '#065f46',
         },
         warning: {
+          100: '#fef3c7',
+          400: '#fbbf24',
           500: '#f59e0b',
           600: '#d97706',
+          800: '#92400e',
         },
         danger: {
+          100: '#fee2e2',
           500: '#ef4444',
           600: '#dc2626',
+          800: '#991b1b',
         },
         blueGray: {
           50: '#f8fafc',

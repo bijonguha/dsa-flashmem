@@ -70,8 +70,8 @@ export const Navigation: React.FC<NavigationProps> = ({ onSignOut }) => {
       <div className="max-w-6xl mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center space-x-2">
-            <BookOpen className="h-8 w-8 text-blue-600" />
-            <h1 className="text-xl font-bold text-gray-800">DSA FlashMem</h1>
+            <BookOpen className="h-8 w-8 text-primary-600" />
+            <h1 className="text-xl font-bold text-neutral-800">DSA FlashMem</h1>
           </div>
 
           <div className="flex items-center space-x-4">
@@ -81,8 +81,8 @@ export const Navigation: React.FC<NavigationProps> = ({ onSignOut }) => {
                 onClick={onClick}
                 className={`flex items-center space-x-1 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
                   isActivePath(path)
-                    ? 'bg-blue-100 text-blue-700'
-                    : 'text-gray-500 hover:text-gray-700'
+                    ? 'bg-primary-100 text-primary-700'
+                    : 'text-neutral-500 hover:text-neutral-700'
                 }`}
               >
                 {Icon && <Icon className="h-4 w-4" />}
@@ -94,7 +94,7 @@ export const Navigation: React.FC<NavigationProps> = ({ onSignOut }) => {
               <button
                 onClick={handleSignOut}
                 disabled={authLoading}
-                className="flex items-center space-x-1 px-3 py-2 rounded-md text-sm font-medium transition-colors text-gray-500 hover:text-red-700 disabled:opacity-50"
+                className="flex items-center space-x-1 px-3 py-2 rounded-md text-sm font-medium transition-colors text-neutral-500 hover:text-danger-600 disabled:opacity-50"
               >
                 <LogOut className="h-4 w-4" />
                 <span>Logout</span>

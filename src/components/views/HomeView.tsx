@@ -10,10 +10,10 @@ export const HomeView: React.FC = () => {
   return (
     <div className="max-w-4xl mx-auto p-6">
       <div className="text-center mb-8">
-        <h2 className="text-3xl font-bold text-gray-800 mb-4">
+        <h2 className="text-3xl font-bold text-neutral-800 mb-4">
           Welcome to DSA FlashMem
         </h2>
-        <p className="text-gray-600 max-w-2xl mx-auto">
+        <p className="text-neutral-600 max-w-2xl mx-auto">
           Master data structures and algorithms through AI-powered flashcards with spaced
           repetition, voice interaction, and comprehensive solution analysis.
         </p>
@@ -22,23 +22,23 @@ export const HomeView: React.FC = () => {
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
         <div className="bg-white rounded-lg shadow-md p-6 text-center">
-          <div className="text-2xl font-bold text-blue-600 mb-2">{stats.dueToday}</div>
-          <div className="text-sm text-gray-600">Due Today</div>
+          <div className="text-2xl font-bold text-primary-600 mb-2">{stats.dueToday}</div>
+          <div className="text-sm text-neutral-600">Due Today</div>
         </div>
 
         <div className="bg-white rounded-lg shadow-md p-6 text-center">
-          <div className="text-2xl font-bold text-green-600 mb-2">{stats.reviewedToday}</div>
-          <div className="text-sm text-gray-600">Reviewed Today</div>
+          <div className="text-2xl font-bold text-success-600 mb-2">{stats.reviewedToday}</div>
+          <div className="text-sm text-neutral-600">Reviewed Today</div>
         </div>
 
         <div className="bg-white rounded-lg shadow-md p-6 text-center">
           <div className="text-2xl font-bold text-purple-600 mb-2">{flashcardCount}</div>
-          <div className="text-sm text-gray-600">Total Cards</div>
+          <div className="text-sm text-neutral-600">Total Cards</div>
         </div>
 
         <div className="bg-white rounded-lg shadow-md p-6 text-center">
           <div className="text-2xl font-bold text-orange-600 mb-2">{stats.currentStreak}</div>
-          <div className="text-sm text-gray-600">Day Streak</div>
+          <div className="text-sm text-neutral-600">Day Streak</div>
         </div>
       </div>
 
@@ -54,7 +54,7 @@ export const HomeView: React.FC = () => {
           <button
             onClick={startReview}
             disabled={stats.dueToday === 0}
-            className="flex items-center space-x-2 bg-white text-blue-600 px-4 py-2 rounded-md font-medium hover:bg-blue-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center space-x-2 bg-white text-primary-600 px-4 py-2 rounded-md font-medium hover:bg-primary-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Play className="h-4 w-4" />
             <span>Start Review</span>
