@@ -1,4 +1,4 @@
-import React, { Suspense, lazy, ReactNode } from 'react';
+import React, { Suspense, lazy, ReactNode, useEffect } from 'react';
 import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
 import { ErrorBoundary } from './components/common/ErrorBoundary';
@@ -49,19 +49,18 @@ const LoadingSpinner: React.FC<{ message?: string }> = ({ message = 'Loading...'
 const ProtectedRoute: React.FC<{ children: ReactNode }> = ({ children }) => {
   const { user, loading } = useAuth();
 
-  if (loading) {
+  if (loading || !user) {
+    if (!user && !loading) {
+      return <Navigate to="/" replace />;
+    }
     return <LoadingSpinner message="Checking authentication..." />;
-  }
-
-  if (!user) {
-    return <Navigate to="/" replace />;
   }
 
   return <>{children}</>;
 };
 
 function AppContent() {
-  const { user, signOut } = useAuth();
+  const { user, signOut, loading } = useAuth();
   const navigate = useNavigate();
   const {
     dueCards,
@@ -75,6 +74,24 @@ function AppContent() {
     handleShowSolution,
     closeSolutionModal,
   } = useAppData();
+
+  // Handle logout redirect
+  const isPublicRoute = ['/', '/login', '/signup', '/forgot-password', '/reset-password'].includes(window.location.pathname);
+  
+  useEffect(() => {
+    if (!user && !loading && !isPublicRoute) {
+      navigate('/', { replace: true });
+    }
+  }, [user, loading, isPublicRoute, navigate]);
+
+  // Defer early returns until after all hooks are called
+  if (loading) {
+    return <LoadingSpinner message="Loading application..." />;
+  }
+
+  if (!user && !loading && !isPublicRoute) {
+    return <LoadingSpinner message="Redirecting..." />;
+  }
 
   return (
     <ErrorBoundary>
@@ -172,13 +189,13 @@ function AppContent() {
                 element={
                   <ProtectedRoute>
                     <Suspense fallback={<LoadingSpinner message="Loading review..." />}>
-                      {dueCards.length > 0 ? (
+                      {dueCards.length > 0 && user ? (
                         <FlashcardReview
                           flashcards={dueCards}
                           onComplete={handleReviewComplete}
                           settings={settings}
                           onShowSolution={handleShowSolution}
-                          userId={user!.id}
+                          userId={user.id}
                         />
                       ) : (
                         <div className="max-w-2xl mx-auto p-6 text-center">
