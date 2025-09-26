@@ -22,7 +22,7 @@ export const Navigation: React.FC<NavigationProps> = ({ onSignOut }) => {
 
   const handleSignOut = useCallback(async () => {
     await onSignOut();
-    navigate('/');
+    navigate('/', { replace: true });
   }, [onSignOut, navigate]);
 
   const navigationItems = useMemo(
