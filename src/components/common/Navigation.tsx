@@ -21,9 +21,12 @@ export const Navigation: React.FC<NavigationProps> = ({ onSignOut }) => {
   const { user, loading: authLoading } = useAuth();
 
   const handleSignOut = useCallback(async () => {
-    await onSignOut();
-    navigate('/', { replace: true });
-  }, [onSignOut, navigate]);
+    try {
+      await onSignOut();
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
+  }, [onSignOut]);
 
   const navigationItems = useMemo(
     () => [
