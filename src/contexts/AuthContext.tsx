@@ -7,6 +7,8 @@ import { AuthService } from '../services/auth';
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [message, setMessage] = useState('');
+  const [error, setError] = useState('');
 
   useEffect(() => {
     const fetchSession = async () => {
@@ -38,7 +40,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const signUp = async (email: string, password: string) => {
     setLoading(true);
     try {
-      await AuthService.signUp(email, password);
+      const result = await AuthService.signUp(email, password);
+      return result;
+    } catch (error) {
+      throw error;
     } finally {
       setLoading(false);
     }
@@ -48,6 +53,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setLoading(true);
     try {
       await AuthService.signIn(email, password);
+    } catch (error) {
+      throw error;
     } finally {
       setLoading(false);
     }
@@ -80,15 +87,21 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
 
-  // Helper for error/message state within AuthProvider
-  const [error] = useState('');
-  const [message] = useState('');
+  const clearMessages = () => {
+    setMessage('');
+    setError('');
+  };
 
   return (
     <AuthContext.Provider
       value={{
         user,
         loading,
+        message,
+        error,
+        setMessage,
+        setError,
+        clearMessages,
         signUp,
         signIn,
         signOut,
@@ -97,16 +110,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       }}
     >
       {children}
-      {error && (
-        <div className="fixed bottom-4 left-4 bg-red-500 text-white p-3 rounded shadow-lg">
-          {error}
-        </div>
-      )}
-      {message && (
-        <div className="fixed bottom-4 left-4 bg-green-500 text-white p-3 rounded shadow-lg">
-          {message}
-        </div>
-      )}
     </AuthContext.Provider>
   );
 };
