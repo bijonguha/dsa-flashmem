@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import {
   Search,
-  Filter,
   Edit2,
   Trash2,
   ChevronLeft,
@@ -11,8 +10,6 @@ import {
   List,
   CheckSquare,
   Square,
-  MoreVertical,
-  Calendar,
   BarChart3,
   BookOpen,
 } from 'lucide-react';
@@ -26,7 +23,7 @@ interface ManageCardsProps {
 }
 
 type ViewMode = 'grid' | 'list';
-type SortBy = 'created_at' | 'title' | 'topic' | 'difficulty' | 'last_reviewed';
+type SortBy = 'title' | 'topic' | 'difficulty';
 type SortOrder = 'asc' | 'desc';
 
 const CARDS_PER_PAGE = 12;
@@ -43,10 +40,9 @@ export const ManageCards: React.FC<ManageCardsProps> = ({ className = '' }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterTopic, setFilterTopic] = useState<string>('');
   const [filterDifficulty, setFilterDifficulty] = useState<string>('');
-  const [sortBy, setSortBy] = useState<SortBy>('created_at');
+  const [sortBy, setSortBy] = useState<SortBy>('title');
   const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
   const [currentPage, setCurrentPage] = useState(1);
-  const [editingCard, setEditingCard] = useState<string | null>(null);
 
   // Load flashcards
   const loadFlashcards = useCallback(async () => {
@@ -107,10 +103,7 @@ export const ManageCards: React.FC<ManageCardsProps> = ({ className = '' }) => {
       let aValue: any = a[sortBy];
       let bValue: any = b[sortBy];
       
-      if (sortBy === 'created_at' || sortBy === 'last_reviewed') {
-        aValue = new Date(aValue || 0).getTime();
-        bValue = new Date(bValue || 0).getTime();
-      } else if (typeof aValue === 'string') {
+      if (typeof aValue === 'string') {
         aValue = aValue.toLowerCase();
         bValue = bValue.toLowerCase();
       }
@@ -205,10 +198,6 @@ export const ManageCards: React.FC<ManageCardsProps> = ({ className = '' }) => {
     }
   };
 
-  const formatDate = (dateString: string | null) => {
-    if (!dateString) return 'Never';
-    return new Date(dateString).toLocaleDateString();
-  };
 
   if (loading) {
     return (
@@ -293,11 +282,10 @@ export const ManageCards: React.FC<ManageCardsProps> = ({ className = '' }) => {
             }}
             className="px-3 py-2 border border-neutral-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
           >
-            <option value="created_at-desc">Newest First</option>
-            <option value="created_at-asc">Oldest First</option>
             <option value="title-asc">Title A-Z</option>
             <option value="title-desc">Title Z-A</option>
             <option value="topic-asc">Topic A-Z</option>
+            <option value="topic-desc">Topic Z-A</option>
             <option value="difficulty-asc">Difficulty Easy-Hard</option>
             <option value="difficulty-desc">Difficulty Hard-Easy</option>
           </select>
@@ -427,7 +415,7 @@ export const ManageCards: React.FC<ManageCardsProps> = ({ className = '' }) => {
 
                   {/* Card Stats */}
                   <div className="mt-3 pt-3 border-t border-neutral-100 flex items-center justify-between text-xs text-neutral-500">
-                    <span>Created: {formatDate(card.created_at)}</span>
+                    <span>Topic: {card.topic}</span>
                     <div className="flex items-center space-x-1">
                       <BarChart3 className="h-3 w-3" />
                       <span>0 reviews</span>
@@ -448,7 +436,7 @@ export const ManageCards: React.FC<ManageCardsProps> = ({ className = '' }) => {
                       <th className="px-4 py-3 text-left text-sm font-medium text-neutral-700">Title</th>
                       <th className="px-4 py-3 text-left text-sm font-medium text-neutral-700">Topic</th>
                       <th className="px-4 py-3 text-left text-sm font-medium text-neutral-700">Difficulty</th>
-                      <th className="px-4 py-3 text-left text-sm font-medium text-neutral-700">Created</th>
+                      <th className="px-4 py-3 text-left text-sm font-medium text-neutral-700">Tags</th>
                       <th className="px-4 py-3 text-left text-sm font-medium text-neutral-700">Reviews</th>
                       <th className="w-20 px-4 py-3"></th>
                     </tr>
@@ -484,7 +472,8 @@ export const ManageCards: React.FC<ManageCardsProps> = ({ className = '' }) => {
                           </span>
                         </td>
                         <td className="px-4 py-3 text-sm text-neutral-500">
-                          {formatDate(card.created_at)}
+                          {card.tags.slice(0, 2).join(', ')}
+                          {card.tags.length > 2 && ' +' + (card.tags.length - 2)}
                         </td>
                         <td className="px-4 py-3 text-sm text-neutral-500">0</td>
                         <td className="px-4 py-3">

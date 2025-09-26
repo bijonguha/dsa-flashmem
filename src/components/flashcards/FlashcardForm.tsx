@@ -120,12 +120,6 @@ export const FlashcardForm: React.FC = () => {
 
       if (isEditing && editingId) {
         // Update existing flashcard
-        const updatedFlashcard: Flashcard = {
-          ...flashcard as Flashcard,
-          id: editingId,
-          user_id: user.id,
-        };
-
         await SupabaseDataService.updateFlashcard(editingId, user.id, flashcard);
       } else {
         // Create new flashcard
