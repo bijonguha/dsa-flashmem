@@ -44,7 +44,7 @@ export const AuthForm: React.FC<AuthFormProps> = ({
 
     try {
       if (type === 'signUp') {
-        const result = await signUp(email, password);
+        await signUp(email, password);
         setMessage('Sign up successful! Please check your email to confirm your account');
         setEmail('');
         setPassword('');
