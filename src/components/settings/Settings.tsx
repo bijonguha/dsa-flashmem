@@ -91,6 +91,19 @@ export const Settings: React.FC<SettingsProps> = ({
     <div className="max-w-2xl mx-auto p-6">
       <h2 className="text-2xl font-bold text-gray-800 mb-6">Settings</h2>
 
+      {/* About User Section */}
+      <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+        <h3 className="text-lg font-medium text-gray-800 mb-4">About User</h3>
+        <div className="space-y-2">
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Email</label>
+            <div className="mt-1 text-sm text-gray-900">
+              {user?.email || 'No email available'}
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div className="bg-white rounded-lg shadow-md p-6">
         <div className="space-y-6">
           {/* Timer Duration */}
