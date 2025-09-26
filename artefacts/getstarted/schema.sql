@@ -14,14 +14,15 @@ DROP TABLE IF EXISTS profiles CASCADE;
 
 -- Profiles
 CREATE TABLE profiles (
-  id TEXT PRIMARY KEY,
-  username TEXT
+  id UUID PRIMARY KEY,
+  username TEXT,
+  CONSTRAINT fk_user FOREIGN KEY(id) REFERENCES auth.users(id) ON DELETE CASCADE
 );
 
 -- Flashcards
 CREATE TABLE flashcards (
   id TEXT PRIMARY KEY,
-  user_id TEXT NOT NULL,
+  user_id UUID NOT NULL,
   topic TEXT NOT NULL,
   title TEXT NOT NULL,
   question TEXT NOT NULL,
@@ -30,13 +31,14 @@ CREATE TABLE flashcards (
   solution JSONB NOT NULL DEFAULT '{}',
   neetcode_url TEXT,
   difficulty TEXT NOT NULL DEFAULT 'Medium',
-  tags TEXT[] DEFAULT '{}'
+  tags TEXT[] DEFAULT '{}',
+  CONSTRAINT fk_user FOREIGN KEY(user_id) REFERENCES auth.users(id) ON DELETE CASCADE
 );
 
 -- Progress
 CREATE TABLE progress (
   flashcard_id TEXT,
-  user_id TEXT NOT NULL,
+  user_id UUID NOT NULL,
   next_review_date TIMESTAMPTZ DEFAULT now(),
   last_review_date TIMESTAMPTZ DEFAULT now(),
   interval_days NUMERIC DEFAULT 1,
@@ -44,13 +46,15 @@ CREATE TABLE progress (
   total_reviews INTEGER DEFAULT 0,
   correct_streak INTEGER DEFAULT 0,
   average_response_time INTEGER DEFAULT 0,
-  PRIMARY KEY (flashcard_id, user_id)
+  PRIMARY KEY (flashcard_id, user_id),
+  CONSTRAINT fk_flashcard FOREIGN KEY(flashcard_id) REFERENCES flashcards(id) ON DELETE CASCADE,
+  CONSTRAINT fk_user FOREIGN KEY(user_id) REFERENCES auth.users(id) ON DELETE CASCADE
 );
 
 -- Sessions
 CREATE TABLE sessions (
   id TEXT PRIMARY KEY,
-  user_id TEXT NOT NULL,
+  user_id UUID NOT NULL,
   flashcard_id TEXT NOT NULL,
   start_time TIMESTAMPTZ DEFAULT now(),
   end_time TIMESTAMPTZ DEFAULT now(),
@@ -58,7 +62,9 @@ CREATE TABLE sessions (
   ai_evaluation JSONB DEFAULT '{"score": 0, "feedback": "", "missing_points": []}',
   self_rating TEXT DEFAULT 'good',
   input_method TEXT DEFAULT 'typing',
-  time_taken INTEGER DEFAULT 0
+  time_taken INTEGER DEFAULT 0,
+  CONSTRAINT fk_flashcard FOREIGN KEY(flashcard_id) REFERENCES flashcards(id) ON DELETE CASCADE,
+  CONSTRAINT fk_user FOREIGN KEY(user_id) REFERENCES auth.users(id) ON DELETE CASCADE
 );
 
 -- Settings
@@ -89,6 +95,31 @@ GRANT USAGE ON SCHEMA public TO anon, authenticated;
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO anon, authenticated;
 GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO anon, authenticated;
 GRANT ALL PRIVILEGES ON ALL FUNCTIONS IN SCHEMA public TO anon, authenticated;
+
+-- Function and Trigger for automatic profile creation
+CREATE OR REPLACE FUNCTION create_user_profile()
+RETURNS TRIGGER AS $$
+BEGIN
+  -- Insert a new profile for the new user
+  INSERT INTO public.profiles (id, username)
+  VALUES (
+    NEW.id,
+    COALESCE(
+      NEW.raw_user_meta_data->>'username',
+      SPLIT_PART(NEW.email, '@', 1),
+      'User'
+    )
+  )
+  ON CONFLICT (id) DO NOTHING; -- Ignore if profile already exists
+  
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+CREATE TRIGGER create_profile_trigger
+  AFTER INSERT ON auth.users
+  FOR EACH ROW
+  EXECUTE FUNCTION create_user_profile();
 
 COMMIT;
 
