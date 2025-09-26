@@ -1,32 +1,37 @@
 import React, { useCallback, useState } from 'react';
 import { Save, Check } from 'lucide-react';
 import { AppSettings } from '../../types';
-import { DatabaseService } from '../../services/indexedDB';
+import { SupabaseDataService } from '../../services/SupabaseDataService';
 
 interface SettingsProps {
   settings: AppSettings;
   onSettingsChange: (settings: AppSettings) => void;
 }
 
-export const Settings: React.FC<SettingsProps> = ({
-  settings,
-  onSettingsChange
-}) => {
+export const Settings: React.FC<SettingsProps> = ({ settings, onSettingsChange }) => {
   const [isSaving, setIsSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
 
-  const handleSettingChange = useCallback((key: keyof AppSettings, value: any) => {
-    onSettingsChange({ ...settings, [key]: value });
-  }, [settings, onSettingsChange]);
+  const handleSettingChange = useCallback(
+    <K extends keyof AppSettings>(key: K, value: AppSettings[K]) => {
+      onSettingsChange({ ...settings, [key]: value });
+    },
+    [settings, onSettingsChange],
+  );
 
   const handleSave = useCallback(async () => {
     setIsSaving(true);
     setSaveSuccess(false);
-    
+
     try {
-      await DatabaseService.updateSettings(settings);
-      setSaveSuccess(true);
-      
+      if (settings.id) {
+        // Ensure userId is available
+        await SupabaseDataService.updateSettings(settings);
+        setSaveSuccess(true);
+      } else {
+        throw new Error('User ID not available for saving settings.');
+      }
+
       // Hide success message after 3 seconds
       setTimeout(() => {
         setSaveSuccess(false);
@@ -42,7 +47,7 @@ export const Settings: React.FC<SettingsProps> = ({
   return (
     <div className="max-w-2xl mx-auto p-6">
       <h2 className="text-2xl font-bold text-gray-800 mb-6">Settings</h2>
-      
+
       <div className="bg-white rounded-lg shadow-md p-6">
         <div className="space-y-6">
           {/* OpenAI API Key */}
@@ -63,10 +68,13 @@ export const Settings: React.FC<SettingsProps> = ({
               Your API key is stored locally and never shared.
             </p>
           </div>
-          
+
           {/* Timer Duration */}
           <div>
-            <label htmlFor="timer-duration" className="block text-sm font-medium text-gray-700 mb-2">
+            <label
+              htmlFor="timer-duration"
+              className="block text-sm font-medium text-gray-700 mb-2"
+            >
               Timer Duration
             </label>
             <select
@@ -82,16 +90,24 @@ export const Settings: React.FC<SettingsProps> = ({
               <option value={900}>15 minutes</option>
             </select>
           </div>
-          
+
           {/* Input Preference */}
           <div>
-            <label htmlFor="input-preference" className="block text-sm font-medium text-gray-700 mb-2">
+            <label
+              htmlFor="input-preference"
+              className="block text-sm font-medium text-gray-700 mb-2"
+            >
               Input Preference
             </label>
             <select
               id="input-preference"
               value={settings.input_preference}
-              onChange={(e) => handleSettingChange('input_preference', e.target.value)}
+              onChange={(e) =>
+                handleSettingChange(
+                  'input_preference',
+                  e.target.value as AppSettings['input_preference'],
+                )
+              }
               className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
             >
               <option value="both">Both Voice & Typing</option>
@@ -99,7 +115,7 @@ export const Settings: React.FC<SettingsProps> = ({
               <option value="typing">Typing Only</option>
             </select>
           </div>
-          
+
           {/* Checkboxes */}
           <div className="space-y-4">
             <div className="flex items-center">
@@ -114,7 +130,7 @@ export const Settings: React.FC<SettingsProps> = ({
                 Auto-advance after rating
               </label>
             </div>
-            
+
             <div className="flex items-center">
               <input
                 type="checkbox"
@@ -128,7 +144,7 @@ export const Settings: React.FC<SettingsProps> = ({
               </label>
             </div>
           </div>
-          
+
           {/* Save Button */}
           <div className="pt-4 border-t border-gray-200">
             <button
@@ -136,11 +152,12 @@ export const Settings: React.FC<SettingsProps> = ({
               disabled={isSaving}
               className={`
                 w-full flex items-center justify-center space-x-2 py-3 px-4 rounded-md font-medium transition-all duration-200
-                ${isSaving 
-                  ? 'bg-gray-400 cursor-not-allowed' 
-                  : saveSuccess
-                  ? 'bg-green-500 hover:bg-green-600'
-                  : 'bg-blue-500 hover:bg-blue-600'
+                ${
+                  isSaving
+                    ? 'bg-gray-400 cursor-not-allowed'
+                    : saveSuccess
+                      ? 'bg-green-500 hover:bg-green-600'
+                      : 'bg-blue-500 hover:bg-blue-600'
                 }
                 text-white focus:outline-none focus:ring-2 focus:ring-offset-2 
                 ${saveSuccess ? 'focus:ring-green-500' : 'focus:ring-blue-500'}
@@ -166,7 +183,7 @@ export const Settings: React.FC<SettingsProps> = ({
           </div>
         </div>
       </div>
-      
+
       {/* Performance Tips */}
       <div className="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
         <h3 className="text-sm font-medium text-blue-800 mb-2">💡 Performance Tips</h3>

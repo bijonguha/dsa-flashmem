@@ -21,16 +21,16 @@ export const Timer: React.FC<TimerProps> = ({
   onTimeChange,
   autoStart = false,
   showControls = true,
-  size = 'md'
+  size = 'md',
 }) => {
   const [timeRemaining, setTimeRemaining] = useState(duration);
   const [isRunning, setIsRunning] = useState(autoStart);
   const [isPaused, setIsPaused] = useState(false);
-  
+
   // Use refs to avoid stale closures in intervals
   const onTimeUpRef = useRef(onTimeUp);
   const onTimeChangeRef = useRef(onTimeChange);
-  
+
   // Keep refs current
   useEffect(() => {
     onTimeUpRef.current = onTimeUp;
@@ -52,13 +52,13 @@ export const Timer: React.FC<TimerProps> = ({
       interval = window.setInterval(() => {
         setTimeRemaining((prev) => {
           const newTime = Math.max(0, prev - 1);
-          
+
           if (newTime === 0) {
             setIsRunning(false);
             // Use ref to avoid stale closure
             onTimeUpRef.current?.();
           }
-          
+
           return newTime;
         });
       }, TIMER_INTERVAL_MS);
@@ -127,21 +127,21 @@ export const Timer: React.FC<TimerProps> = ({
           container: 'w-16 h-16',
           text: 'text-xs',
           button: 'p-1',
-          icon: 'h-3 w-3'
+          icon: 'h-3 w-3',
         };
       case 'lg':
         return {
           container: 'w-32 h-32',
           text: 'text-xl font-bold',
           button: 'p-3',
-          icon: 'h-6 w-6'
+          icon: 'h-6 w-6',
         };
       default:
         return {
           container: 'w-24 h-24',
           text: 'text-sm font-medium',
           button: 'p-2',
-          icon: 'h-4 w-4'
+          icon: 'h-4 w-4',
         };
     }
   }, [size]);
@@ -174,11 +174,11 @@ export const Timer: React.FC<TimerProps> = ({
             strokeDasharray={`${CIRCLE_CIRCUMFERENCE} ${CIRCLE_CIRCUMFERENCE}`}
             strokeDashoffset={`${CIRCLE_CIRCUMFERENCE * (1 - progressPercentage / 100)}`}
             style={{
-              transition: 'stroke-dashoffset 1s linear'
+              transition: 'stroke-dashoffset 1s linear',
             }}
           />
         </svg>
-        
+
         {/* Time display */}
         <div className="absolute inset-0 flex items-center justify-center">
           <div className={`${sizeClasses.text} ${colorClass} text-center leading-tight`}>
@@ -218,7 +218,7 @@ export const Timer: React.FC<TimerProps> = ({
               <Pause className={sizeClasses.icon} />
             </button>
           )}
-          
+
           <button
             onClick={reset}
             className={`${sizeClasses.button} bg-gray-500 hover:bg-gray-600 text-white rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2`}

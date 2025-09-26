@@ -32,56 +32,52 @@ export const VoiceRecorder: React.FC<VoiceRecorderProps> = ({
   timeout = DEFAULT_TIMEOUT_MS,
   placeholder = 'Click to start speaking...',
   showTranscript = true,
-  size = 'md'
+  size = 'md',
 }) => {
   const [recordingState, setRecordingState] = useState<RecordingState>('idle');
   const [restartCount, setRestartCount] = useState(0);
   const restartTimeoutRef = useRef<number | null>(null);
   const [isPending, startTransition] = useTransition();
-  
+
   // Derived state for backward compatibility
   const isRecording = recordingState === 'recording' || recordingState === 'starting';
-  
-  // Memoized callbacks to prevent unnecessary re-renders
-  const stableCallbacks = useMemo(() => ({
-    onResult: (finalTranscript: string, finalConfidence: number) => {
-      if (finalTranscript.trim()) {
-        onTranscript(finalTranscript, finalConfidence);
-        setRecordingState('idle');
-        setRestartCount(0); // Reset restart count on successful completion
-      }
-    },
-    onError: (errorMessage: string) => {
-      console.error('Voice recognition error:', errorMessage);
-      onError?.(errorMessage);
-      setRecordingState('error');
-      
-      // Reset restart count on certain errors
-      if (errorMessage.includes('not-allowed') || errorMessage.includes('audio-capture')) {
-        setRestartCount(0);
-      }
-    }
-  }), [onTranscript, onError]);
 
-  const {
-    isListening,
-    transcript,
-    confidence,
-    error,
-    startListening,
-    stopListening,
-    resetTranscript,
-    isSupported
-  } = useSpeechRecognition({
-    onResult: stableCallbacks.onResult,
-    onError: stableCallbacks.onError,
-    continuous: true,
-    interimResults: true
-  });
+  // Memoized callbacks to prevent unnecessary re-renders
+  const stableCallbacks = useMemo(
+    () => ({
+      onResult: (finalTranscript: string, finalConfidence: number) => {
+        if (finalTranscript.trim()) {
+          onTranscript(finalTranscript, finalConfidence);
+          setRecordingState('idle');
+          setRestartCount(0); // Reset restart count on successful completion
+        }
+      },
+      onError: (errorMessage: string) => {
+        console.error('Voice recognition error:', errorMessage);
+        onError?.(errorMessage);
+        setRecordingState('error');
+
+        // Reset restart count on certain errors
+        if (errorMessage.includes('not-allowed') || errorMessage.includes('audio-capture')) {
+          setRestartCount(0);
+        }
+      },
+    }),
+    [onTranscript, onError],
+  );
+
+  const { isListening, transcript, confidence, error, startListening, stopListening, isSupported } =
+    useSpeechRecognition({
+      onResult: stableCallbacks.onResult,
+      onError: stableCallbacks.onError,
+      continuous: true,
+      interimResults: true,
+    });
 
   const handleStartRecording = useCallback(() => {
     if (!isSupported) {
-      const errorMsg = 'Speech recognition is not supported. Please use HTTPS or localhost and ensure your browser supports the Web Speech API.';
+      const errorMsg =
+        'Speech recognition is not supported. Please use HTTPS or localhost and ensure your browser supports the Web Speech API.';
       onError?.(errorMsg);
       setRecordingState('error');
       return;
@@ -105,25 +101,25 @@ export const VoiceRecorder: React.FC<VoiceRecorderProps> = ({
         onError?.('Failed to start voice recording');
       }
     });
-  }, [isSupported, recordingState, restartCount, resetTranscript, onStart, startListening, timeout, onError]);
+  }, [isSupported, recordingState, restartCount, onStart, startListening, timeout, onError]);
 
   const handleStopRecording = useCallback(() => {
     if (recordingState === 'idle') {
       return;
     }
-    
+
     startTransition(() => {
       try {
         setRecordingState('stopping');
         stopListening();
         onStop?.();
-        
+
         // Clear any pending restart timeouts
         if (restartTimeoutRef.current) {
           clearTimeout(restartTimeoutRef.current);
           restartTimeoutRef.current = null;
         }
-        
+
         setRecordingState('idle');
         setRestartCount(0);
       } catch (error) {
@@ -139,7 +135,7 @@ export const VoiceRecorder: React.FC<VoiceRecorderProps> = ({
       const timeoutId = setTimeout(() => {
         onInterim(transcript);
       }, 100); // Small debounce to avoid excessive calls
-      
+
       return () => clearTimeout(timeoutId);
     }
   }, [transcript, isListening, onInterim]);
@@ -151,11 +147,19 @@ export const VoiceRecorder: React.FC<VoiceRecorderProps> = ({
     // 2. Recognition stopped unexpectedly
     // 3. We haven't exceeded max restart attempts
     // 4. Speech recognition is supported
-    if (recordingState === 'recording' && !isListening && isSupported && !error && restartCount < MAX_RESTART_ATTEMPTS) {
-      console.log(`Auto-restarting speech recognition (attempt ${restartCount + 1}/${MAX_RESTART_ATTEMPTS})`);
-      
+    if (
+      recordingState === 'recording' &&
+      !isListening &&
+      isSupported &&
+      !error &&
+      restartCount < MAX_RESTART_ATTEMPTS
+    ) {
+      console.log(
+        `Auto-restarting speech recognition (attempt ${restartCount + 1}/${MAX_RESTART_ATTEMPTS})`,
+      );
+
       restartTimeoutRef.current = window.setTimeout(() => {
-        setRestartCount(prev => prev + 1);
+        setRestartCount((prev) => prev + 1);
         try {
           startListening(timeout);
         } catch (error) {
@@ -164,7 +168,7 @@ export const VoiceRecorder: React.FC<VoiceRecorderProps> = ({
           stableCallbacks.onError('Failed to restart voice recognition');
         }
       }, RESTART_COOLDOWN_MS);
-      
+
       return () => {
         if (restartTimeoutRef.current) {
           clearTimeout(restartTimeoutRef.current);
@@ -172,7 +176,16 @@ export const VoiceRecorder: React.FC<VoiceRecorderProps> = ({
         }
       };
     }
-  }, [recordingState, isListening, isSupported, restartCount, startListening, timeout, stableCallbacks]);
+  }, [
+    recordingState,
+    isListening,
+    isSupported,
+    restartCount,
+    startListening,
+    timeout,
+    stableCallbacks,
+    error,
+  ]);
 
   const getButtonSizeClasses = () => {
     switch (size) {
@@ -218,12 +231,13 @@ export const VoiceRecorder: React.FC<VoiceRecorderProps> = ({
 
   if (!isSupported) {
     return (
-      <div className="flex flex-col space-y-2 p-4 bg-red-50 border border-red-200 rounded-lg" role="alert">
+      <div
+        className="flex flex-col space-y-2 p-4 bg-red-50 border border-red-200 rounded-lg"
+        role="alert"
+      >
         <div className="flex items-center space-x-2 text-red-600">
           <AlertCircle className={getIconSizeClasses()} aria-hidden="true" />
-          <span className={`${getTextSizeClass()} font-medium`}>
-            Voice recording not available
-          </span>
+          <span className={`${getTextSizeClass()} font-medium`}>Voice recording not available</span>
         </div>
         <div className="text-sm text-red-700 space-y-1">
           <p>Speech recognition requires:</p>
@@ -233,7 +247,8 @@ export const VoiceRecorder: React.FC<VoiceRecorderProps> = ({
             <li>Microphone permissions enabled</li>
           </ul>
           <p className="mt-2">
-            <strong>Current status:</strong> {window.location.protocol === 'https:' ? 'HTTPS ✓' : 'HTTPS ✗'} | 
+            <strong>Current status:</strong>{' '}
+            {window.location.protocol === 'https:' ? 'HTTPS ✓' : 'HTTPS ✗'} |
             {window.location.hostname === 'localhost' ? ' Localhost ✓' : ' Localhost ✗'}
           </p>
         </div>
@@ -248,19 +263,26 @@ export const VoiceRecorder: React.FC<VoiceRecorderProps> = ({
         <div className="relative">
           <button
             onClick={isRecording ? handleStopRecording : handleStartRecording}
-            disabled={disabled || isPending || recordingState === 'starting' || recordingState === 'stopping'}
+            disabled={
+              disabled ||
+              isPending ||
+              recordingState === 'starting' ||
+              recordingState === 'stopping'
+            }
             className={`
               ${getButtonSizeClasses()}
               rounded-full transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2
-              ${isRecording
-                ? 'bg-red-500 hover:bg-red-600 focus:ring-red-500 animate-pulse'
-                : recordingState === 'error'
-                ? 'bg-orange-500 hover:bg-orange-600 focus:ring-orange-500'
-                : 'bg-blue-500 hover:bg-blue-600 focus:ring-blue-500'
+              ${
+                isRecording
+                  ? 'bg-red-500 hover:bg-red-600 focus:ring-red-500 animate-pulse'
+                  : recordingState === 'error'
+                    ? 'bg-orange-500 hover:bg-orange-600 focus:ring-orange-500'
+                    : 'bg-blue-500 hover:bg-blue-600 focus:ring-blue-500'
               }
-              ${disabled || recordingState === 'starting' || recordingState === 'stopping' 
-                ? 'opacity-50 cursor-not-allowed' 
-                : 'text-white shadow-lg hover:shadow-xl'
+              ${
+                disabled || recordingState === 'starting' || recordingState === 'stopping'
+                  ? 'opacity-50 cursor-not-allowed'
+                  : 'text-white shadow-lg hover:shadow-xl'
               }
             `}
             title={isRecording ? 'Stop voice recording' : 'Start voice recording'}
@@ -284,7 +306,11 @@ export const VoiceRecorder: React.FC<VoiceRecorderProps> = ({
         {/* Status Text */}
         <div className="flex-1" id="recording-status">
           {isRecording && (
-            <div className="flex items-center space-x-2 text-red-600" role="status" aria-live="polite">
+            <div
+              className="flex items-center space-x-2 text-red-600"
+              role="status"
+              aria-live="polite"
+            >
               <Volume2 className="h-4 w-4 animate-pulse" aria-hidden="true" />
               <span className={`${getTextSizeClass()} font-medium`}>
                 Recording... Speak now
@@ -292,7 +318,7 @@ export const VoiceRecorder: React.FC<VoiceRecorderProps> = ({
               </span>
             </div>
           )}
-          
+
           {recordingState === 'error' && (
             <div className="flex items-center space-x-2 text-orange-600" role="alert">
               <AlertCircle className="h-4 w-4" aria-hidden="true" />
@@ -301,11 +327,9 @@ export const VoiceRecorder: React.FC<VoiceRecorderProps> = ({
               </span>
             </div>
           )}
-          
+
           {recordingState === 'idle' && !transcript && !error && (
-            <span className={`${getTextSizeClass()} text-gray-500`}>
-              {placeholder}
-            </span>
+            <span className={`${getTextSizeClass()} text-gray-500`}>{placeholder}</span>
           )}
         </div>
       </div>
@@ -345,7 +369,7 @@ export const VoiceRecorder: React.FC<VoiceRecorderProps> = ({
                   </span>
                 )}
               </div>
-              
+
               <div className={`${getTextSizeClass()} text-gray-800 leading-relaxed`}>
                 {transcript || (
                   <span className="text-gray-400 italic">
@@ -359,8 +383,14 @@ export const VoiceRecorder: React.FC<VoiceRecorderProps> = ({
                 <div className="flex items-center mt-2 text-blue-600">
                   <div className="flex space-x-1">
                     <div className="w-1 h-1 bg-blue-600 rounded-full animate-pulse"></div>
-                    <div className="w-1 h-1 bg-blue-600 rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></div>
-                    <div className="w-1 h-1 bg-blue-600 rounded-full animate-pulse" style={{ animationDelay: '0.4s' }}></div>
+                    <div
+                      className="w-1 h-1 bg-blue-600 rounded-full animate-pulse"
+                      style={{ animationDelay: '0.2s' }}
+                    ></div>
+                    <div
+                      className="w-1 h-1 bg-blue-600 rounded-full animate-pulse"
+                      style={{ animationDelay: '0.4s' }}
+                    ></div>
                   </div>
                   <span className="text-xs ml-2">Processing...</span>
                 </div>

@@ -1,20 +1,20 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { 
-  ChevronLeft, 
-  ChevronRight, 
-  Eye, 
-  EyeOff, 
-  Lightbulb, 
-  BookOpen, 
+import {
+  ChevronLeft,
+  ChevronRight,
+  Eye,
+  EyeOff,
+  Lightbulb,
+  BookOpen,
   Send,
   Loader2,
   ThumbsUp,
   ThumbsDown,
   RotateCcw,
-  Clock
+  Clock,
 } from 'lucide-react';
-import { Flashcard, SRSRating, ReviewSession, AppSettings } from '../../types';
-import { DatabaseService } from '../../services/indexedDB';
+import { Flashcard, SRSRating, ReviewSession, AppSettings, EvaluationResult } from '../../types'; // Add EvaluationResult
+import { SupabaseDataService } from '../../services/SupabaseDataService';
 import { SRSService } from '../../services/srs';
 import { OpenAIService } from '../../services/openai';
 import Timer from '../common/Timer';
@@ -25,19 +25,21 @@ interface FlashcardReviewProps {
   onComplete: () => void;
   settings: AppSettings;
   onShowSolution: (flashcard: Flashcard) => void;
+  userId: string; // Added userId prop
 }
 
-export const FlashcardReview: React.FC<FlashcardReviewProps> = ({ 
-  flashcards, 
+export const FlashcardReview: React.FC<FlashcardReviewProps> = ({
+  flashcards,
   onComplete,
   settings,
-  onShowSolution
+  onShowSolution,
+  userId, // Destructure userId from props
 }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [userAnswer, setUserAnswer] = useState('');
   const [showHint, setShowHint] = useState(false);
   const [isEvaluating, setIsEvaluating] = useState(false);
-  const [evaluation, setEvaluation] = useState<any>(null);
+  const [evaluation, setEvaluation] = useState<EvaluationResult | null>(null); // Use EvaluationResult
   const [sessionStartTime, setSessionStartTime] = useState<Date>(new Date());
   const [inputMethod, setInputMethod] = useState<'voice' | 'typing'>('typing');
   const [timeSpent, setTimeSpent] = useState(0);
@@ -62,20 +64,20 @@ export const FlashcardReview: React.FC<FlashcardReviewProps> = ({
     if (isLastCard) {
       onComplete();
     } else {
-      setCurrentIndex(prev => prev + 1);
+      setCurrentIndex((prev) => prev + 1);
       resetCardState();
     }
   }, [isLastCard, onComplete, resetCardState]);
 
   const handlePrevious = useCallback(() => {
     if (currentIndex > 0) {
-      setCurrentIndex(prev => prev - 1);
+      setCurrentIndex((prev) => prev - 1);
       resetCardState();
     }
   }, [currentIndex, resetCardState]);
 
   const handleVoiceTranscript = useCallback((transcript: string) => {
-    setUserAnswer(prev => prev ? `${prev}\n${transcript}`.trim() : transcript); // Append final transcript
+    setUserAnswer((prev) => (prev ? `${prev}\n${transcript}`.trim() : transcript)); // Append final transcript
     setInputMethod('voice');
   }, []);
 
@@ -83,27 +85,28 @@ export const FlashcardReview: React.FC<FlashcardReviewProps> = ({
     if (!currentCard || !userAnswer.trim()) return;
 
     setIsEvaluating(true);
-    
+
     try {
       if (settings.openai_api_key) {
         const result = await OpenAIService.evaluateAnswer(
           currentCard,
           userAnswer,
-          settings.openai_api_key
+          settings.openai_api_key,
         );
         setEvaluation(result);
       } else {
         // Simple evaluation without AI
-        const missingPoints = currentCard.expected_points.filter(point =>
-          !userAnswer.toLowerCase().includes(point.toLowerCase().split(' ')[0])
+        const missingPoints = currentCard.expected_points.filter(
+          (point) => !userAnswer.toLowerCase().includes(point.toLowerCase().split(' ')[0]),
         );
-        
+
         setEvaluation({
-          score: Math.max(0, 100 - (missingPoints.length * 20)),
-          feedback: missingPoints.length === 0 
-            ? "Good coverage of the key concepts!" 
-            : `Consider addressing: ${missingPoints.join(', ')}`,
-          missing_points: missingPoints
+          score: Math.max(0, 100 - missingPoints.length * 20),
+          feedback:
+            missingPoints.length === 0
+              ? 'Good coverage of the key concepts!'
+              : `Consider addressing: ${missingPoints.join(', ')}`,
+          missing_points: missingPoints,
         });
       }
     } catch (error) {
@@ -111,51 +114,64 @@ export const FlashcardReview: React.FC<FlashcardReviewProps> = ({
       setEvaluation({
         score: 0,
         feedback: `Evaluation failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
-        missing_points: currentCard.expected_points
+        missing_points: currentCard.expected_points,
       });
     } finally {
       setIsEvaluating(false);
     }
   }, [currentCard, userAnswer, settings.openai_api_key]);
 
-  const handleSelfRating = useCallback(async (rating: SRSRating) => {
-    if (!currentCard) return;
+  const handleSelfRating = useCallback(
+    async (rating: SRSRating) => {
+      if (!currentCard) return;
 
-    const endTime = new Date();
-    const sessionTime = Math.floor((endTime.getTime() - sessionStartTime.getTime()) / 1000);
+      const endTime = new Date();
+      const sessionTime = Math.floor((endTime.getTime() - sessionStartTime.getTime()) / 1000);
 
-    // Create session record
-    const session: ReviewSession = {
-      id: `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-      flashcard_id: currentCard.id,
-      start_time: sessionStartTime,
-      end_time: endTime,
-      user_answer: userAnswer,
-      ai_evaluation: evaluation || {
-        score: rating === 'again' ? 0 : rating === 'hard' ? 50 : rating === 'good' ? 75 : 100,
-        feedback: 'Self-rated without AI evaluation',
-        missing_points: []
-      },
-      self_rating: rating,
-      input_method: inputMethod,
-      time_taken: sessionTime
-    };
+      // Create session record
+      const session: ReviewSession = {
+        id: `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        flashcard_id: currentCard.id,
+        user_id: userId, // Set user_id for the session
+        start_time: sessionStartTime,
+        end_time: endTime,
+        user_answer: userAnswer,
+        ai_evaluation: evaluation || {
+          score: rating === 'again' ? 0 : rating === 'hard' ? 50 : rating === 'good' ? 75 : 100,
+          feedback: 'Self-rated without AI evaluation',
+          missing_points: [],
+        },
+        self_rating: rating,
+        input_method: inputMethod,
+        time_taken: sessionTime,
+      };
 
-    try {
-      // Save session
-      await DatabaseService.addSession(session);
+      try {
+        // Save session
+        await SupabaseDataService.addSession(session); // Pass userId embedded in session
 
-      // Update SRS progress
-      await SRSService.updateProgress(currentCard.id, rating, sessionTime);
+        // Update SRS progress
+        await SRSService.updateProgress(currentCard.id, rating, sessionTime, userId); // Pass userId
 
-      // Auto-advance if enabled
-      if (settings.auto_advance) {
-        setTimeout(handleNext, 1500);
+        // Auto-advance if enabled
+        if (settings.auto_advance) {
+          setTimeout(handleNext, 1500);
+        }
+      } catch (error) {
+        console.error('Failed to save session:', error);
       }
-    } catch (error) {
-      console.error('Failed to save session:', error);
-    }
-  }, [currentCard, sessionStartTime, userAnswer, evaluation, inputMethod, settings.auto_advance, handleNext]);
+    },
+    [
+      currentCard,
+      sessionStartTime,
+      userAnswer,
+      evaluation,
+      inputMethod,
+      settings.auto_advance,
+      handleNext,
+      userId,
+    ],
+  ); // Add userId to dependencies
 
   const handleTimeUp = useCallback(() => {
     if (!evaluation && userAnswer.trim()) {
@@ -165,10 +181,14 @@ export const FlashcardReview: React.FC<FlashcardReviewProps> = ({
 
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
-      case 'Easy': return 'text-green-600 bg-green-100';
-      case 'Medium': return 'text-yellow-600 bg-yellow-100';
-      case 'Hard': return 'text-red-600 bg-red-100';
-      default: return 'text-gray-600 bg-gray-100';
+      case 'Easy':
+        return 'text-green-600 bg-green-100';
+      case 'Medium':
+        return 'text-yellow-600 bg-yellow-100';
+      case 'Hard':
+        return 'text-red-600 bg-red-100';
+      default:
+        return 'text-gray-600 bg-gray-100';
     }
   };
 
@@ -186,14 +206,16 @@ export const FlashcardReview: React.FC<FlashcardReviewProps> = ({
               <span className="text-sm text-gray-500">
                 Card {currentIndex + 1} of {flashcards.length}
               </span>
-              <span className={`px-2 py-1 rounded-full text-xs font-medium ${getDifficultyColor(currentCard.difficulty)}`}>
+              <span
+                className={`px-2 py-1 rounded-full text-xs font-medium ${getDifficultyColor(currentCard.difficulty)}`}
+              >
                 {currentCard.difficulty}
               </span>
               <span className="text-sm text-gray-600 bg-gray-100 px-2 py-1 rounded">
                 {currentCard.topic}
               </span>
             </div>
-            
+
             <Timer
               key={currentIndex} // Force reset when card changes
               duration={settings.timer_duration}
@@ -204,24 +226,17 @@ export const FlashcardReview: React.FC<FlashcardReviewProps> = ({
             />
           </div>
 
-          <h2 className="text-xl font-bold text-gray-800 mb-2">
-            {currentCard.title}
-          </h2>
-          
+          <h2 className="text-xl font-bold text-gray-800 mb-2">{currentCard.title}</h2>
+
           <div className="prose max-w-none">
-            <p className="text-gray-700 leading-relaxed">
-              {currentCard.question}
-            </p>
+            <p className="text-gray-700 leading-relaxed">{currentCard.question}</p>
           </div>
 
           {/* Tags */}
           {currentCard.tags.length > 0 && (
             <div className="flex flex-wrap gap-2 mt-4">
               {currentCard.tags.map((tag, index) => (
-                <span 
-                  key={index}
-                  className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded"
-                >
+                <span key={index} className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
                   {tag}
                 </span>
               ))}
@@ -237,16 +252,12 @@ export const FlashcardReview: React.FC<FlashcardReviewProps> = ({
               className="flex items-center space-x-2 text-yellow-700 hover:text-yellow-800 transition-colors"
             >
               <Lightbulb className="h-4 w-4" />
-              <span className="text-sm font-medium">
-                {showHint ? 'Hide Hint' : 'Show Hint'}
-              </span>
+              <span className="text-sm font-medium">{showHint ? 'Hide Hint' : 'Show Hint'}</span>
               {showHint ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
             </button>
-            
+
             {showHint && (
-              <p className="mt-2 text-sm text-yellow-800 italic">
-                💡 {currentCard.hint}
-              </p>
+              <p className="mt-2 text-sm text-yellow-800 italic">💡 {currentCard.hint}</p>
             )}
           </div>
         )}
@@ -256,7 +267,7 @@ export const FlashcardReview: React.FC<FlashcardReviewProps> = ({
       <div className="bg-white rounded-lg shadow-md mb-6 p-6">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-medium text-gray-800">Your Answer</h3>
-          
+
           <div className="flex items-center space-x-2">
             <button
               onClick={() => setInputMethod('typing')}
@@ -328,9 +339,7 @@ export const FlashcardReview: React.FC<FlashcardReviewProps> = ({
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-medium text-gray-800">AI Evaluation</h3>
             <div className="flex items-center space-x-2">
-              <span className="text-2xl font-bold text-blue-600">
-                {evaluation.score}/100
-              </span>
+              <span className="text-2xl font-bold text-blue-600">{evaluation.score}/100</span>
             </div>
           </div>
 
@@ -417,7 +426,9 @@ export const FlashcardReview: React.FC<FlashcardReviewProps> = ({
       {/* Time Tracking */}
       <div className="mt-4 flex items-center justify-center text-sm text-gray-500">
         <Clock className="h-4 w-4 mr-2" />
-        <span>Time spent: {Math.floor(timeSpent / 60)}:{(timeSpent % 60).toString().padStart(2, '0')}</span>
+        <span>
+          Time spent: {Math.floor(timeSpent / 60)}:{(timeSpent % 60).toString().padStart(2, '0')}
+        </span>
       </div>
     </div>
   );

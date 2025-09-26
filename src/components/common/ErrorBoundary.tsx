@@ -26,13 +26,13 @@ export class ErrorBoundary extends Component<Props, State> {
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
     console.error('ErrorBoundary caught an error:', error, errorInfo);
-    
+
     // Call optional error handler
     this.props.onError?.(error, errorInfo);
-    
+
     this.setState({
       error,
-      errorInfo
+      errorInfo,
     });
   }
 
@@ -53,11 +53,10 @@ export class ErrorBoundary extends Component<Props, State> {
           <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-6 text-center">
             <div className="mb-4">
               <AlertTriangle className="h-12 w-12 text-red-500 mx-auto mb-3" />
-              <h2 className="text-xl font-semibold text-gray-900 mb-2">
-                Something went wrong
-              </h2>
+              <h2 className="text-xl font-semibold text-gray-900 mb-2">Something went wrong</h2>
               <p className="text-gray-600 text-sm mb-4">
-                We're sorry, but something unexpected happened. Please try refreshing the page or contact support if the problem persists.
+                We're sorry, but something unexpected happened. Please try refreshing the page or
+                contact support if the problem persists.
               </p>
             </div>
 
@@ -69,7 +68,7 @@ export class ErrorBoundary extends Component<Props, State> {
                 <RefreshCw className="h-4 w-4" />
                 <span>Try Again</span>
               </button>
-              
+
               <button
                 onClick={() => window.location.reload()}
                 className="w-full text-gray-600 hover:text-gray-800 text-sm transition-colors"

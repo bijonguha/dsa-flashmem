@@ -1,6 +1,7 @@
 // Core flashcard data structure
 export interface Flashcard {
   id: string;
+  user_id?: string; // Added for Supabase integration
   topic: string;
   title: string;
   question: string;
@@ -25,6 +26,7 @@ export interface Flashcard {
 // User progress tracking
 export interface UserProgress {
   flashcard_id: string;
+  user_id?: string; // Added for Supabase integration
   next_review_date: Date;
   interval_days: number;
   ease_factor: number;
@@ -38,6 +40,7 @@ export interface UserProgress {
 export interface ReviewSession {
   id: string;
   flashcard_id: string;
+  user_id?: string; // Added for Supabase integration
   start_time: Date;
   end_time: Date;
   user_answer: string;
@@ -53,6 +56,7 @@ export interface ReviewSession {
 
 // Application settings
 export interface AppSettings {
+  id?: string; // Added for Supabase integration (will be user_id)
   openai_api_key?: string;
   timer_duration: number; // in seconds
   input_preference: 'voice' | 'typing' | 'both';
@@ -63,9 +67,15 @@ export interface AppSettings {
 
 // Analytics event tracking
 export interface AnalyticsEvent {
-  event_type: 'session_start' | 'voice_used' | 'ai_evaluated' | 'solution_viewed' | 'flashcard_completed';
+  event_type:
+    | 'session_start'
+    | 'voice_used'
+    | 'ai_evaluated'
+    | 'solution_viewed'
+    | 'flashcard_completed';
   timestamp: Date;
-  metadata: Record<string, any>;
+  metadata: Record<string, unknown>;
+  user_id?: string; // Added for Supabase integration
 }
 
 // SRS algorithm types
@@ -89,10 +99,14 @@ export interface VoiceRecognitionState {
 }
 
 // API response types
-export interface OpenAIEvaluationResponse {
+export interface EvaluationResult {
   score: number;
   feedback: string;
   missing_points: string[];
+  suggestions?: string[];
+}
+
+export interface OpenAIEvaluationResponse extends EvaluationResult {
   suggestions?: string[];
 }
 
@@ -112,9 +126,12 @@ export interface DashboardStats {
   current_streak: number;
   accuracy_rate: number;
   average_session_time: number;
-  topics_progress: Record<string, {
-    total: number;
-    mastered: number;
-    accuracy: number;
-  }>;
+  topics_progress: Record<
+    string,
+    {
+      total: number;
+      mastered: number;
+      accuracy: number;
+    }
+  >;
 }

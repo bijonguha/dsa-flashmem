@@ -6,7 +6,7 @@ interface SpeechRecognitionEvent extends Event {
 }
 
 interface SpeechRecognitionErrorEvent extends Event {
-  readonly error: 
+  readonly error:
     | 'no-speech'
     | 'aborted'
     | 'audio-capture'
@@ -81,22 +81,22 @@ interface Window {
   webkitSpeechGrammarList: typeof SpeechGrammarList;
 }
 
-declare var SpeechRecognition: {
+declare const SpeechRecognition: {
   prototype: SpeechRecognition;
-  new(): SpeechRecognition;
+  new (): SpeechRecognition;
 };
 
-declare var webkitSpeechRecognition: {
+declare const webkitSpeechRecognition: {
   prototype: SpeechRecognition;
-  new(): SpeechRecognition;
+  new (): SpeechRecognition;
 };
 
-declare var SpeechGrammarList: {
+declare const SpeechGrammarList: {
   prototype: SpeechGrammarList;
-  new(): SpeechGrammarList;
+  new (): SpeechGrammarList;
 };
 
-declare var webkitSpeechGrammarList: {
+declare const webkitSpeechGrammarList: {
   prototype: SpeechGrammarList;
-  new(): SpeechGrammarList;
+  new (): SpeechGrammarList;
 };

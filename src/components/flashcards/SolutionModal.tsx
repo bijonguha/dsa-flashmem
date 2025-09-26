@@ -53,7 +53,7 @@ export const SolutionModal: React.FC<SolutionModalProps> = ({ flashcard, isOpen,
           {/* Left Sidebar - Approach Selection */}
           <div className="lg:w-1/4 border-r border-gray-200 p-4 bg-gray-50">
             <h3 className="font-medium text-gray-800 mb-4">Solution Approaches</h3>
-            
+
             <div className="space-y-2">
               {flashcard.solution.approaches.map((approach, index) => (
                 <button
@@ -105,7 +105,7 @@ export const SolutionModal: React.FC<SolutionModalProps> = ({ flashcard, isOpen,
                   <span>NeetCode</span>
                 </button>
               )}
-              
+
               {flashcard.solution.youtube_url && (
                 <button
                   onClick={() => openExternalLink(flashcard.solution.youtube_url!)}
@@ -122,9 +122,7 @@ export const SolutionModal: React.FC<SolutionModalProps> = ({ flashcard, isOpen,
           <div className="flex-1 p-6 overflow-y-auto">
             <div className="mb-6">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-xl font-bold text-gray-800">
-                  {currentApproach.name}
-                </h3>
+                <h3 className="text-xl font-bold text-gray-800">{currentApproach.name}</h3>
                 <div className="flex items-center space-x-4 text-sm">
                   <span className="flex items-center text-gray-600">
                     <Clock className="h-4 w-4 mr-1" />
@@ -179,7 +177,7 @@ export const SolutionModal: React.FC<SolutionModalProps> = ({ flashcard, isOpen,
                     customStyle={{
                       margin: 0,
                       borderRadius: '0.5rem',
-                      fontSize: '0.875rem'
+                      fontSize: '0.875rem',
                     }}
                   >
                     {currentApproach.code}
@@ -200,7 +198,7 @@ export const SolutionModal: React.FC<SolutionModalProps> = ({ flashcard, isOpen,
                       {currentApproach.time_complexity}
                     </span>
                   </div>
-                  
+
                   <div className="bg-white p-3 rounded border">
                     <div className="flex items-center space-x-2 mb-2">
                       <Zap className="h-4 w-4 text-green-600" />

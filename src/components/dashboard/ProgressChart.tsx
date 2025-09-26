@@ -9,7 +9,7 @@ interface ProgressChartProps {
 }
 
 export const ProgressChart: React.FC<ProgressChartProps> = ({ data }) => {
-  const maxCompleted = Math.max(...data.map(d => d.completed), 1);
+  const maxCompleted = Math.max(...data.map((d) => d.completed), 1);
   const maxAccuracy = 1; // Accuracy is between 0 and 1
 
   const getBarHeight = (value: number, max: number) => {
@@ -34,28 +34,26 @@ export const ProgressChart: React.FC<ProgressChartProps> = ({ data }) => {
                 className={`${getAccuracyColor(item.accuracy)} rounded-full transition-all duration-300`}
                 style={{
                   height: `${getBarHeight(item.accuracy, maxAccuracy)}%`,
-                  minHeight: '4px'
+                  minHeight: '4px',
                 }}
                 title={`Accuracy: ${Math.round(item.accuracy * 100)}%`}
               />
             </div>
-            
+
             {/* Completed Cards Bar */}
             <div className="relative w-8 bg-gray-200 rounded-t-lg">
               <div
                 className="bg-blue-500 rounded-t-lg transition-all duration-300"
                 style={{
                   height: `${getBarHeight(item.completed, maxCompleted)}%`,
-                  minHeight: '4px'
+                  minHeight: '4px',
                 }}
                 title={`Completed: ${item.completed} cards`}
               />
             </div>
-            
+
             {/* Date Label */}
-            <span className="text-xs text-gray-600 font-medium">
-              {item.date}
-            </span>
+            <span className="text-xs text-gray-600 font-medium">{item.date}</span>
           </div>
         ))}
       </div>

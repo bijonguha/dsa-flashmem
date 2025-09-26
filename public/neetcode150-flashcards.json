@@ -269,7 +269,7 @@
         },
         {
           "name": "Escape Character Approach",
-          "code": "def encode(strs):\n    result = []\n    for s in strs:\n        # Replace any existing '#' with '##'\n        escaped = s.replace('#', '##')\n        result.append(escaped + ' # ')\n    return ''.join(result)\n\ndef decode(s):\n    # Split by ' # ' and handle escaped characters\n    parts = s.split(' # ')[:-1]  # Remove last empty part\n    result = []\n    for part in parts:\n        # Unescape '##' back to '#'\n        result.append(part.replace('##', '#'))\n    return result",
+          "code": "def encode(strs):\n    result = []\n    for s in strs:\n        # Replace any existing '#' with '##'\n        escaped = s.replace('#', '##')\n        result.append(escaped + ' # ')\n    return ''.join(result)\n\ndef decode(s):\n    # Split by ' # ' and handle escaped characters\n    parts = s.split(' # ')[:-1]  # Remove last empty part\n    result = []\n    for part in parts:\n        # Unescape '##' back to '# '\n        result.append(part.replace('##', '#'))\n    return result",
           "time_complexity": "O(n)",
           "space_complexity": "O(1)",
           "explanation": "We use an escape character approach where '#' is escaped as '##' and ' # ' is used as a delimiter between strings."
@@ -447,6 +447,45 @@
     "tags": ["Array", "Two Pointers", "Greedy"]
   },
   {
+    "id": "trapping-rain-water",
+    "topic": "Two Pointers",
+    "title": "Trapping Rain Water",
+    "question": "Given n non-negative integers representing an elevation map where the width of each bar is 1, compute how much water it can trap after raining.",
+    "hint": "Use two pointers starting from both ends. The amount of water trapped at any point is determined by the minimum of the maximum heights seen from the left and right so far.",
+    "expected_points": [
+      "Use two pointers, left and right, at the start and end of the array",
+      "Maintain max_left and max_right heights seen so far",
+      "If height[left] < height[right], process the left side",
+      "Water trapped at left pointer is max_left - height[left]",
+      "Move the pointer corresponding to the smaller height inward",
+      "Time complexity: O(n), Space complexity: O(1)"
+    ],
+    "solution": {
+      "prerequisites": [
+        "Two pointers",
+        "Greedy algorithms"
+      ],
+      "youtube_url": "",
+      "approaches": [
+        {
+          "name": "Two Pointers Approach",
+          "code": "def trap(height):\n    if not height:\n        return 0\n\n    left, right = 0, len(height) - 1\n    max_left, max_right = height[left], height[right]\n    water_trapped = 0\n\n    while left < right:\n        if max_left < max_right:\n            left += 1\n            max_left = max(max_left, height[left])\n            water_trapped += max_left - height[left]\n        else:\n            right -= 1\n            max_right = max(max_right, height[right])\n            water_trapped += max_right - height[right]\n\n    return water_trapped",
+          "time_complexity": "O(n)",
+          "space_complexity": "O(1)",
+          "explanation": "We use two pointers, one at the beginning and one at the end of the array. We also keep track of the maximum height seen from the left and from the right. At each step, we move the pointer with the smaller maximum height. The water trapped at any position is the difference between the minimum of the left and right max heights and the current height. This approach is optimal with O(n) time and O(1) space."
+        }
+      ]
+    },
+    "neetcode_url": "https://neetcode.io/problems/trapping-rain-water",
+    "difficulty": "Hard",
+    "tags": [
+      "Array",
+      "Two Pointers",
+      "Dynamic Programming",
+      "Stack"
+    ]
+  },
+  {
     "id": "best-time-to-buy-and-sell-stock",
     "topic": "Sliding Window",
     "title": "Best Time to Buy and Sell Stock",
@@ -587,7 +626,7 @@
       "approaches": [
         {
           "name": "Sliding Window Approach",
-          "code": "def minWindow(s, t):\n    if not s or not t or len(s) < len(t):\n        return \"\"\n    \n    # Count characters in t\n    t_count = {}\n    for char in t:\n        t_count[char] = t_count.get(char, 0) + 1\n    \n    required = len(t_count)\n    formed = 0\n    window_counts = {}\n    \n    # Sliding window variables\n    left = right = 0\n    ans = float('inf'), None, None\n    \n    while right < len(s):\n        # Add character from right to window\n        c = s[right]\n        window_counts[c] = window_counts.get(c, 0) + 1\n        \n        # Check if current character's frequency matches\n        if c in t_count and window_counts[c] == t_count[c]:\n            formed += 1\n        \n        # Try to contract window\n        while left <= right and formed == required:\n            c = s[left]\n            \n            # Save the smallest window\n            if right - left + 1 < ans[0]:\n                ans = (right - left + 1, left, right)\n            \n            # Remove character from left\n            window_counts[c] -= 1\n            if c in t_count and window_counts[c] < t_count[c]:\n                formed -= 1\n            \n            left += 1\n        \n        right += 1\n    \n    return \"\" if ans[0] == float('inf') else s[ans[1]:ans[2] + 1]",
+          "code": "def minWindow(s, t):\n    if not s or not t or len(s) < len(t):\n        return ''\n    \n    # Count characters in t\n    t_count = {}\n    for char in t:\n        t_count[char] = t_count.get(char, 0) + 1\n    \n    required = len(t_count)\n    formed = 0\n    window_counts = {}\n    \n    # Sliding window variables\n    left = right = 0\n    ans = float('inf'), None, None\n    \n    while right < len(s):\n        # Add character from right to window\n        c = s[right]\n        window_counts[c] = window_counts.get(c, 0) + 1\n        \n        # Check if current character's frequency matches\n        if c in t_count and window_counts[c] == t_count[c]:\n            formed += 1\n        \n        # Try to contract window\n        while left <= right and formed == required:\n            c = s[left]\n            \n            # Save the smallest window\n            if right - left + 1 < ans[0]:\n                ans = (right - left + 1, left, right)\n            \n            # Remove character from left\n            window_counts[c] -= 1\n            if c in t_count and window_counts[c] < t_count[c]:\n                formed -= 1\n            \n            left += 1\n        \n        right += 1\n    \n    return '' if ans[0] == float('inf') else s[ans[1]:ans[2] + 1]",
           "time_complexity": "O(m + n)",
           "space_complexity": "O(m + n)",
           "explanation": "We use a sliding window to find the minimum substring that contains all characters in t. We expand the right pointer until we have all required characters, then shrink the left pointer to find the minimum window."
@@ -1420,7 +1459,7 @@
     "topic": "Dynamic Programming",
     "title": "Longest Common Subsequence",
     "question": "Given two strings text1 and text2, return the length of their longest common subsequence. If there is no common subsequence, return 0. A subsequence of a string is a new string generated from the original string with some characters (can be none) deleted without changing the relative order of the remaining characters.",
-    "hint": "Use 2D dynamic programming where dp[i][j] represents the LCS length of text1[0:i] and text2[0:j].",
+    "hint": "Use 2D dynamic programming where dp[i]j] represents the LCS length of text1[0:i] and text2[0:j].",
     "expected_points": [
       "Use 2D DP where dp[i][j] = LCS of text1[0:i] and text2[0:j]",
       "If characters match: dp[i][j] = dp[i-1][j-1] + 1",
@@ -1650,7 +1689,7 @@
       "approaches": [
         {
           "name": "DFS Backtracking",
-          "code": "def exist(board, word):\n    if not board or not board[0]:\n        return False\n    \n    rows, cols = len(board), len(board[0])\n    \n    def dfs(r, c, word_idx):\n        if word_idx == len(word):\n            return True\n        \n        if (r < 0 or r >= rows or c < 0 or c >= cols or \n            board[r][c] != word[word_idx]):\n            return False\n        \n        # Mark as visited\n        temp = board[r][c]\n        board[r][c] = '#'\n        \n        # Check all 4 directions\n        found = (dfs(r + 1, c, word_idx + 1) or\n                dfs(r - 1, c, word_idx + 1) or\n                dfs(r, c + 1, word_idx + 1) or\n                dfs(r, c - 1, word_idx + 1))\n        \n        # Unmark (backtrack)\n        board[r][c] = temp\n        return found\n    \n    for r in range(rows):\n        for c in range(cols):\n            if dfs(r, c, 0):\n                return True\n    \n    return False",
+          "code": "def exist(board, word):\n    if not board or not board[0]:\n        return False\n    \n    rows, cols = len(board), len(board[0])\n    \n    def dfs(r, c, word_idx):\n        if word_idx == len(word):\n            return True\n        \n        if (r < 0 or r >= rows or c < 0 or c >= cols or \n            board[r][c] != word[word_idx]):\n            return False\n        \n        # Mark as visited\n        temp = board[r][c]\n        board[r][c] = '#"\n        \n        # Check all 4 directions\n        found = (dfs(r + 1, c, word_idx + 1) or\n                dfs(r - 1, c, word_idx + 1) or\n                dfs(r, c + 1, word_idx + 1) or\n                dfs(r, c - 1, word_idx + 1))\n        \n        # Unmark (backtrack)\n        board[r][c] = temp\n        return found\n    \n    for r in range(rows):\n        for c in range(cols):\n            if dfs(r, c, 0):\n                return True\n    \n    return False",
           "time_complexity": "O(m×n×4^L)",
           "space_complexity": "O(L)",
           "explanation": "We use DFS backtracking to search for the word. For each cell, we try to find the word starting from that position. We mark visited cells and unmark them when backtracking."
@@ -1805,5 +1844,35 @@
     "neetcode_url": "https://neetcode.io/problems/gas-station",
     "difficulty": "Medium",
     "tags": ["Array", "Greedy"]
+  },
+  {
+    "id": "sliding-window-maximum",
+    "topic": "Sliding Window",
+    "title": "Sliding Window Maximum",
+    "question": "You are given an array of integers nums, there is a sliding window of size k which is moving from the very left of the array to the very right. You can only see the k numbers in the window. Each time the sliding window moves right by one position. Return the max sliding window.",
+    "hint": "Use a deque (double-ended queue) to store indices of elements in the current window. The deque should be monotonic, storing indices in decreasing order of their corresponding values in the array.",
+    "expected_points": [
+      "Use a deque to maintain a monotonic decreasing window of indices",
+      "The front of the deque is always the max element in the current window",
+      "Remove elements from the left of the deque that are out of the window's bounds",
+      "Remove elements from the right of the deque that are smaller than the current element",
+      "Time complexity: O(n), Space complexity: O(k)"
+    ],
+    "solution": {
+      "prerequisites": ["Sliding window", "Deque", "Monotonic queue"],
+      "youtube_url": "",
+      "approaches": [
+        {
+          "name": "Deque (Monotonic Queue) Approach",
+          "code": "import collections\n\ndef maxSlidingWindow(nums, k):\n    output = []\n    q = collections.deque()  # stores indices\n    l = r = 0\n\n    while r < len(nums):\n        # pop smaller values from q\n        while q and nums[q[-1]] < nums[r]:\n            q.pop()\n        q.append(r)\n\n        # remove left val from window\n        if l > q[0]:\n            q.popleft()\n\n        if (r + 1) >= k:\n            output.append(nums[q[0]])\n            l += 1\n        r += 1\n\n    return output",
+          "time_complexity": "O(n)",
+          "space_complexity": "O(k)",
+          "explanation": "We use a deque to store indices of elements in the current window, maintaining a monotonically decreasing order of values. This ensures the leftmost element in the deque is always the maximum for the current window. Each element is added and removed from the deque at most once, leading to O(n) time complexity."
+        }
+      ]
+    },
+    "neetcode_url": "https://neetcode.io/problems/sliding-window-maximum",
+    "difficulty": "Hard",
+    "tags": ["Array", "Queue", "Sliding Window", "Heap (Priority Queue)", "Monotonic Queue", "Deque"]
   }
 ]

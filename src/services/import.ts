@@ -1,12 +1,12 @@
 import { Flashcard, ImportResult } from '../types';
-import { DatabaseService } from './indexedDB';
+import { SupabaseDataService } from './SupabaseDataService';
 
 export class ImportService {
-  static async importFromJSON(file: File): Promise<ImportResult> {
+  static async importFromJSON(file: File, userId?: string): Promise<ImportResult> {
     try {
       const text = await file.text();
       const data = JSON.parse(text);
-      
+
       const flashcards: Flashcard[] = Array.isArray(data) ? data : [data];
       const validatedFlashcards: Flashcard[] = [];
       const errors: string[] = [];
@@ -14,7 +14,7 @@ export class ImportService {
       for (let i = 0; i < flashcards.length; i++) {
         const card = flashcards[i];
         const validation = this.validateFlashcard(card, i);
-        
+
         if (validation.isValid) {
           validatedFlashcards.push(card);
         } else {
@@ -23,40 +23,45 @@ export class ImportService {
       }
 
       if (validatedFlashcards.length > 0) {
-        await DatabaseService.addFlashcards(validatedFlashcards);
+        const upload = userId
+          ? validatedFlashcards.map((c) => ({ ...c, user_id: userId }))
+          : validatedFlashcards;
+        await SupabaseDataService.addFlashcards(upload);
       }
 
       return {
         success: errors.length === 0,
         imported_count: validatedFlashcards.length,
         errors,
-        flashcards: validatedFlashcards
+        flashcards: validatedFlashcards,
       };
     } catch (error) {
       return {
         success: false,
         imported_count: 0,
-        errors: [`Failed to parse JSON: ${error instanceof Error ? error.message : 'Unknown error'}`],
-        flashcards: []
+        errors: [
+          `Failed to parse JSON: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        ],
+        flashcards: [],
       };
     }
   }
 
-  static async importFromCSV(file: File): Promise<ImportResult> {
+  static async importFromCSV(file: File, userId?: string): Promise<ImportResult> {
     try {
       const text = await file.text();
-      const lines = text.split('\n').filter(line => line.trim());
-      
+      const lines = text.split('\n').filter((line) => line.trim());
+
       if (lines.length < 2) {
         return {
           success: false,
           imported_count: 0,
           errors: ['CSV file must have at least a header row and one data row'],
-          flashcards: []
+          flashcards: [],
         };
       }
 
-      const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
+      const headers = lines[0].split(',').map((h) => h.trim().replace(/"/g, ''));
       const flashcards: Flashcard[] = [];
       const errors: string[] = [];
 
@@ -64,7 +69,7 @@ export class ImportService {
         try {
           const values = this.parseCSVLine(lines[i]);
           const flashcard = this.csvRowToFlashcard(headers, values);
-          
+
           const validation = this.validateFlashcard(flashcard, i);
           if (validation.isValid) {
             flashcards.push(flashcard);
@@ -77,21 +82,24 @@ export class ImportService {
       }
 
       if (flashcards.length > 0) {
-        await DatabaseService.addFlashcards(flashcards);
+        const upload = userId ? flashcards.map((c) => ({ ...c, user_id: userId })) : flashcards;
+        await SupabaseDataService.addFlashcards(upload);
       }
 
       return {
         success: errors.length === 0,
         imported_count: flashcards.length,
         errors,
-        flashcards
+        flashcards,
       };
     } catch (error) {
       return {
         success: false,
         imported_count: 0,
-        errors: [`Failed to parse CSV: ${error instanceof Error ? error.message : 'Unknown error'}`],
-        flashcards: []
+        errors: [
+          `Failed to parse CSV: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        ],
+        flashcards: [],
       };
     }
   }
@@ -103,7 +111,7 @@ export class ImportService {
 
     for (let i = 0; i < line.length; i++) {
       const char = line[i];
-      
+
       if (char === '"') {
         inQuotes = !inQuotes;
       } else if (char === ',' && !inQuotes) {
@@ -113,7 +121,7 @@ export class ImportService {
         current += char;
       }
     }
-    
+
     result.push(current.trim());
     return result;
   }
@@ -132,7 +140,7 @@ export class ImportService {
     const expected_points = getField('expected_points')?.split('|') || [];
     const difficulty = (getField('difficulty') as 'Easy' | 'Medium' | 'Hard') || 'Medium';
     const tags = getField('tags')?.split('|') || [];
-    
+
     // Handle solution - for CSV, we'll create a basic structure
     const solutionCode = getField('solution_code') || '';
     const timeComplexity = getField('time_complexity') || 'O(n)';
@@ -151,56 +159,74 @@ export class ImportService {
       solution: {
         prerequisites: [],
         youtube_url: youtubeUrl,
-        approaches: [{
-          name: 'Primary Solution',
-          code: solutionCode,
-          time_complexity: timeComplexity,
-          space_complexity: spaceComplexity,
-          explanation
-        }]
+        approaches: [
+          {
+            name: 'Primary Solution',
+            code: solutionCode,
+            time_complexity: timeComplexity,
+            space_complexity: spaceComplexity,
+            explanation,
+          },
+        ],
       },
       neetcode_url: neetcodeUrl,
       difficulty,
-      tags
+      tags,
     };
   }
 
-  private static validateFlashcard(card: any, index: number): { isValid: boolean; errors: string[] } {
+  private static validateFlashcard(
+    card: unknown,
+    index: number,
+  ): { isValid: boolean; errors: string[] } {
     const errors: string[] = [];
     const prefix = `Card ${index + 1}:`;
 
-    if (!card.id || typeof card.id !== 'string') {
+    // Basic object check
+    if (typeof card !== 'object' || card === null) {
+      errors.push(`${prefix} Invalid card object`);
+      return { isValid: false, errors };
+    }
+
+    const c = card as Record<string, unknown>;
+
+    if (typeof c.id !== 'string' || c.id.trim().length === 0) {
       errors.push(`${prefix} Missing or invalid id`);
     }
 
-    if (!card.title || typeof card.title !== 'string') {
+    if (typeof c.title !== 'string' || c.title.trim().length === 0) {
       errors.push(`${prefix} Missing or invalid title`);
     }
 
-    if (!card.question || typeof card.question !== 'string') {
+    if (typeof c.question !== 'string' || c.question.trim().length === 0) {
       errors.push(`${prefix} Missing or invalid question`);
     }
 
-    if (!card.topic || typeof card.topic !== 'string') {
+    if (typeof c.topic !== 'string' || c.topic.trim().length === 0) {
       errors.push(`${prefix} Missing or invalid topic`);
     }
 
-    if (!['Easy', 'Medium', 'Hard'].includes(card.difficulty)) {
+    const difficulty = typeof c.difficulty === 'string' ? c.difficulty : undefined;
+    if (!difficulty || !['Easy', 'Medium', 'Hard'].includes(difficulty)) {
       errors.push(`${prefix} Invalid difficulty (must be Easy, Medium, or Hard)`);
     }
 
-    if (!Array.isArray(card.expected_points)) {
+    if (!Array.isArray(c.expected_points)) {
       errors.push(`${prefix} expected_points must be an array`);
     }
 
-    if (!Array.isArray(card.tags)) {
+    if (!Array.isArray(c.tags)) {
       errors.push(`${prefix} tags must be an array`);
     }
 
-    if (!card.solution || typeof card.solution !== 'object') {
+    const solution = c.solution;
+    if (typeof solution !== 'object' || solution === null) {
       errors.push(`${prefix} Missing or invalid solution object`);
-    } else if (!Array.isArray(card.solution.approaches) || card.solution.approaches.length === 0) {
-      errors.push(`${prefix} solution.approaches must be a non-empty array`);
+    } else {
+      const sol = solution as Record<string, unknown>;
+      if (!Array.isArray(sol.approaches) || (sol.approaches as unknown[]).length === 0) {
+        errors.push(`${prefix} solution.approaches must be a non-empty array`);
+      }
     }
 
     return { isValid: errors.length === 0, errors };
@@ -210,7 +236,7 @@ export class ImportService {
     const headers = [
       'id',
       'topic',
-      'title', 
+      'title',
       'question',
       'hint',
       'expected_points',
@@ -221,7 +247,7 @@ export class ImportService {
       'neetcode_url',
       'youtube_url',
       'difficulty',
-      'tags'
+      'tags',
     ];
 
     const sampleRow = [
@@ -238,10 +264,10 @@ export class ImportService {
       'https://neetcode.io/problems/two-sum',
       'https://www.youtube.com/watch?v=KLlXCFG5TnA',
       'Easy',
-      'Array|Hash Table|Two Pointers'
+      'Array|Hash Table|Two Pointers',
     ];
 
-    return [headers.join(','), sampleRow.map(cell => `"${cell}"`).join(',')].join('\n');
+    return [headers.join(','), sampleRow.map((cell) => `"${cell}"`).join(',')].join('\n');
   }
 
   static downloadCSVTemplate() {

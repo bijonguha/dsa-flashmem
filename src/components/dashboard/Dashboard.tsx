@@ -1,21 +1,23 @@
-import React, { useState, useEffect } from 'react';
-import { 
-  BarChart3, 
-  TrendingUp, 
-  Clock, 
-  Target, 
-  Award, 
+import React, { useState, useEffect, useCallback } from 'react';
+import {
+  BarChart3,
+  TrendingUp,
+  Clock,
+  Target,
+  Award,
   Calendar,
   CheckCircle,
   XCircle,
-  ArrowUp
+  ArrowUp,
 } from 'lucide-react';
-import { DatabaseService } from '../../services/indexedDB';
+import { SupabaseDataService } from '../../services/SupabaseDataService';
 import { SRSService } from '../../services/srs';
 import { DashboardStats } from '../../types';
 import { ProgressChart } from './ProgressChart';
+import { useAuth } from '../../hooks/useAuth'; // Import useAuth
 
 export const Dashboard: React.FC = () => {
+  const { user } = useAuth(); // Get user from AuthContext
   const [stats, setStats] = useState<DashboardStats>({
     total_flashcards: 0,
     due_today: 0,
@@ -23,34 +25,69 @@ export const Dashboard: React.FC = () => {
     current_streak: 0,
     accuracy_rate: 0,
     average_session_time: 0,
-    topics_progress: {}
+    topics_progress: {},
   });
-  const [weeklyProgress, setWeeklyProgress] = useState<Array<{ date: string; completed: number; accuracy: number }>>([]);
+  const [weeklyProgress, setWeeklyProgress] = useState<
+    Array<{ date: string; completed: number; accuracy: number }>
+  >([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    loadDashboardData();
+  const generateWeeklyProgressData = useCallback(async (userId: string) => {
+    const data = [];
+    const today = new Date();
+
+    for (let i = 6; i >= 0; i--) {
+      const date = new Date(today);
+      date.setDate(date.getDate() - i);
+      date.setHours(0, 0, 0, 0);
+
+      const nextDay = new Date(date);
+      nextDay.setDate(nextDay.getDate() + 1);
+
+      const sessionsThisDay = await SupabaseDataService.getSessionsInDateRange(date, nextDay, userId);
+      const completed = sessionsThisDay.length;
+
+      // Calculate accuracy for the day
+      const accuracy =
+        sessionsThisDay.length > 0
+          ? sessionsThisDay.reduce((sum, s) => sum + s.ai_evaluation.score, 0) /
+            (sessionsThisDay.length * 100)
+          : 0;
+
+      data.push({
+        date: date.toLocaleDateString('en-US', { weekday: 'short' }),
+        completed,
+        accuracy: Math.round(accuracy * 100) / 100,
+      });
+    }
+
+    return data;
   }, []);
 
-  const loadDashboardData = async () => {
+  const loadDashboardData = useCallback(async () => {
+    if (!user?.id) {
+      setIsLoading(false);
+      return;
+    }
     try {
       setIsLoading(true);
-      
+
       // Load basic stats
-      const studyStats = await SRSService.getStudyStats();
-      const allFlashcards = await DatabaseService.getAllFlashcards();
-      const allProgress = await DatabaseService.getAllProgress();
-      
+      const studyStats = await SRSService.getStudyStats(user.id);
+      const allFlashcards = await SupabaseDataService.getAllFlashcards(user.id);
+      const allProgress = await SupabaseDataService.getAllProgress(user.id);
+
       // Calculate topic progress
-      const topicsProgress: Record<string, { total: number; mastered: number; accuracy: number }> = {};
-      
+      const topicsProgress: Record<string, { total: number; mastered: number; accuracy: number }> =
+        {};
+
       for (const card of allFlashcards) {
         if (!topicsProgress[card.topic]) {
           topicsProgress[card.topic] = { total: 0, mastered: 0, accuracy: 0 };
         }
         topicsProgress[card.topic].total++;
-        
-        const progress = allProgress.find(p => p.flashcard_id === card.id);
+
+        const progress = allProgress.find((p) => p.flashcard_id === card.id);
         if (progress) {
           // Consider mastered if reviewed 3+ times with ease factor >= 2.0
           if (progress.total_reviews >= 3 && progress.ease_factor >= 2.0) {
@@ -58,34 +95,35 @@ export const Dashboard: React.FC = () => {
           }
           // Calculate topic accuracy
           if (progress.total_reviews > 0) {
-            topicsProgress[card.topic].accuracy += (progress.correct_streak / progress.total_reviews);
+            topicsProgress[card.topic].accuracy += progress.correct_streak / progress.total_reviews;
           }
         }
       }
-      
+
       // Average accuracy per topic
-      Object.keys(topicsProgress).forEach(topic => {
-        const cardsInTopic = allFlashcards.filter(c => c.topic === topic).length;
+      Object.keys(topicsProgress).forEach((topic) => {
+        const cardsInTopic = allFlashcards.filter((c) => c.topic === topic).length;
         if (cardsInTopic > 0) {
           topicsProgress[topic].accuracy = topicsProgress[topic].accuracy / cardsInTopic;
         }
       });
-      
+
       // Calculate overall accuracy
       const totalAccuracy = allProgress.reduce((sum, p) => {
-        return sum + (p.total_reviews > 0 ? (p.correct_streak / p.total_reviews) : 0);
+        return sum + (p.total_reviews > 0 ? p.correct_streak / p.total_reviews : 0);
       }, 0);
       const overallAccuracy = allProgress.length > 0 ? totalAccuracy / allProgress.length : 0;
-      
+
       // Calculate average session time
-      const recentSessions = await DatabaseService.getRecentSessions(50);
-      const avgSessionTime = recentSessions.length > 0 
-        ? recentSessions.reduce((sum, s) => sum + s.time_taken, 0) / recentSessions.length 
-        : 0;
-      
+      const recentSessions = await SupabaseDataService.getRecentSessions(user.id, 50);
+      const avgSessionTime =
+        recentSessions.length > 0
+          ? recentSessions.reduce((sum, s) => sum + s.time_taken, 0) / recentSessions.length
+          : 0;
+
       // Generate weekly progress data
-      const weeklyData = await generateWeeklyProgressData();
-      
+      const weeklyData = await generateWeeklyProgressData(user.id);
+
       setStats({
         total_flashcards: allFlashcards.length,
         due_today: studyStats.dueToday,
@@ -93,47 +131,20 @@ export const Dashboard: React.FC = () => {
         current_streak: studyStats.currentStreak,
         accuracy_rate: Math.round(overallAccuracy * 100) / 100,
         average_session_time: Math.round(avgSessionTime),
-        topics_progress: topicsProgress
+        topics_progress: topicsProgress,
       });
-      
+
       setWeeklyProgress(weeklyData);
-      
     } catch (error) {
       console.error('Failed to load dashboard data:', error);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [user?.id, generateWeeklyProgressData]);
 
-  const generateWeeklyProgressData = async () => {
-    const data = [];
-    const today = new Date();
-    
-    for (let i = 6; i >= 0; i--) {
-      const date = new Date(today);
-      date.setDate(date.getDate() - i);
-      date.setHours(0, 0, 0, 0);
-      
-      const nextDay = new Date(date);
-      nextDay.setDate(nextDay.getDate() + 1);
-      
-      const sessionsThisDay = await DatabaseService.getSessionsInDateRange(date, nextDay);
-      const completed = sessionsThisDay.length;
-      
-      // Calculate accuracy for the day
-      const accuracy = sessionsThisDay.length > 0
-        ? sessionsThisDay.reduce((sum, s) => sum + s.ai_evaluation.score, 0) / (sessionsThisDay.length * 100)
-        : 0;
-      
-      data.push({
-        date: date.toLocaleDateString('en-US', { weekday: 'short' }),
-        completed,
-        accuracy: Math.round(accuracy * 100) / 100
-      });
-    }
-    
-    return data;
-  };
+  useEffect(() => {
+    loadDashboardData();
+  }, [loadDashboardData]);
 
   const getTopicProgressPercentage = (topic: string) => {
     const progress = stats.topics_progress[topic];
@@ -244,17 +255,15 @@ export const Dashboard: React.FC = () => {
               <span className="text-gray-600">Completed Today</span>
               <div className="flex items-center space-x-2">
                 <span className="font-medium">{stats.completed_today}</span>
-                {stats.completed_today > 0 && (
-                  <ArrowUp className="h-4 w-4 text-green-600" />
-                )}
+                {stats.completed_today > 0 && <ArrowUp className="h-4 w-4 text-green-600" />}
               </div>
             </div>
-            
+
             <div className="flex items-center justify-between">
               <span className="text-gray-600">Avg. Session Time</span>
               <span className="font-medium">{formatSessionTime(stats.average_session_time)}</span>
             </div>
-            
+
             <div className="flex items-center justify-between">
               <span className="text-gray-600">Review Efficiency</span>
               <div className="flex items-center space-x-2">
@@ -283,14 +292,14 @@ export const Dashboard: React.FC = () => {
                     {progress.mastered}/{progress.total}
                   </span>
                 </div>
-                
+
                 <div className="w-full bg-gray-200 rounded-full h-2 mb-2">
-                  <div 
+                  <div
                     className="bg-blue-600 h-2 rounded-full transition-all duration-300"
                     style={{ width: `${getTopicProgressPercentage(topic)}%` }}
                   ></div>
                 </div>
-                
+
                 <div className="flex justify-between text-xs text-gray-500">
                   <span>{getTopicProgressPercentage(topic)}% mastered</span>
                   <span>{Math.round(progress.accuracy * 100)}% accuracy</span>
