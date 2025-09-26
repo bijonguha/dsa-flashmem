@@ -1,9 +1,0 @@
-
-import { createClient } from '@supabase/supabase-js'
-
-const supabaseUrl = 'https://aagnqlxkwrpeyduubcai.supabase.co'
-const supabaseKey = process.env.SUPABASE_KEY
-const supabase = createClient(supabaseUrl, supabaseKey)
-
-https://aagnqlxkwrpeyduubcai.supabase.co
-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFhZ25xbHhrd3JwZXlkdXViY2FpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg4Mzc1MjksImV4cCI6MjA3NDQxMzUyOX0.sXv1L1NMCDDuoDKR4K97bkzmsY-WBISheOLD5IRdQ8U
