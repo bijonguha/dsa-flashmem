@@ -58,6 +58,7 @@ export interface ReviewSession {
 export interface AppSettings {
   user_id: string; // user_id is the primary key
   openai_api_key?: string;
+  gemini_api_key?: string;
   timer_duration: number; // in seconds
   input_preference: 'voice' | 'typing' | 'both';
   auto_advance: boolean;
@@ -126,6 +127,14 @@ export interface DashboardStats {
   current_streak: number;
   accuracy_rate: number;
   average_session_time: number;
+  // Detailed review statistics for today
+  today_reviews: {
+    again: number;
+    hard: number;
+    good: number;
+    easy: number;
+    total: number;
+  };
   topics_progress: Record<
     string,
     {

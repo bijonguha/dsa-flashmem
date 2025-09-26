@@ -25,6 +25,13 @@ export const Dashboard: React.FC = () => {
     current_streak: 0,
     accuracy_rate: 0,
     average_session_time: 0,
+    today_reviews: {
+      again: 0,
+      hard: 0,
+      good: 0,
+      easy: 0,
+      total: 0,
+    },
     topics_progress: {},
   });
   const [weeklyProgress, setWeeklyProgress] = useState<
@@ -121,6 +128,22 @@ export const Dashboard: React.FC = () => {
           ? recentSessions.reduce((sum, s) => sum + s.time_taken, 0) / recentSessions.length
           : 0;
 
+      // Get today's sessions for detailed review statistics
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const tomorrow = new Date(today);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      const todaySessions = await SupabaseDataService.getSessionsInDateRange(today, tomorrow, user.id);
+      
+      // Calculate today's review statistics
+      const todayReviews = {
+        again: todaySessions.filter(s => s.self_rating === 'again').length,
+        hard: todaySessions.filter(s => s.self_rating === 'hard').length,
+        good: todaySessions.filter(s => s.self_rating === 'good').length,
+        easy: todaySessions.filter(s => s.self_rating === 'easy').length,
+        total: todaySessions.length,
+      };
+
       // Generate weekly progress data
       const weeklyData = await generateWeeklyProgressData(user.id);
 
@@ -131,6 +154,7 @@ export const Dashboard: React.FC = () => {
         current_streak: studyStats.currentStreak,
         accuracy_rate: Math.round(overallAccuracy * 100) / 100,
         average_session_time: Math.round(avgSessionTime),
+        today_reviews: todayReviews,
         topics_progress: topicsProgress,
       });
 
@@ -273,6 +297,32 @@ export const Dashboard: React.FC = () => {
                 ) : (
                   <XCircle className="h-4 w-4 text-red-600" />
                 )}
+              </div>
+            </div>
+
+            {/* Today's Review Distribution */}
+            <div className="pt-4 border-t border-gray-200">
+              <h3 className="text-sm font-medium text-gray-700 mb-2">Today's Reviews</h3>
+              <div className="grid grid-cols-4 gap-2">
+                <div className="text-center">
+                  <div className="text-lg font-bold text-red-600">{stats.today_reviews.again}</div>
+                  <div className="text-xs text-gray-500">Again</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-lg font-bold text-orange-600">{stats.today_reviews.hard}</div>
+                  <div className="text-xs text-gray-500">Hard</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-lg font-bold text-blue-600">{stats.today_reviews.good}</div>
+                  <div className="text-xs text-gray-500">Good</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-lg font-bold text-green-600">{stats.today_reviews.easy}</div>
+                  <div className="text-xs text-gray-500">Easy</div>
+                </div>
+              </div>
+              <div className="mt-2 text-center text-sm text-gray-500">
+                Total: {stats.today_reviews.total} reviews
               </div>
             </div>
           </div>

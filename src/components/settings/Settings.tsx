@@ -54,11 +54,11 @@ export const Settings: React.FC<SettingsProps> = ({ settings, onSettingsChange }
         <div className="space-y-6">
           {/* OpenAI API Key */}
           <div>
-            <label htmlFor="api-key" className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="openai-api-key" className="block text-sm font-medium text-gray-700 mb-2">
               OpenAI API Key (for AI evaluation)
             </label>
             <input
-              id="api-key"
+              id="openai-api-key"
               type="password"
               value={settings.openai_api_key || ''}
               onChange={(e) => handleSettingChange('openai_api_key', e.target.value)}
@@ -68,6 +68,25 @@ export const Settings: React.FC<SettingsProps> = ({ settings, onSettingsChange }
             />
             <p className="mt-1 text-sm text-gray-500">
               Your API key is stored locally and never shared.
+            </p>
+          </div>
+
+          {/* Google Gemini API Key */}
+          <div>
+            <label htmlFor="gemini-api-key" className="block text-sm font-medium text-gray-700 mb-2">
+              Google Gemini API Key (alternative AI evaluation)
+            </label>
+            <input
+              id="gemini-api-key"
+              type="password"
+              value={settings.gemini_api_key || ''}
+              onChange={(e) => handleSettingChange('gemini_api_key', e.target.value)}
+              className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+              placeholder="AIzaSy..."
+              autoComplete="off"
+            />
+            <p className="mt-1 text-sm text-gray-500">
+              Optional: Use Google Gemini instead of OpenAI for evaluation.
             </p>
           </div>
 

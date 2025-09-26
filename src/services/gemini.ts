@@ -1,8 +1,7 @@
-import { Flashcard, OpenAIEvaluationResponse } from '../types';
+import { Flashcard, EvaluationResult } from '../types';
 
-export class OpenAIService {
-  private static readonly API_ENDPOINT = 'https://api.openai.com/v1/chat/completions';
-  private static readonly DEFAULT_MODEL = import.meta.env.VITE_OPENAI_MODEL || 'gpt-4o-mini';
+export class GeminiService {
+  private static readonly API_ENDPOINT = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent';
   private static readonly MAX_TOKENS = 1000;
   private static readonly TEMPERATURE = 0.3;
 
@@ -10,9 +9,9 @@ export class OpenAIService {
     flashcard: Flashcard,
     userAnswer: string,
     apiKey: string,
-  ): Promise<OpenAIEvaluationResponse> {
+  ): Promise<EvaluationResult> {
     if (!apiKey) {
-      throw new Error('OpenAI API key is required');
+      throw new Error('Google Gemini API key is required');
     }
 
     if (!userAnswer.trim()) {
@@ -27,26 +26,21 @@ export class OpenAIService {
     const prompt = this.constructEvaluationPrompt(flashcard, userAnswer);
 
     try {
-      const response = await fetch(this.API_ENDPOINT, {
+      const response = await fetch(`${this.API_ENDPOINT}?key=${apiKey}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${apiKey}`,
         },
         body: JSON.stringify({
-          model: this.DEFAULT_MODEL,
-          messages: [
-            {
-              role: 'system',
-              content: this.getSystemPrompt(),
-            },
-            {
-              role: 'user',
-              content: prompt,
-            },
-          ],
-          max_tokens: this.MAX_TOKENS,
-          temperature: this.TEMPERATURE,
+          contents: [{
+            parts: [{
+              text: prompt
+            }]
+          }],
+          generationConfig: {
+            maxOutputTokens: this.MAX_TOKENS,
+            temperature: this.TEMPERATURE,
+          }
         }),
       });
 
@@ -54,15 +48,15 @@ export class OpenAIService {
         const errorData = await response.json().catch(() => null);
         throw new Error(
           errorData?.error?.message ||
-            `OpenAI API error: ${response.status} ${response.statusText}`,
+            `Google Gemini API error: ${response.status} ${response.statusText}`,
         );
       }
 
       const data = await response.json();
-      const content = data.choices?.[0]?.message?.content;
+      const content = data.candidates?.[0]?.content?.parts?.[0]?.text;
 
       if (!content) {
-        throw new Error('No response content from OpenAI');
+        throw new Error('No response content from Google Gemini');
       }
 
       return this.parseEvaluationResponse(content, flashcard.expected_points);
@@ -70,27 +64,8 @@ export class OpenAIService {
       if (error instanceof Error) {
         throw error;
       }
-      throw new Error('Failed to evaluate answer with OpenAI');
+      throw new Error('Failed to evaluate answer with Google Gemini');
     }
-  }
-
-  private static getSystemPrompt(): string {
-    return `You are an expert technical interviewer evaluating data structures and algorithms solutions. 
-
-Your role is to:
-1. Assess how well the candidate demonstrates understanding of key concepts
-2. Identify missing or incomplete explanations
-3. Provide constructive feedback for improvement
-4. Score based on technical accuracy and completeness
-
-Evaluation Criteria:
-- Algorithm understanding and explanation
-- Time/space complexity analysis
-- Edge cases consideration
-- Code structure and clarity
-- Problem-solving approach
-
-Always respond in the exact JSON format requested, with constructive and specific feedback.`;
   }
 
   private static constructEvaluationPrompt(flashcard: Flashcard, userAnswer: string): string {
@@ -132,7 +107,7 @@ Provide specific, actionable feedback to help the candidate improve.`;
   private static parseEvaluationResponse(
     content: string,
     expectedPoints: string[],
-  ): OpenAIEvaluationResponse {
+  ): EvaluationResult {
     try {
       // Extract JSON from the response (handle potential markdown formatting)
       const jsonMatch = content.match(/\{[\s\S]*\}/);
@@ -143,7 +118,7 @@ Provide specific, actionable feedback to help the candidate improve.`;
       const parsed = JSON.parse(jsonMatch[0]);
 
       // Validate and sanitize the response
-      const evaluation: OpenAIEvaluationResponse = {
+      const evaluation: EvaluationResult = {
         score: this.validateScore(parsed.score),
         feedback: this.validateFeedback(parsed.feedback),
         missing_points: this.validateMissingPoints(parsed.missing_points, expectedPoints),
@@ -195,7 +170,7 @@ Provide specific, actionable feedback to help the candidate improve.`;
   private static createFallbackResponse(
     content: string,
     expectedPoints: string[],
-  ): OpenAIEvaluationResponse {
+  ): EvaluationResult {
     // Try to extract a score from the content
     const scoreMatch = content.match(/score[:\s]*(\d+)/i);
     const score = scoreMatch ? Math.min(100, Math.max(0, parseInt(scoreMatch[1]))) : 50;
@@ -215,21 +190,20 @@ Provide specific, actionable feedback to help the candidate improve.`;
   // Utility method to test API key validity
   static async testApiKey(apiKey: string): Promise<boolean> {
     try {
-      const response = await fetch(this.API_ENDPOINT, {
+      const response = await fetch(`${this.API_ENDPOINT}?key=${apiKey}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${apiKey}`,
         },
         body: JSON.stringify({
-          model: this.DEFAULT_MODEL,
-          messages: [
-            {
-              role: 'user',
-              content: 'Test message',
-            },
-          ],
-          max_tokens: 5,
+          contents: [{
+            parts: [{
+              text: 'Test message'
+            }]
+          }],
+          generationConfig: {
+            maxOutputTokens: 5,
+          }
         }),
       });
 
@@ -237,22 +211,5 @@ Provide specific, actionable feedback to help the candidate improve.`;
     } catch {
       return false;
     }
-  }
-
-  // Get estimated token count (rough approximation)
-  static estimateTokens(text: string): number {
-    // Rough approximation: 1 token ≈ 4 characters for English
-    return Math.ceil(text.length / 4);
-  }
-
-  // Calculate estimated cost (as of 2024 pricing)
-  static estimateCost(inputTokens: number, outputTokens: number): number {
-    const INPUT_COST_PER_1K = 0.03; // GPT-4 input cost per 1K tokens
-    const OUTPUT_COST_PER_1K = 0.06; // GPT-4 output cost per 1K tokens
-
-    const inputCost = (inputTokens / 1000) * INPUT_COST_PER_1K;
-    const outputCost = (outputTokens / 1000) * OUTPUT_COST_PER_1K;
-
-    return inputCost + outputCost;
   }
 }

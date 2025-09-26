@@ -17,6 +17,7 @@ import { Flashcard, SRSRating, ReviewSession, AppSettings, EvaluationResult } fr
 import { SupabaseDataService } from '../../services/SupabaseDataService';
 import { SRSService } from '../../services/srs';
 import { OpenAIService } from '../../services/openai';
+import { GeminiService } from '../../services/gemini';
 import Timer from '../common/Timer';
 import VoiceRecorder from '../common/VoiceRecorder';
 
@@ -91,12 +92,41 @@ export const FlashcardReview: React.FC<FlashcardReviewProps> = ({
     try {
       console.log('Evaluating with API key:', settings.openai_api_key ? 'Present' : 'Missing');
       console.log('API key length:', settings.openai_api_key?.length || 0);
-      if (settings.openai_api_key) {
-        const result = await OpenAIService.evaluateAnswer(
-          currentCard,
-          userAnswer,
-          settings.openai_api_key,
-        );
+      if (settings.openai_api_key || settings.gemini_api_key) {
+        let result;
+        if (settings.gemini_api_key) {
+          // Try Google Gemini first
+          try {
+            result = await GeminiService.evaluateAnswer(
+              currentCard,
+              userAnswer,
+              settings.gemini_api_key,
+            );
+          } catch (geminiError) {
+            // Fallback to OpenAI if Gemini fails
+            if (settings.openai_api_key) {
+              console.log('Gemini evaluation failed, falling back to OpenAI:', geminiError);
+              result = await OpenAIService.evaluateAnswer(
+                currentCard,
+                userAnswer,
+                settings.openai_api_key,
+              );
+            } else {
+              throw geminiError;
+            }
+          }
+        } else {
+          // Use OpenAI only
+          if (settings.openai_api_key) {
+            result = await OpenAIService.evaluateAnswer(
+              currentCard,
+              userAnswer,
+              settings.openai_api_key,
+            );
+          } else {
+            throw new Error('OpenAI API key is required for evaluation');
+          }
+        }
         setEvaluation(result);
       } else {
         // Simple evaluation without AI
