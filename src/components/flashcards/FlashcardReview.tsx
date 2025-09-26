@@ -211,13 +211,13 @@ export const FlashcardReview: React.FC<FlashcardReviewProps> = ({
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
       case 'Easy':
-        return 'text-green-600 bg-green-100';
+        return 'text-success-600 bg-success-100';
       case 'Medium':
-        return 'text-yellow-600 bg-yellow-100';
+        return 'text-warning-600 bg-warning-100';
       case 'Hard':
-        return 'text-red-600 bg-red-100';
+        return 'text-danger-600 bg-danger-100';
       default:
-        return 'text-gray-600 bg-gray-100';
+        return 'text-neutral-600 bg-neutral-100';
     }
   };
 
@@ -227,22 +227,22 @@ export const FlashcardReview: React.FC<FlashcardReviewProps> = ({
     switch (rating) {
       case 'again':
         return isSelected
-          ? 'bg-red-200 text-red-900 border-2 border-red-400'
-          : 'bg-red-100 hover:bg-red-200 text-red-800';
+          ? 'bg-danger-200 text-danger-900 border-2 border-danger-400'
+          : 'bg-danger-100 hover:bg-danger-200 text-danger-800';
       case 'hard':
         return isSelected
-          ? 'bg-orange-200 text-orange-900 border-2 border-orange-400'
-          : 'bg-orange-100 hover:bg-orange-200 text-orange-800';
+          ? 'bg-warning-200 text-warning-900 border-2 border-warning-400'
+          : 'bg-warning-100 hover:bg-warning-200 text-warning-800';
       case 'good':
         return isSelected
-          ? 'bg-green-200 text-green-900 border-2 border-green-400'
-          : 'bg-green-100 hover:bg-green-200 text-green-800';
+          ? 'bg-success-200 text-success-900 border-2 border-success-400'
+          : 'bg-success-100 hover:bg-success-200 text-success-800';
       case 'easy':
         return isSelected
-          ? 'bg-blue-200 text-blue-900 border-2 border-blue-400'
-          : 'bg-blue-100 hover:bg-blue-200 text-blue-800';
+          ? 'bg-primary-200 text-primary-900 border-2 border-primary-400'
+          : 'bg-primary-100 hover:bg-primary-200 text-primary-800';
       default:
-        return 'bg-gray-100 hover:bg-gray-200 text-gray-800';
+        return 'bg-neutral-100 hover:bg-neutral-200 text-neutral-800';
     }
   };
 
@@ -254,10 +254,10 @@ export const FlashcardReview: React.FC<FlashcardReviewProps> = ({
     <div className="max-w-4xl mx-auto p-6">
       {/* Header */}
       <div className="bg-white rounded-lg shadow-md mb-6">
-        <div className="p-6 border-b border-gray-200">
+        <div className="p-6 border-b border-neutral-200">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center space-x-4">
-              <span className="text-sm text-gray-500">
+              <span className="text-sm text-neutral-500">
                 Card {currentIndex + 1} of {flashcards.length}
               </span>
               <span
@@ -265,7 +265,7 @@ export const FlashcardReview: React.FC<FlashcardReviewProps> = ({
               >
                 {currentCard.difficulty}
               </span>
-              <span className="text-sm text-gray-600 bg-gray-100 px-2 py-1 rounded">
+              <span className="text-sm text-neutral-600 bg-neutral-100 px-2 py-1 rounded">
                 {currentCard.topic}
               </span>
             </div>
@@ -280,10 +280,10 @@ export const FlashcardReview: React.FC<FlashcardReviewProps> = ({
             />
           </div>
 
-          <h2 className="text-xl font-bold text-gray-800 mb-2">{currentCard.title}</h2>
+          <h2 className="text-xl font-bold text-neutral-800 mb-2">{currentCard.title}</h2>
 
           <div className="prose max-w-none">
-            <p className="text-gray-700 leading-relaxed">{currentCard.question}</p>
+            <p className="text-neutral-700 leading-relaxed">{currentCard.question}</p>
           </div>
 
           {/* Tags */}
@@ -300,10 +300,10 @@ export const FlashcardReview: React.FC<FlashcardReviewProps> = ({
 
         {/* Hint Section */}
         {currentCard.hint && (
-          <div className="px-6 py-4 bg-yellow-50 border-b border-gray-200">
+          <div className="px-6 py-4 bg-warning-50 border-b border-neutral-200">
             <button
               onClick={() => setShowHint(!showHint)}
-              className="flex items-center space-x-2 text-yellow-700 hover:text-yellow-800 transition-colors"
+              className="flex items-center space-x-2 text-warning-700 hover:text-warning-800 transition-colors"
             >
               <Lightbulb className="h-4 w-4" />
               <span className="text-sm font-medium">{showHint ? 'Hide Hint' : 'Show Hint'}</span>
@@ -311,7 +311,7 @@ export const FlashcardReview: React.FC<FlashcardReviewProps> = ({
             </button>
 
             {showHint && (
-              <p className="mt-2 text-sm text-yellow-800 italic">💡 {currentCard.hint}</p>
+              <p className="mt-2 text-sm text-warning-800 italic">💡 {currentCard.hint}</p>
             )}
           </div>
         )}
@@ -320,15 +320,15 @@ export const FlashcardReview: React.FC<FlashcardReviewProps> = ({
       {/* Answer Input */}
       <div className="bg-white rounded-lg shadow-md mb-6 p-6">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-medium text-gray-800">Your Answer</h3>
+          <h3 className="text-lg font-medium text-neutral-800">Your Answer</h3>
 
           <div className="flex items-center space-x-2">
             <button
               onClick={() => setInputMethod('typing')}
               className={`px-3 py-1 text-sm rounded ${
                 inputMethod === 'typing'
-                  ? 'bg-blue-500 text-white'
-                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                  ? 'bg-primary-500 text-white'
+                  : 'bg-neutral-200 text-neutral-700 hover:bg-neutral-300'
               }`}
             >
               Type
@@ -337,8 +337,8 @@ export const FlashcardReview: React.FC<FlashcardReviewProps> = ({
               onClick={() => setInputMethod('voice')}
               className={`px-3 py-1 text-sm rounded ${
                 inputMethod === 'voice'
-                  ? 'bg-blue-500 text-white'
-                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                  ? 'bg-primary-500 text-white'
+                  : 'bg-neutral-200 text-neutral-700 hover:bg-neutral-300'
               }`}
             >
               Voice
@@ -350,7 +350,7 @@ export const FlashcardReview: React.FC<FlashcardReviewProps> = ({
           <textarea
             value={userAnswer}
             onChange={(e) => setUserAnswer(e.target.value)}
-            className="w-full h-32 p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none text-gray-900"
+            className="w-full h-32 p-3 border border-neutral-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500 resize-none text-neutral-900"
             placeholder="Explain your approach, algorithm, and complexity analysis..."
           />
         ) : (
@@ -366,7 +366,7 @@ export const FlashcardReview: React.FC<FlashcardReviewProps> = ({
         <div className="flex items-center justify-between mt-4">
           <button
             onClick={() => setUserAnswer('')}
-            className="flex items-center space-x-2 text-gray-500 hover:text-gray-700 transition-colors"
+            className="flex items-center space-x-2 text-neutral-500 hover:text-neutral-700 transition-colors"
           >
             <RotateCcw className="h-4 w-4" />
             <span>Clear</span>
@@ -375,7 +375,7 @@ export const FlashcardReview: React.FC<FlashcardReviewProps> = ({
           <button
             onClick={handleEvaluate}
             disabled={!userAnswer.trim() || isEvaluating}
-            className="flex items-center space-x-2 bg-blue-500 hover:bg-blue-600 disabled:bg-gray-300 text-white px-4 py-2 rounded-md transition-colors"
+            className="flex items-center space-x-2 bg-primary hover:bg-primary-600 disabled:bg-neutral-300 text-white px-4 py-2 rounded-md transition-colors"
           >
             {isEvaluating ? (
               <Loader2 className="h-4 w-4 animate-spin" />
@@ -387,11 +387,44 @@ export const FlashcardReview: React.FC<FlashcardReviewProps> = ({
         </div>
       </div>
 
+      {/* Self-Rating Section - Always Visible */}
+      <div className="bg-white rounded-lg shadow-md mb-6 p-6">
+        <h4 className="font-medium text-neutral-800 mb-3">How difficult was this for you?</h4>
+        <div className="flex space-x-2">
+          <button
+            onClick={() => handleSelfRating('again')}
+            className={`flex-1 flex items-center justify-center space-x-2 py-2 px-4 rounded-md transition-colors ${getRatingButtonStyles('again')}`}
+          >
+            <ThumbsDown className="h-4 w-4" />
+            <span>Again</span>
+          </button>
+          <button
+            onClick={() => handleSelfRating('hard')}
+            className={`flex-1 flex items-center justify-center space-x-2 py-2 px-4 rounded-md transition-colors ${getRatingButtonStyles('hard')}`}
+          >
+            <span>Hard</span>
+          </button>
+          <button
+            onClick={() => handleSelfRating('good')}
+            className={`flex-1 flex items-center justify-center space-x-2 py-2 px-4 rounded-md transition-colors ${getRatingButtonStyles('good')}`}
+          >
+            <ThumbsUp className="h-4 w-4" />
+            <span>Good</span>
+          </button>
+          <button
+            onClick={() => handleSelfRating('easy')}
+            className={`flex-1 flex items-center justify-center space-x-2 py-2 px-4 rounded-md transition-colors ${getRatingButtonStyles('easy')}`}
+          >
+            <span>Easy</span>
+          </button>
+        </div>
+      </div>
+
       {/* Evaluation Results */}
       {evaluation && (
         <div className="bg-white rounded-lg shadow-md mb-6 p-6">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-medium text-gray-800">AI Evaluation</h3>
+            <h3 className="text-lg font-medium text-neutral-800">AI Evaluation</h3>
             <div className="flex items-center space-x-2">
               <span className="text-2xl font-bold text-blue-600">{evaluation.score}/100</span>
             </div>
@@ -402,9 +435,9 @@ export const FlashcardReview: React.FC<FlashcardReviewProps> = ({
           </div>
 
           {evaluation.missing_points && evaluation.missing_points.length > 0 && (
-            <div className="bg-yellow-50 border-l-4 border-yellow-500 p-4 mb-4">
-              <h4 className="font-medium text-yellow-800 mb-2">Missing Key Points:</h4>
-              <ul className="list-disc list-inside text-yellow-700 text-sm">
+            <div className="bg-warning-50 border-l-4 border-warning-500 p-4 mb-4">
+              <h4 className="font-medium text-warning-800 mb-2">Missing Key Points:</h4>
+              <ul className="list-disc list-inside text-warning-700 text-sm">
                 {evaluation.missing_points.map((point: string, index: number) => (
                   <li key={index}>{point}</li>
                 ))}
@@ -412,38 +445,6 @@ export const FlashcardReview: React.FC<FlashcardReviewProps> = ({
             </div>
           )}
 
-          {/* Self-Rating */}
-          <div className="border-t pt-4">
-            <h4 className="font-medium text-gray-800 mb-3">How difficult was this for you?</h4>
-            <div className="flex space-x-2">
-              <button
-                onClick={() => handleSelfRating('again')}
-                className={`flex-1 flex items-center justify-center space-x-2 py-2 px-4 rounded-md transition-colors ${getRatingButtonStyles('again')}`}
-              >
-                <ThumbsDown className="h-4 w-4" />
-                <span>Again</span>
-              </button>
-              <button
-                onClick={() => handleSelfRating('hard')}
-                className={`flex-1 flex items-center justify-center space-x-2 py-2 px-4 rounded-md transition-colors ${getRatingButtonStyles('hard')}`}
-              >
-                <span>Hard</span>
-              </button>
-              <button
-                onClick={() => handleSelfRating('good')}
-                className={`flex-1 flex items-center justify-center space-x-2 py-2 px-4 rounded-md transition-colors ${getRatingButtonStyles('good')}`}
-              >
-                <ThumbsUp className="h-4 w-4" />
-                <span>Good</span>
-              </button>
-              <button
-                onClick={() => handleSelfRating('easy')}
-                className={`flex-1 flex items-center justify-center space-x-2 py-2 px-4 rounded-md transition-colors ${getRatingButtonStyles('easy')}`}
-              >
-                <span>Easy</span>
-              </button>
-            </div>
-          </div>
         </div>
       )}
 
@@ -452,7 +453,7 @@ export const FlashcardReview: React.FC<FlashcardReviewProps> = ({
         <button
           onClick={handlePrevious}
           disabled={currentIndex === 0}
-          className="flex items-center space-x-2 bg-gray-500 hover:bg-gray-600 disabled:bg-gray-300 text-white px-4 py-2 rounded-md transition-colors"
+          className="flex items-center space-x-2 bg-neutral-500 hover:bg-neutral-600 disabled:bg-neutral-300 text-white px-4 py-2 rounded-md transition-colors"
         >
           <ChevronLeft className="h-4 w-4" />
           <span>Previous</span>
@@ -478,7 +479,7 @@ export const FlashcardReview: React.FC<FlashcardReviewProps> = ({
       </div>
 
       {/* Time Tracking */}
-      <div className="mt-4 flex items-center justify-center text-sm text-gray-500">
+      <div className="mt-4 flex items-center justify-center text-sm text-neutral-500">
         <Clock className="h-4 w-4 mr-2" />
         <span>
           Time spent: {Math.floor(timeSpent / 60)}:{(timeSpent % 60).toString().padStart(2, '0')}
