@@ -9,29 +9,29 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    const fetchSession = async () => {
+      try {
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
+        setUser(session?.user ?? null);
+      } catch (error) {
+        console.error('Error fetching session:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchSession();
+
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
-      const currentUser = session?.user || null;
-      setUser(currentUser);
-      setLoading(false);
+      setUser(session?.user ?? null);
     });
 
-    // Initial check for user
-    AuthService.getCurrentUser()
-      .then((currentUser) => {
-        setUser(currentUser);
-      })
-      .catch((error) => {
-        console.error('Error getting current user:', error);
-        setUser(null);
-      })
-      .finally(() => {
-        setLoading(false);
-      });
-
     return () => {
-      subscription.unsubscribe();
+      subscription?.unsubscribe();
     };
   }, []);
 

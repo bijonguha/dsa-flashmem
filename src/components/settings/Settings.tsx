@@ -24,9 +24,11 @@ export const Settings: React.FC<SettingsProps> = ({ settings, onSettingsChange }
     setSaveSuccess(false);
 
     try {
-      if (settings.id) {
+      console.log('Saving settings:', settings);
+      if (settings.user_id) {
         // Ensure userId is available
-        await SupabaseDataService.updateSettings(settings);
+        const result = await SupabaseDataService.updateSettings(settings);
+        console.log('Settings saved successfully:', result);
         setSaveSuccess(true);
       } else {
         throw new Error('User ID not available for saving settings.');

@@ -20,15 +20,37 @@ export class SupabaseDataService {
 
   // --- Flashcards ---
   static async addFlashcard(flashcard: Flashcard) {
-    const { data, error } = await supabase.from('flashcards').insert([flashcard]).select();
-    if (error) throw error;
-    return data;
+    try {
+      console.log('Adding flashcard:', flashcard);
+      const { data, error } = await supabase.from('flashcards').insert([flashcard]).select();
+      if (error) {
+        console.error('Error adding flashcard:', error);
+        console.error('Error details:', JSON.stringify(error, null, 2));
+        throw error;
+      }
+      console.log('Successfully added flashcard:', data);
+      return data;
+    } catch (error) {
+      console.error('Flashcard insert failed:', error);
+      throw error;
+    }
   }
 
   static async addFlashcards(flashcards: Flashcard[]) {
-    const { data, error } = await supabase.from('flashcards').insert(flashcards).select();
-    if (error) throw error;
-    return data;
+    try {
+      console.log('Adding flashcards:', flashcards.length, 'items');
+      const { data, error } = await supabase.from('flashcards').upsert(flashcards, { onConflict: 'id' }).select();
+      if (error) {
+        console.error('Error adding flashcards:', error);
+        console.error('Error details:', JSON.stringify(error, null, 2));
+        throw error;
+      }
+      console.log('Successfully upserted flashcards:', data?.length, 'items');
+      return data;
+    } catch (error) {
+      console.error('Bulk flashcard insert failed:', error);
+      throw error;
+    }
   }
 
   static async getFlashcard(id: string, userId: string) {
@@ -43,9 +65,17 @@ export class SupabaseDataService {
   }
 
   static async getAllFlashcards(userId: string) {
-    const { data, error } = await supabase.from('flashcards').select('*').eq('user_id', userId);
-    if (error) throw error;
-    return data;
+    try {
+      const { data, error } = await supabase.from('flashcards').select('*').eq('user_id', userId);
+      if (error) {
+        console.error('Error fetching flashcards:', error);
+        throw error;
+      }
+      return data || [];
+    } catch (error) {
+      console.error('Flashcards service error:', error);
+      return []; // Return empty array on error
+    }
   }
 
   static async updateFlashcard(id: string, userId: string, updates: Partial<Flashcard>) {
@@ -77,7 +107,7 @@ export class SupabaseDataService {
       .select('*')
       .eq('flashcard_id', flashcard_id)
       .eq('user_id', userId)
-      .single();
+      .maybeSingle();
     if (error) throw error;
     return data;
   }
@@ -133,20 +163,69 @@ export class SupabaseDataService {
   }
 
   // --- Settings ---
-  static async getSettings(userId: string) {
-    const { data, error } = await supabase.from('settings').select('*').eq('id', userId).single();
-    if (error) throw error;
-    return data;
+  static async getSettings(userId: string): Promise<AppSettings> {
+    try {
+      const { data, error } = await supabase
+        .from('settings')
+        .select('*')
+        .eq('user_id', userId)
+        .maybeSingle(); // Use maybeSingle instead of single to handle no rows gracefully
+      
+      if (error) {
+        console.error('Error fetching settings:', error);
+        throw error;
+      }
+      
+      // If no settings exist, create default settings
+      if (!data) {
+        console.log('No settings found, creating defaults for user:', userId);
+        const defaultSettings: AppSettings = {
+          user_id: userId,
+          timer_duration: 300,
+          input_preference: 'both',
+          auto_advance: false,
+          show_hints: true,
+          theme: 'auto',
+        };
+        
+        // Insert default settings
+        const { data: newData, error: insertError } = await supabase
+          .from('settings')
+          .insert([defaultSettings])
+          .select()
+          .single();
+          
+        if (insertError) {
+          console.error('Error creating default settings:', insertError);
+          throw insertError;
+        }
+        
+        return newData;
+      }
+      
+      return data;
+    } catch (error) {
+      console.error('Settings service error:', error);
+      // Return default settings if all else fails
+      return {
+        user_id: userId,
+        timer_duration: 300,
+        input_preference: 'both',
+        auto_advance: false,
+        show_hints: true,
+        theme: 'auto',
+      };
+    }
   }
 
   // Support both updateSettings(settings: AppSettings) and updateSettings(userId, updates)
-  static async updateSettings(arg1: string | AppSettings, arg2?: Partial<AppSettings>) {
+  static async updateSettings(arg1: string | AppSettings, arg2?: Partial<AppSettings>): Promise<AppSettings[]> {
     if (typeof arg1 === 'string') {
       const userId = arg1;
       const updates = arg2 || {};
       const existing = await this.getSettings(userId).catch(() => null);
       const merged: AppSettings = {
-        id: userId,
+        user_id: userId,
         timer_duration: 300,
         input_preference: 'both',
         auto_advance: false,
@@ -165,8 +244,7 @@ export class SupabaseDataService {
       const settings = arg1 as AppSettings;
       const { data, error } = await supabase
         .from('settings')
-        .update(settings)
-        .eq('id', settings.id)
+        .upsert(settings)
         .select();
       if (error) throw error;
       return data;

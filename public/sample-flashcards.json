@@ -17,7 +17,7 @@
       "approaches": [
         {
           "name": "Hash Map Approach",
-          "code": "def twoSum(nums, target):\n    hashmap = {}\n    \n    for i, num in enumerate(nums):\n        complement = target - num\n        \n        if complement in hashmap:\n            return [hashmap[complement], i]\n        \n        hashmap[num] = i\n    \n    return []",
+          "code": "def twoSum(nums, target):\\n    hashmap = {}\\n    \\n    for i, num in enumerate(nums):\\n        complement = target - num\\n        \\n        if complement in hashmap:\\n            return [hashmap[complement], i]\\n        \\n        hashmap[num] = i\\n    \\n    return []",
           "time_complexity": "O(n)",
           "space_complexity": "O(n)",
           "explanation": "We iterate through the array once, using a hash map to store each number and its index. For each number, we calculate its complement (target - current number) and check if it exists in our hash map. If it does, we found our answer and return both indices."
@@ -46,14 +46,14 @@
       "approaches": [
         {
           "name": "Hash Set Approach",
-          "code": "def containsDuplicate(nums):\n    seen = set()\n    \n    for num in nums:\n        if num in seen:\n            return True\n        seen.add(num)\n    \n    return False",
+          "code": "def containsDuplicate(nums):\\n    seen = set()\\n    \\n    for num in nums:\\n        if num in seen:\\n            return True\\n        seen.add(num)\\n    \\n    return False",
           "time_complexity": "O(n)",
           "space_complexity": "O(n)",
           "explanation": "We iterate through the array and use a set to keep track of numbers we've seen. If we encounter a number that's already in the set, we return True. Otherwise, we add it to the set and continue."
         },
         {
           "name": "Sorting Approach",
-          "code": "def containsDuplicate(nums):\n    nums.sort()\n    \n    for i in range(1, len(nums)):\n        if nums[i] == nums[i-1]:\n            return True\n    \n    return False",
+          "code": "def containsDuplicate(nums):\\n    nums.sort()\\n    \\n    for i in range(1, len(nums)):\\n        if nums[i] == nums[i-1]:\\n            return True\\n    \\n    return False",
           "time_complexity": "O(n log n)",
           "space_complexity": "O(1)",
           "explanation": "Sort the array first, then check adjacent elements. If any two adjacent elements are equal, we have a duplicate. This approach uses less space but has worse time complexity."
@@ -82,14 +82,14 @@
       "approaches": [
         {
           "name": "Character Count Approach",
-          "code": "def isAnagram(s, t):\n    if len(s) != len(t):\n        return False\n    \n    char_count = {}\n    \n    # Count characters in s\n    for char in s:\n        char_count[char] = char_count.get(char, 0) + 1\n    \n    # Subtract characters in t\n    for char in t:\n        if char not in char_count:\n            return False\n        char_count[char] -= 1\n        if char_count[char] == 0:\n            del char_count[char]\n    \n    return len(char_count) == 0",
+          "code": "def isAnagram(s, t):\\n    if len(s) != len(t):\\n        return False\\n    \\n    char_count = {}\\n    \\n    # Count characters in s\\n    for char in s:\\n        char_count[char] = char_count.get(char, 0) + 1\\n    \\n    # Subtract characters in t\\n    for char in t:\\n        if char not in char_count:\\n            return False\\n        char_count[char] -= 1\\n        if char_count[char] == 0:\\n            del char_count[char]\\n    \\n    return len(char_count) == 0",
           "time_complexity": "O(n)",
           "space_complexity": "O(k)",
           "explanation": "We count the frequency of each character in the first string, then decrement the count for each character in the second string. If the strings are anagrams, all counts should be zero at the end."
         },
         {
           "name": "Sorting Approach", 
-          "code": "def isAnagram(s, t):\n    return sorted(s) == sorted(t)",
+          "code": "def isAnagram(s, t):\\n    return sorted(s) == sorted(t)",
           "time_complexity": "O(n log n)",
           "space_complexity": "O(1)",
           "explanation": "Sort both strings and compare them. If they're anagrams, their sorted versions will be identical. This is more concise but less efficient."
@@ -118,14 +118,14 @@
       "approaches": [
         {
           "name": "Iterative Approach",
-          "code": "def reverseList(head):\n    prev = None\n    current = head\n    \n    while current:\n        next_temp = current.next\n        current.next = prev\n        prev = current\n        current = next_temp\n    \n    return prev",
+          "code": "def reverseList(head):\\n    prev = None\\n    current = head\\n    \\n    while current:\\n        next_temp = current.next\\n        current.next = prev\\n        prev = current\\n        current = next_temp\\n    \\n    return prev",
           "time_complexity": "O(n)",
           "space_complexity": "O(1)",
           "explanation": "We use three pointers to track the previous node, current node, and next node. We reverse the link by pointing current.next to prev, then move all pointers one step forward."
         },
         {
           "name": "Recursive Approach",
-          "code": "def reverseList(head):\n    if not head or not head.next:\n        return head\n    \n    # Reverse the rest of the list\n    new_head = reverseList(head.next)\n    \n    # Reverse current connection\n    head.next.next = head\n    head.next = None\n    \n    return new_head",
+          "code": "def reverseList(head):\\n    if not head or not head.next:\\n        return head\\n    \\n    # Reverse the rest of the list\\n    new_head = reverseList(head.next)\\n    \\n    # Reverse current connection\\n    head.next.next = head\\n    head.next = None\\n    \\n    return new_head",
           "time_complexity": "O(n)",
           "space_complexity": "O(n)",
           "explanation": "Recursively reverse the rest of the list first, then reverse the current connection. The base case is when we reach the end of the list or a single node."
@@ -154,7 +154,7 @@
       "approaches": [
         {
           "name": "Kadane's Algorithm",
-          "code": "def maxSubArray(nums):\n    max_sum = current_sum = nums[0]\n    \n    for i in range(1, len(nums)):\n        # Either start a new subarray or extend current one\n        current_sum = max(nums[i], current_sum + nums[i])\n        # Update maximum sum seen so far\n        max_sum = max(max_sum, current_sum)\n    \n    return max_sum",
+          "code": "def maxSubArray(nums):\\n    max_sum = current_sum = nums[0]\\n    \\n    for i in range(1, len(nums)):\\n        # Either start a new subarray or extend current one\\n        current_sum = max(nums[i], current_sum + nums[i])\\n        # Update maximum sum seen so far\\n        max_sum = max(max_sum, current_sum)\\n    \\n    return max_sum",
           "time_complexity": "O(n)",
           "space_complexity": "O(1)",
           "explanation": "Kadane's algorithm works by maintaining the maximum sum of subarrays ending at each position. At each step, we decide whether to start a new subarray (if the current element is larger) or extend the existing subarray."
@@ -183,7 +183,7 @@
       "approaches": [
         {
           "name": "Bottom-up DP (Space Optimized)",
-          "code": "def climbStairs(n):\n    if n <= 2:\n        return n\n    \n    prev2 = 1  # ways to reach step 1\n    prev1 = 2  # ways to reach step 2\n    \n    for i in range(3, n + 1):\n        current = prev1 + prev2\n        prev2 = prev1\n        prev1 = current\n    \n    return prev1",
+          "code": "def climbStairs(n):\\n    if n <= 2:\\n        return n\\n    \\n    prev2 = 1  # ways to reach step 1\\n    prev1 = 2  # ways to reach step 2\\n    \\n    for i in range(3, n + 1):\\n        current = prev1 + prev2\\n        prev2 = prev1\\n        prev1 = current\\n    \\n    return prev1",
           "time_complexity": "O(n)",
           "space_complexity": "O(1)",
           "explanation": "We use the fact that the number of ways to reach step n is the sum of ways to reach steps n-1 and n-2. We only need to track the previous two values, making this space-efficient."
@@ -212,14 +212,14 @@
       "approaches": [
         {
           "name": "Recursive Approach",
-          "code": "def invertTree(root):\n    if not root:\n        return None\n    \n    # Swap the children\n    root.left, root.right = root.right, root.left\n    \n    # Recursively invert subtrees\n    invertTree(root.left)\n    invertTree(root.right)\n    \n    return root",
+          "code": "def invertTree(root):\\n    if not root:\\n        return None\\n    \\n    # Swap the children\\n    root.left, root.right = root.right, root.left\\n    \\n    # Recursively invert subtrees\\n    invertTree(root.left)\\n    invertTree(root.right)\\n    \\n    return root",
           "time_complexity": "O(n)",
           "space_complexity": "O(h)",
           "explanation": "We recursively visit each node, swap its left and right children, then recursively invert both subtrees. The space complexity is O(h) due to the recursion stack, where h is the height of the tree."
         },
         {
           "name": "Iterative Approach",
-          "code": "def invertTree(root):\n    if not root:\n        return None\n    \n    queue = [root]\n    \n    while queue:\n        node = queue.pop(0)\n        \n        # Swap children\n        node.left, node.right = node.right, node.left\n        \n        # Add children to queue\n        if node.left:\n            queue.append(node.left)\n        if node.right:\n            queue.append(node.right)\n    \n    return root",
+          "code": "def invertTree(root):\\n    if not root:\\n        return None\\n    \\n    queue = [root]\\n    \\n    while queue:\\n        node = queue.pop(0)\\n        \\n        # Swap children\\n        node.left, node.right = node.right, node.left\\n        \\n        # Add children to queue\\n        if node.left:\\n            queue.append(node.left)\\n        if node.right:\\n            queue.append(node.right)\\n    \\n    return root",
           "time_complexity": "O(n)",
           "space_complexity": "O(n)",
           "explanation": "We use a queue to perform level-order traversal. For each node, we swap its children and add them to the queue for processing. This avoids recursion but uses O(n) space for the queue."
@@ -248,7 +248,7 @@
       "approaches": [
         {
           "name": "DFS Approach",
-          "code": "def numIslands(grid):\n    if not grid or not grid[0]:\n        return 0\n    \n    rows, cols = len(grid), len(grid[0])\n    islands = 0\n    \n    def dfs(r, c):\n        if (r < 0 or r >= rows or c < 0 or c >= cols or \n            grid[r][c] == '0'):\n            return\n        \n        grid[r][c] = '0'  # Mark as visited\n        \n        # Explore all 4 directions\n        dfs(r + 1, c)\n        dfs(r - 1, c) \n        dfs(r, c + 1)\n        dfs(r, c - 1)\n    \n    for r in range(rows):\n        for c in range(cols):\n            if grid[r][c] == '1':\n                islands += 1\n                dfs(r, c)  # Mark entire island\n    \n    return islands",
+          "code": "def numIslands(grid):\\n    if not grid or not grid[0]:\\n        return 0\\n    \\n    rows, cols = len(grid), len(grid[0])\\n    islands = 0\\n    \\n    def dfs(r, c):\\n        if (r < 0 or r >= rows or c < 0 or c >= cols or \\n            grid[r][c] == '0'):\\n            return\\n        \\n        grid[r][c] = '0'  # Mark as visited\\n        \\n        # Explore all 4 directions\\n        dfs(r + 1, c)\\n        dfs(r - 1, c) \\n        dfs(r, c + 1)\\n        dfs(r, c - 1)\\n    \\n    for r in range(rows):\\n        for c in range(cols):\\n            if grid[r][c] == '1':\\n                islands += 1\\n                dfs(r, c)  # Mark entire island\\n    \\n    return islands",
           "time_complexity": "O(m × n)",
           "space_complexity": "O(m × n)",
           "explanation": "We iterate through each cell. When we find land ('1'), we increment the island count and use DFS to mark all connected land cells as visited by setting them to '0'. The DFS explores all 4 directions recursively."

@@ -95,6 +95,11 @@ export class SRSService {
     );
     updatedProgress.interval_days = Math.max(0.1, updatedProgress.interval_days * timeAdjustment);
 
+    // Round decimal values to prevent excessive precision
+    updatedProgress.interval_days = Math.round(updatedProgress.interval_days * 100) / 100;
+    updatedProgress.ease_factor = Math.round(updatedProgress.ease_factor * 100) / 100;
+    updatedProgress.average_response_time = Math.round(updatedProgress.average_response_time * 100) / 100;
+
     // Set next review date
     updatedProgress.next_review_date = this.addDays(now, updatedProgress.interval_days);
 
@@ -142,7 +147,7 @@ export class SRSService {
         average_response_time: 0,
       };
 
-      await SupabaseDataService.updateProgress(initialProgress); // Pass userId (embedded in initialProgress)
+      await SupabaseDataService.addProgress(initialProgress);
     }
   }
 

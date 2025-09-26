@@ -56,7 +56,7 @@ export interface ReviewSession {
 
 // Application settings
 export interface AppSettings {
-  id?: string; // Added for Supabase integration (will be user_id)
+  user_id: string; // user_id is the primary key
   openai_api_key?: string;
   timer_duration: number; // in seconds
   input_preference: 'voice' | 'typing' | 'both';

@@ -2,12 +2,14 @@ import React, { useState } from 'react';
 import { Upload, Download, FileText, AlertCircle, CheckCircle } from 'lucide-react';
 import { ImportService } from '../../services/import';
 import { ImportResult } from '../../types';
+import { useAuth } from '../../hooks/useAuth';
 
 interface FlashcardImportProps {
   onImportComplete: (result: ImportResult) => void;
 }
 
 export const FlashcardImport: React.FC<FlashcardImportProps> = ({ onImportComplete }) => {
+  const { user } = useAuth();
   const [isDragging, setIsDragging] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [importResult, setImportResult] = useState<ImportResult | null>(null);
@@ -34,12 +36,24 @@ export const FlashcardImport: React.FC<FlashcardImportProps> = ({ onImportComple
     setImportResult(null);
 
     try {
+      if (!user?.id) {
+        const errorResult: ImportResult = {
+          success: false,
+          imported_count: 0,
+          errors: ['User not authenticated. Please sign in to import flashcards.'],
+          flashcards: [],
+        };
+        setImportResult(errorResult);
+        onImportComplete(errorResult);
+        return;
+      }
+
       let result: ImportResult;
 
       if (fileExtension === 'json') {
-        result = await ImportService.importFromJSON(file);
+        result = await ImportService.importFromJSON(file, user.id);
       } else {
-        result = await ImportService.importFromCSV(file);
+        result = await ImportService.importFromCSV(file, user.id);
       }
 
       setImportResult(result);

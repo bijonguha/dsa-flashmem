@@ -43,6 +43,7 @@ export const FlashcardReview: React.FC<FlashcardReviewProps> = ({
   const [sessionStartTime, setSessionStartTime] = useState<Date>(new Date());
   const [inputMethod, setInputMethod] = useState<'voice' | 'typing'>('typing');
   const [timeSpent, setTimeSpent] = useState(0);
+  const [selectedRating, setSelectedRating] = useState<SRSRating | null>(null);
 
   const currentCard = flashcards[currentIndex];
   const isLastCard = currentIndex === flashcards.length - 1;
@@ -57,6 +58,7 @@ export const FlashcardReview: React.FC<FlashcardReviewProps> = ({
     setShowHint(false);
     setEvaluation(null);
     setIsEvaluating(false);
+    setSelectedRating(null);
     setInputMethod(settings.input_preference === 'both' ? 'typing' : settings.input_preference);
   }, [settings.input_preference]);
 
@@ -87,6 +89,8 @@ export const FlashcardReview: React.FC<FlashcardReviewProps> = ({
     setIsEvaluating(true);
 
     try {
+      console.log('Evaluating with API key:', settings.openai_api_key ? 'Present' : 'Missing');
+      console.log('API key length:', settings.openai_api_key?.length || 0);
       if (settings.openai_api_key) {
         const result = await OpenAIService.evaluateAnswer(
           currentCard,
@@ -124,6 +128,9 @@ export const FlashcardReview: React.FC<FlashcardReviewProps> = ({
   const handleSelfRating = useCallback(
     async (rating: SRSRating) => {
       if (!currentCard) return;
+
+      // Set the selected rating for visual feedback
+      setSelectedRating(rating);
 
       const endTime = new Date();
       const sessionTime = Math.floor((endTime.getTime() - sessionStartTime.getTime()) / 1000);
@@ -189,6 +196,31 @@ export const FlashcardReview: React.FC<FlashcardReviewProps> = ({
         return 'text-red-600 bg-red-100';
       default:
         return 'text-gray-600 bg-gray-100';
+    }
+  };
+
+  const getRatingButtonStyles = (rating: SRSRating) => {
+    const isSelected = selectedRating === rating;
+    
+    switch (rating) {
+      case 'again':
+        return isSelected 
+          ? 'bg-red-200 text-red-900 border-2 border-red-400' 
+          : 'bg-red-100 hover:bg-red-200 text-red-800';
+      case 'hard':
+        return isSelected 
+          ? 'bg-orange-200 text-orange-900 border-2 border-orange-400' 
+          : 'bg-orange-100 hover:bg-orange-200 text-orange-800';
+      case 'good':
+        return isSelected 
+          ? 'bg-green-200 text-green-900 border-2 border-green-400' 
+          : 'bg-green-100 hover:bg-green-200 text-green-800';
+      case 'easy':
+        return isSelected 
+          ? 'bg-blue-200 text-blue-900 border-2 border-blue-400' 
+          : 'bg-blue-100 hover:bg-blue-200 text-blue-800';
+      default:
+        return 'bg-gray-100 hover:bg-gray-200 text-gray-800';
     }
   };
 
@@ -364,27 +396,27 @@ export const FlashcardReview: React.FC<FlashcardReviewProps> = ({
             <div className="flex space-x-2">
               <button
                 onClick={() => handleSelfRating('again')}
-                className="flex-1 flex items-center justify-center space-x-2 bg-red-100 hover:bg-red-200 text-red-800 py-2 px-4 rounded-md transition-colors"
+                className={`flex-1 flex items-center justify-center space-x-2 py-2 px-4 rounded-md transition-colors ${getRatingButtonStyles('again')}`}
               >
                 <ThumbsDown className="h-4 w-4" />
                 <span>Again</span>
               </button>
               <button
                 onClick={() => handleSelfRating('hard')}
-                className="flex-1 flex items-center justify-center space-x-2 bg-orange-100 hover:bg-orange-200 text-orange-800 py-2 px-4 rounded-md transition-colors"
+                className={`flex-1 flex items-center justify-center space-x-2 py-2 px-4 rounded-md transition-colors ${getRatingButtonStyles('hard')}`}
               >
                 <span>Hard</span>
               </button>
               <button
                 onClick={() => handleSelfRating('good')}
-                className="flex-1 flex items-center justify-center space-x-2 bg-green-100 hover:bg-green-200 text-green-800 py-2 px-4 rounded-md transition-colors"
+                className={`flex-1 flex items-center justify-center space-x-2 py-2 px-4 rounded-md transition-colors ${getRatingButtonStyles('good')}`}
               >
                 <ThumbsUp className="h-4 w-4" />
                 <span>Good</span>
               </button>
               <button
                 onClick={() => handleSelfRating('easy')}
-                className="flex-1 flex items-center justify-center space-x-2 bg-blue-100 hover:bg-blue-200 text-blue-800 py-2 px-4 rounded-md transition-colors"
+                className={`flex-1 flex items-center justify-center space-x-2 py-2 px-4 rounded-md transition-colors ${getRatingButtonStyles('easy')}`}
               >
                 <span>Easy</span>
               </button>

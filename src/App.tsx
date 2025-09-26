@@ -74,6 +74,7 @@ function AppContent() {
   const [flashcardCount, setFlashcardCount] = useState(0);
   const [dueCards, setDueCards] = useState<Flashcard[]>([]);
   const [settings, setSettings] = useState<AppSettings>({
+    user_id: '',
     timer_duration: 300,
     input_preference: 'both',
     auto_advance: false,

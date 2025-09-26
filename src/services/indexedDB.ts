@@ -15,7 +15,7 @@ class DSAFlashMemDB extends Dexie {
       flashcards: 'id, user_id, topic, difficulty, *tags',
       progress: 'flashcard_id, user_id, next_review_date, last_review_date',
       sessions: 'id, user_id, flashcard_id, start_time, end_time',
-      settings: 'id',
+      settings: 'user_id',
       analytics: '++id, user_id, event_type, timestamp',
     });
   }
@@ -129,10 +129,10 @@ export class DatabaseService {
 
   // Settings operations
   static async getSettings(userId: string): Promise<AppSettings> {
-    const settings = await db.settings.where('id').equals(userId).first();
+    const settings = await db.settings.where('user_id').equals(userId).first();
     if (!settings) {
       const defaultSettings: AppSettings = {
-        id: userId,
+        user_id: userId,
         timer_duration: 300, // 5 minutes
         input_preference: 'both',
         auto_advance: false,
@@ -150,7 +150,7 @@ export class DatabaseService {
     const updatedSettings: AppSettings = {
       ...existingSettings,
       ...updates,
-      id: userId, // Ensure id is always set
+      user_id: userId, // Ensure id is always set
     };
     await db.settings.put(updatedSettings);
   }
@@ -173,7 +173,7 @@ export class DatabaseService {
     await db.flashcards.where('user_id').equals(userId).delete();
     await db.progress.where('user_id').equals(userId).delete();
     await db.sessions.where('user_id').equals(userId).delete();
-    await db.settings.where('id').equals(userId).delete();
+    await db.settings.where('user_id').equals(userId).delete();
     await db.analytics.where('user_id').equals(userId).delete();
   }
 
@@ -214,7 +214,7 @@ export class DatabaseService {
       await db.sessions.bulkPut(sessionsWithUserId);
     }
     if (data.settings && data.settings.length > 0) {
-      await db.settings.put({ ...data.settings[0], id: userId });
+      await db.settings.put({ ...data.settings[0], user_id: userId });
     }
   }
 
