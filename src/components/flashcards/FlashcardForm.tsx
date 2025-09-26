@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { PlusCircle, Trash2, Save } from 'lucide-react';
 import { Flashcard } from '../../types';
 import { SupabaseDataService } from '../../services/SupabaseDataService';
@@ -7,9 +7,12 @@ import { useAuth } from '../../hooks/useAuth';
 
 export const FlashcardForm: React.FC = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { user } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
 
   const [flashcard, setFlashcard] = useState<Partial<Flashcard>>({
     topic: '',
@@ -31,6 +34,29 @@ export const FlashcardForm: React.FC = () => {
     difficulty: 'Medium',
     tags: [],
   });
+
+  // Load existing flashcard for editing
+  useEffect(() => {
+    const editId = searchParams.get('edit');
+    if (editId && user) {
+      setIsEditing(true);
+      setEditingId(editId);
+      loadFlashcard(editId);
+    }
+  }, [searchParams, user]);
+
+  const loadFlashcard = async (cardId: string) => {
+    try {
+      const cards = await SupabaseDataService.getAllFlashcards(user!.id);
+      const card = cards.find(c => c.id === cardId);
+      if (card) {
+        setFlashcard(card);
+      }
+    } catch (error) {
+      console.error('Failed to load flashcard:', error);
+      setError('Failed to load flashcard for editing');
+    }
+  };
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
@@ -79,7 +105,7 @@ export const FlashcardForm: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) {
-      setError('You must be logged in to create a flashcard.');
+      setError('You must be logged in to save a flashcard.');
       return;
     }
 
@@ -92,23 +118,35 @@ export const FlashcardForm: React.FC = () => {
         throw new Error('Topic, Title, and Question are required fields.');
       }
 
-      const newFlashcard: Flashcard = {
-        ...flashcard,
-        id: crypto.randomUUID(),
-        user_id: user.id,
-        topic: flashcard.topic || 'General',
-        title: flashcard.title,
-        question: flashcard.question,
-        expected_points: flashcard.expected_points || [],
-        solution: flashcard.solution || { approaches: [] },
-        difficulty: flashcard.difficulty || 'Medium',
-        tags: flashcard.tags || [],
-      };
+      if (isEditing && editingId) {
+        // Update existing flashcard
+        const updatedFlashcard: Flashcard = {
+          ...flashcard as Flashcard,
+          id: editingId,
+          user_id: user.id,
+        };
 
-      await SupabaseDataService.addFlashcard(newFlashcard);
+        await SupabaseDataService.updateFlashcard(editingId, user.id, flashcard);
+      } else {
+        // Create new flashcard
+        const newFlashcard: Flashcard = {
+          ...flashcard,
+          id: crypto.randomUUID(),
+          user_id: user.id,
+          topic: flashcard.topic || 'General',
+          title: flashcard.title,
+          question: flashcard.question,
+          expected_points: flashcard.expected_points || [],
+          solution: flashcard.solution || { approaches: [] },
+          difficulty: flashcard.difficulty || 'Medium',
+          tags: flashcard.tags || [],
+        };
 
-      // Ideally, show a success message and then navigate
-      navigate('/home');
+        await SupabaseDataService.addFlashcard(newFlashcard);
+      }
+
+      // Navigate back to manage cards or home
+      navigate(isEditing ? '/manage-cards' : '/home');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An unknown error occurred.');
     } finally {
@@ -119,7 +157,9 @@ export const FlashcardForm: React.FC = () => {
   return (
     <div className="max-w-4xl mx-auto p-6">
       <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-md p-8 space-y-8">
-        <h2 className="text-3xl font-bold text-gray-800">Create New Flashcard</h2>
+        <h2 className="text-3xl font-bold text-neutral-800">
+          {isEditing ? 'Edit Flashcard' : 'Create New Flashcard'}
+        </h2>
 
         {error && (
           <div
@@ -290,7 +330,7 @@ export const FlashcardForm: React.FC = () => {
             className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
           >
             <Save className="mr-2 h-5 w-5" />
-            {isSubmitting ? 'Saving...' : 'Save Flashcard'}
+            {isSubmitting ? 'Saving...' : (isEditing ? 'Update Flashcard' : 'Save Flashcard')}
           </button>
         </div>
       </form>

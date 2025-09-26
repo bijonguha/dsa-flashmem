@@ -31,6 +31,9 @@ const Dashboard = lazy(() =>
 const Settings = lazy(() =>
   import('./components/settings/Settings').then((m) => ({ default: m.Settings })),
 );
+const ManageCards = lazy(() =>
+  import('./components/cards/ManageCards').then((m) => ({ default: m.ManageCards })),
+);
 
 // Loading component
 const LoadingSpinner: React.FC<{ message?: string }> = ({ message = 'Loading...' }) => (
@@ -140,6 +143,16 @@ function AppContent() {
                   <ProtectedRoute>
                     <Suspense fallback={<LoadingSpinner message="Loading form..." />}>
                       <FlashcardForm />
+                    </Suspense>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/manage-cards"
+                element={
+                  <ProtectedRoute>
+                    <Suspense fallback={<LoadingSpinner message="Loading cards..." />}>
+                      <ManageCards />
                     </Suspense>
                   </ProtectedRoute>
                 }

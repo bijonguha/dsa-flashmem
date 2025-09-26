@@ -7,6 +7,7 @@ import {
   BarChart3,
   LogOut,
   PlusCircle,
+  Edit3,
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 
@@ -37,6 +38,12 @@ export const Navigation: React.FC<NavigationProps> = ({ onSignOut }) => {
         label: 'Create',
         icon: PlusCircle,
         onClick: () => navigate('/create-flashcard'),
+      },
+      {
+        path: '/manage-cards',
+        label: 'Manage Cards',
+        icon: Edit3,
+        onClick: () => navigate('/manage-cards'),
       },
       {
         path: '/import',
