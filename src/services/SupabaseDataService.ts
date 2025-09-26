@@ -21,14 +21,12 @@ export class SupabaseDataService {
   // --- Flashcards ---
   static async addFlashcard(flashcard: Flashcard) {
     try {
-      console.log('Adding flashcard:', flashcard);
       const { data, error } = await supabase.from('flashcards').insert([flashcard]).select();
       if (error) {
         console.error('Error adding flashcard:', error);
         console.error('Error details:', JSON.stringify(error, null, 2));
         throw error;
       }
-      console.log('Successfully added flashcard:', data);
       return data;
     } catch (error) {
       console.error('Flashcard insert failed:', error);
@@ -38,14 +36,15 @@ export class SupabaseDataService {
 
   static async addFlashcards(flashcards: Flashcard[]) {
     try {
-      console.log('Adding flashcards:', flashcards.length, 'items');
-      const { data, error } = await supabase.from('flashcards').upsert(flashcards, { onConflict: 'id' }).select();
+      const { data, error } = await supabase
+        .from('flashcards')
+        .upsert(flashcards, { onConflict: 'id' })
+        .select();
       if (error) {
         console.error('Error adding flashcards:', error);
         console.error('Error details:', JSON.stringify(error, null, 2));
         throw error;
       }
-      console.log('Successfully upserted flashcards:', data?.length, 'items');
       return data;
     } catch (error) {
       console.error('Bulk flashcard insert failed:', error);
@@ -116,7 +115,7 @@ export class SupabaseDataService {
     const { data, error } = await supabase.from('progress').select('*').eq('user_id', userId);
     if (error) throw error;
     // Convert date strings to Date objects
-    return data.map((p: any) => this.parseProgress(p));
+    return data.map((p: Record<string, unknown>) => this.parseProgress(p));
   }
 
   static async updateProgress(progress: UserProgress) {
@@ -128,6 +127,16 @@ export class SupabaseDataService {
       .select();
     if (error) throw error;
     return data;
+  }
+
+  static async resetAllProgress(userId: string) {
+    const { error: progressError } = await supabase.from('progress').delete().eq('user_id', userId);
+
+    if (progressError) throw progressError;
+
+    const { error: sessionsError } = await supabase.from('sessions').delete().eq('user_id', userId);
+
+    if (sessionsError) throw sessionsError;
   }
 
   // -- Wrapper to get due cards similar to local DatabaseService --
@@ -146,8 +155,11 @@ export class SupabaseDataService {
 
   static async getAllSessions(userId: string) {
     const { data, error } = await supabase.from('sessions').select('*').eq('user_id', userId);
-    if (error) throw error;
-    return data.map((s: any) => this.parseSession(s));
+    if (error) {
+      console.error('Error fetching sessions:', error);
+      throw error;
+    }
+    return data.map((s: Record<string, unknown>) => this.parseSession(s));
   }
 
   // Get recent sessions with limit (descending by start_time)
@@ -159,7 +171,8 @@ export class SupabaseDataService {
   // Get sessions in date range
   static async getSessionsInDateRange(startDate: Date, endDate: Date, userId: string) {
     const sessions = await this.getAllSessions(userId);
-    return sessions.filter((s) => s.start_time >= startDate && s.start_time < endDate);
+    const filtered = sessions.filter((s) => s.start_time >= startDate && s.start_time < endDate);
+    return filtered;
   }
 
   // --- Settings ---
@@ -170,15 +183,14 @@ export class SupabaseDataService {
         .select('*')
         .eq('user_id', userId)
         .maybeSingle(); // Use maybeSingle instead of single to handle no rows gracefully
-      
+
       if (error) {
         console.error('Error fetching settings:', error);
         throw error;
       }
-      
+
       // If no settings exist, create default settings
       if (!data) {
-        console.log('No settings found, creating defaults for user:', userId);
         const defaultSettings: AppSettings = {
           user_id: userId,
           timer_duration: 300,
@@ -186,23 +198,25 @@ export class SupabaseDataService {
           auto_advance: false,
           show_hints: true,
           theme: 'auto',
+          // openai_api_key: undefined, // Now picked from environment variables
+          // gemini_api_key: undefined, // Now picked from environment variables
         };
-        
+
         // Insert default settings
         const { data: newData, error: insertError } = await supabase
           .from('settings')
           .insert([defaultSettings])
           .select()
           .single();
-          
+
         if (insertError) {
           console.error('Error creating default settings:', insertError);
           throw insertError;
         }
-        
+
         return newData;
       }
-      
+
       return data;
     } catch (error) {
       console.error('Settings service error:', error);
@@ -219,7 +233,10 @@ export class SupabaseDataService {
   }
 
   // Support both updateSettings(settings: AppSettings) and updateSettings(userId, updates)
-  static async updateSettings(arg1: string | AppSettings, arg2?: Partial<AppSettings>): Promise<AppSettings[]> {
+  static async updateSettings(
+    arg1: string | AppSettings,
+    arg2?: Partial<AppSettings>,
+  ): Promise<AppSettings[]> {
     if (typeof arg1 === 'string') {
       const userId = arg1;
       const updates = arg2 || {};
@@ -231,21 +248,17 @@ export class SupabaseDataService {
         auto_advance: false,
         show_hints: true,
         theme: 'auto',
+        // openai_api_key: undefined, // Now picked from environment variables
+        // gemini_api_key: undefined, // Now picked from environment variables
         ...(existing || {}),
         ...updates,
       };
-      const { data, error } = await supabase
-        .from('settings')
-        .upsert(merged)
-        .select();
+      const { data, error } = await supabase.from('settings').upsert(merged).select();
       if (error) throw error;
       return data;
     } else {
       const settings = arg1 as AppSettings;
-      const { data, error } = await supabase
-        .from('settings')
-        .upsert(settings)
-        .select();
+      const { data, error } = await supabase.from('settings').upsert(settings).select();
       if (error) throw error;
       return data;
     }
@@ -265,19 +278,20 @@ export class SupabaseDataService {
   }
 
   // --- Helpers to normalize types returned by Supabase ---
-  private static parseProgress(p: any): UserProgress {
+  private static parseProgress(p: Record<string, unknown>): UserProgress {
     return {
       ...p,
-      next_review_date: p.next_review_date ? new Date(p.next_review_date) : new Date(),
-      last_review_date: p.last_review_date ? new Date(p.last_review_date) : new Date(0),
+      next_review_date: p.next_review_date ? new Date(p.next_review_date as string) : new Date(),
+      last_review_date: p.last_review_date ? new Date(p.last_review_date as string) : new Date(0),
     } as UserProgress;
   }
 
-  private static parseSession(s: any): ReviewSession {
-    return {
+  private static parseSession(s: Record<string, unknown>): ReviewSession {
+    const session = {
       ...s,
-      start_time: s.start_time ? new Date(s.start_time) : new Date(),
-      end_time: s.end_time ? new Date(s.end_time) : new Date(),
+      start_time: s.start_time ? new Date(s.start_time as string) : new Date(),
+      end_time: s.end_time ? new Date(s.end_time as string) : new Date(),
     } as ReviewSession;
+    return session;
   }
 }

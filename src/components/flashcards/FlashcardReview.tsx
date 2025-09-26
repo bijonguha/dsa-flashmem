@@ -90,39 +90,31 @@ export const FlashcardReview: React.FC<FlashcardReviewProps> = ({
     setIsEvaluating(true);
 
     try {
-      console.log('Evaluating with API key:', settings.openai_api_key ? 'Present' : 'Missing');
-      console.log('API key length:', settings.openai_api_key?.length || 0);
-      if (settings.openai_api_key || settings.gemini_api_key) {
+      const openaiApiKey = import.meta.env.VITE_OPENAI_API_KEY;
+      const geminiApiKey = import.meta.env.VITE_GEMINI_API_KEY;
+
+      console.log('Evaluating with OpenAI API key:', openaiApiKey ? 'Present' : 'Missing');
+      console.log('Evaluating with Gemini API key:', geminiApiKey ? 'Present' : 'Missing');
+
+      if (openaiApiKey || geminiApiKey) {
         let result;
-        if (settings.gemini_api_key) {
+        if (geminiApiKey) {
           // Try Google Gemini first
           try {
-            result = await GeminiService.evaluateAnswer(
-              currentCard,
-              userAnswer,
-              settings.gemini_api_key,
-            );
+            result = await GeminiService.evaluateAnswer(currentCard, userAnswer, geminiApiKey);
           } catch (geminiError) {
             // Fallback to OpenAI if Gemini fails
-            if (settings.openai_api_key) {
+            if (openaiApiKey) {
               console.log('Gemini evaluation failed, falling back to OpenAI:', geminiError);
-              result = await OpenAIService.evaluateAnswer(
-                currentCard,
-                userAnswer,
-                settings.openai_api_key,
-              );
+              result = await OpenAIService.evaluateAnswer(currentCard, userAnswer, openaiApiKey);
             } else {
               throw geminiError;
             }
           }
         } else {
           // Use OpenAI only
-          if (settings.openai_api_key) {
-            result = await OpenAIService.evaluateAnswer(
-              currentCard,
-              userAnswer,
-              settings.openai_api_key,
-            );
+          if (openaiApiKey) {
+            result = await OpenAIService.evaluateAnswer(currentCard, userAnswer, openaiApiKey);
           } else {
             throw new Error('OpenAI API key is required for evaluation');
           }
@@ -153,7 +145,7 @@ export const FlashcardReview: React.FC<FlashcardReviewProps> = ({
     } finally {
       setIsEvaluating(false);
     }
-  }, [currentCard, userAnswer, settings.openai_api_key]);
+  }, [currentCard, userAnswer]);
 
   const handleSelfRating = useCallback(
     async (rating: SRSRating) => {
@@ -231,23 +223,23 @@ export const FlashcardReview: React.FC<FlashcardReviewProps> = ({
 
   const getRatingButtonStyles = (rating: SRSRating) => {
     const isSelected = selectedRating === rating;
-    
+
     switch (rating) {
       case 'again':
-        return isSelected 
-          ? 'bg-red-200 text-red-900 border-2 border-red-400' 
+        return isSelected
+          ? 'bg-red-200 text-red-900 border-2 border-red-400'
           : 'bg-red-100 hover:bg-red-200 text-red-800';
       case 'hard':
-        return isSelected 
-          ? 'bg-orange-200 text-orange-900 border-2 border-orange-400' 
+        return isSelected
+          ? 'bg-orange-200 text-orange-900 border-2 border-orange-400'
           : 'bg-orange-100 hover:bg-orange-200 text-orange-800';
       case 'good':
-        return isSelected 
-          ? 'bg-green-200 text-green-900 border-2 border-green-400' 
+        return isSelected
+          ? 'bg-green-200 text-green-900 border-2 border-green-400'
           : 'bg-green-100 hover:bg-green-200 text-green-800';
       case 'easy':
-        return isSelected 
-          ? 'bg-blue-200 text-blue-900 border-2 border-blue-400' 
+        return isSelected
+          ? 'bg-blue-200 text-blue-900 border-2 border-blue-400'
           : 'bg-blue-100 hover:bg-blue-200 text-blue-800';
       default:
         return 'bg-gray-100 hover:bg-gray-200 text-gray-800';

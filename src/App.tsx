@@ -174,6 +174,11 @@ function AppContent() {
     navigate('/home');
   }, [loadInitialData, navigate]);
 
+  const handleResetComplete = useCallback(async () => {
+    await loadInitialData();
+    navigate('/dashboard');
+  }, [loadInitialData, navigate]);
+
   const handleShowSolution = useCallback((flashcard: Flashcard) => {
     setSelectedCard(flashcard);
     setShowSolution(true);
@@ -489,7 +494,11 @@ function AppContent() {
                 element={
                   <ProtectedRoute>
                     <Suspense fallback={<LoadingSpinner message="Loading settings..." />}>
-                      <Settings settings={settings} onSettingsChange={setSettings} />
+                      <Settings
+                        settings={settings}
+                        onSettingsChange={setSettings}
+                        onResetComplete={handleResetComplete}
+                      />
                     </Suspense>
                   </ProtectedRoute>
                 }

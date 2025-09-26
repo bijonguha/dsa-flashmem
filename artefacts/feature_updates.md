@@ -15,44 +15,55 @@ The dashboard has been updated to show more detailed information about your flas
 ### How It Works:
 The dashboard now fetches today's sessions and analyzes the `self_rating` field to provide these statistics, giving you better insights into your learning patterns.
 
-## 2. Google Gemini AI Integration (Optional)
+## 2. AI Integration (OpenAI Default, Google Gemini Optional)
 
-We've added support for Google Gemini as an alternative to OpenAI for answer evaluation:
+We've updated the AI evaluation to use environment variables for API keys and provide an optional Google Gemini integration.
 
 ### Features:
-- **Fallback Mechanism**: If Google Gemini is configured but fails, the system automatically falls back to OpenAI
-- **User Preference**: Users can choose which AI service to use via their settings
-- **Default Model Configuration**: The OpenAI model can be configured via environment variables
+- **Default OpenAI Usage**: The application uses OpenAI by default with configurable model via environment variables.
+- **Optional Gemini Support**: Users can optionally provide a Google Gemini API key via environment variables for alternative evaluation.
+- **Fallback Mechanism**: If Google Gemini is configured but fails, the system automatically falls back to OpenAI.
+- **No API Keys in Settings**: API keys are now managed solely through environment variables for enhanced security.
 
 ### How to Use:
-1. Get a Google Gemini API key from the Google AI Studio (optional)
-2. Add it to your settings in the Settings page
-3. The system will automatically use Gemini for evaluation, falling back to OpenAI if needed
+1. Set your `VITE_OPENAI_API_KEY` in your `.env` file.
+2. Optionally, set your `VITE_GEMINI_API_KEY` in your `.env` file to enable Gemini evaluation.
+3. The application will automatically use the configured AI service.
 
 ### Environment Variables:
 - `VITE_OPENAI_MODEL`: Configure the default OpenAI model (default: gpt-4o-mini)
-- `VITE_OPENAI_API_KEY`: Add your OpenAI API key directly to the environment (default)
+- `VITE_OPENAI_API_KEY`: Your OpenAI API key (required for OpenAI evaluation)
+- `VITE_GEMINI_API_KEY`: Your Google Gemini API key (optional, for Gemini evaluation)
 
 ## 3. Updated Settings Interface
 
-The settings page now includes fields for both OpenAI and Google Gemini API keys:
-
-- **OpenAI API Key**: Default AI service for evaluation
-- **Google Gemini API Key**: Alternative to OpenAI for AI evaluation (optional)
+The settings page no longer includes input fields for API keys.
 
 ## 4. Improved AI Evaluation Logic
 
 The flashcard review component now supports both OpenAI and Google Gemini:
 
-1. If a Gemini API key is provided, it will be used first
-2. If Gemini evaluation fails, the system automatically falls back to OpenAI
-3. If neither key is provided, a simple keyword-based evaluation is used
+1. If a Gemini API key is provided via environment variables, it will be used first.
+2. If Gemini evaluation fails, the system automatically falls back to OpenAI (if `VITE_OPENAI_API_KEY` is provided).
+3. If neither key is provided, a simple keyword-based evaluation is used.
 
 This provides redundancy and choice for users while maintaining the core functionality.
+
+## 5. Daily Review History
+
+A new section has been added to the dashboard to display a day-wise history of reviewed flashcards.
+
+### Features:
+- **Day-wise Grouping**: Shows flashcards reviewed on each day.
+- **Flashcard Details**: For each reviewed flashcard, it displays the question, the self-rating ('again', 'hard', 'good', 'easy'), and the time taken to answer.
+- **Sorting**: History is sorted by date in descending order.
+
+### How It Works:
+The dashboard fetches all review sessions and their associated flashcard details, then groups them by the date of the review session to provide a chronological history of your learning.
 
 ## Default Configuration
 
 By default, the application uses OpenAI with the gpt-4o-mini model. Users can:
-- Add their OpenAI API key to the settings or environment variables
-- Optionally add a Google Gemini API key for alternative evaluation
-- Continue using the application without any API keys for basic functionality
+- Provide their OpenAI API key via `VITE_OPENAI_API_KEY` in `.env`.
+- Optionally provide a Google Gemini API key via `VITE_GEMINI_API_KEY` in `.env` for alternative evaluation.
+- Continue using the application without any API keys for basic functionality.

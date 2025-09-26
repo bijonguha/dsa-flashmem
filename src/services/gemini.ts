@@ -1,7 +1,8 @@
 import { Flashcard, EvaluationResult } from '../types';
 
 export class GeminiService {
-  private static readonly API_ENDPOINT = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent';
+  private static readonly API_ENDPOINT =
+    'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent';
   private static readonly MAX_TOKENS = 1000;
   private static readonly TEMPERATURE = 0.3;
 
@@ -32,15 +33,19 @@ export class GeminiService {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          contents: [{
-            parts: [{
-              text: prompt
-            }]
-          }],
+          contents: [
+            {
+              parts: [
+                {
+                  text: prompt,
+                },
+              ],
+            },
+          ],
           generationConfig: {
             maxOutputTokens: this.MAX_TOKENS,
             temperature: this.TEMPERATURE,
-          }
+          },
         }),
       });
 
@@ -196,14 +201,18 @@ Provide specific, actionable feedback to help the candidate improve.`;
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          contents: [{
-            parts: [{
-              text: 'Test message'
-            }]
-          }],
+          contents: [
+            {
+              parts: [
+                {
+                  text: 'Test message',
+                },
+              ],
+            },
+          ],
           generationConfig: {
             maxOutputTokens: 5,
-          }
+          },
         }),
       });
 

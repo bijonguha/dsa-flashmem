@@ -57,8 +57,8 @@ export interface ReviewSession {
 // Application settings
 export interface AppSettings {
   user_id: string; // user_id is the primary key
-  openai_api_key?: string;
-  gemini_api_key?: string;
+  // openai_api_key?: string; // Now picked from environment variables
+  // gemini_api_key?: string; // Now picked from environment variables
   timer_duration: number; // in seconds
   input_preference: 'voice' | 'typing' | 'both';
   auto_advance: boolean;
@@ -141,6 +141,19 @@ export interface DashboardStats {
       total: number;
       mastered: number;
       accuracy: number;
+    }
+  >;
+  // History of questions done day-wise
+  daily_review_history: Record<
+    string,
+    {
+      date: string;
+      flashcards: {
+        id: string;
+        question: string;
+        self_rating: 'again' | 'hard' | 'good' | 'easy';
+        time_taken: number;
+      }[];
     }
   >;
 }

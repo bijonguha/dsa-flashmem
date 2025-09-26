@@ -98,7 +98,8 @@ export class SRSService {
     // Round decimal values to prevent excessive precision
     updatedProgress.interval_days = Math.round(updatedProgress.interval_days * 100) / 100;
     updatedProgress.ease_factor = Math.round(updatedProgress.ease_factor * 100) / 100;
-    updatedProgress.average_response_time = Math.round(updatedProgress.average_response_time * 100) / 100;
+    updatedProgress.average_response_time =
+      Math.round(updatedProgress.average_response_time * 100) / 100;
 
     // Set next review date
     updatedProgress.next_review_date = this.addDays(now, updatedProgress.interval_days);
@@ -246,6 +247,13 @@ export class SRSService {
     };
 
     await SupabaseDataService.updateProgress(resetProgress); // Pass userId (embedded in resetProgress)
+  }
+
+  /**
+   * Reset all progress for a user
+   */
+  static async resetAllProgress(userId: string): Promise<void> {
+    await SupabaseDataService.resetAllProgress(userId);
   }
 
   // Helper methods
